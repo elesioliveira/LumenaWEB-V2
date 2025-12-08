@@ -116,7 +116,7 @@ export function Register() {
             mb: 2
           },
           startAdornment: (
-            <Mail size={24} style={{ marginRight: "10px", opacity: 0.6 }} />
+            <Building2 size={24} style={{ marginRight: "10px", opacity: 0.6 }} />
           )
         }}
       />
