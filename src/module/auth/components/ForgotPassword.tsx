@@ -1,104 +1,162 @@
-import { ArrowRight, ArrowLeft } from "lucide-react";
-import { Mail} from "lucide-react";
+import { ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
+import { Mail } from "lucide-react";
 import {
   Box,
   Typography,
   TextField,
   Button,
   Stack,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { useAuth } from "../provider/AuthProvider";
 import { CurrentPageEnum } from "../enums/CurrentPageEnum";
+import { useForgotPasswordController } from "../controller/ForgotPasswordController";
+import { useState, useEffect } from "react";
 
 export function ForgotPassword() {
- const { onChagendCurrentPage } = useAuth();
+  const { onChagendCurrentPage } = useAuth();
+  const {
+    email,
+    setEmail,
+    isLoading,
+    error,
+    setError,
+    handleSubmitForm,
+  } = useForgotPasswordController();
 
-    return (
-         <Box width="100%" sx={{ py: 4, mt:30}}> 
+  // Toast
+  const [toastOpen, setToastOpen] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
+  const [toastType, setToastType] = useState<"success" | "error">("error");
+
+  // Mostrar erros no toast automaticamente
+  useEffect(() => {
+    if (error) {
+      setToastMsg(error);
+      setToastType("error");
+      setToastOpen(true);
+      setError(null);
+    }
+  }, [error]);
+
+  async function submit() {
+    const ok = await handleSubmitForm();
+    if (ok) {
+      setToastMsg("Link de recuperação enviado!");
+      setToastType("success");
+      setToastOpen(true);
+
+      setTimeout(() => {
+        onChagendCurrentPage(CurrentPageEnum.Signin);
+      }, 1500);
+    }
+  }
+
+  return (
+    <Box width="100%" sx={{ py: 4, mt: 30 }}>
       {/* Títulos */}
-    <Typography variant="h4" fontWeight="bold" color="text.primary" mb={1}>
-      Esqueceu a senha?
-    </Typography>
-    <Typography variant="h6" color="text.secondary" mb={3} fontSize="18px">
-      Não se preocupe! Digite seu e-mail e enviaremos um link para redefinir sua senha.
-    </Typography>
-      <Typography variant="subtitle1" color="text.primary" fontWeight="400" sx={{mb:0}}>
-      Email
-    </Typography>
-    <TextField
-      fullWidth
-      placeholder="seu@email.com"
-      margin="dense"
-      variant="outlined"
-      InputProps={{
-        sx: {
-          height: 55, // altura REAL
-          fontSize: "1.1rem",
-          '& input': {
-            padding: "14px 0", // ajustes finos opcionais
+      <Typography variant="h4" fontWeight="bold" color="text.primary" mb={1}>
+        Esqueceu a senha?
+      </Typography>
+
+      <Typography variant="h6" color="text.secondary" mb={3} fontSize="18px">
+        Não se preocupe! Digite seu e-mail e enviaremos um link para redefinir sua senha.
+      </Typography>
+
+      {/* Input Email */}
+      <Typography variant="subtitle1" color="text.primary" fontWeight="400" sx={{ mb: 0 }}>
+        Email
+      </Typography>
+
+      <TextField
+        fullWidth
+        placeholder="seu@email.com"
+        margin="dense"
+        variant="outlined"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        InputProps={{
+          sx: {
+            height: 55,
+            fontSize: "1.1rem",
+            "& input": { padding: "14px 0" },
           },
-          mt:0
-        },
-        startAdornment: (
-          <Mail size={24} style={{ marginRight: "10px", opacity: 0.6 }} />
-        ),
-      }}
-    />
-<Button
-    fullWidth
-    variant="contained"
-    sx={{
-      mt: 3,
-      mb: 4,
-      height: "60px",
-      fontSize: "1.2rem",
-      flex: 1,
-      color: "#FFF",
-      fontWeight: "bold",
-      background: "linear-gradient(90deg, #f49c0a, #ec8d09, #ec8d09, #df7109)",
-      transition: "transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 1.5, // distância entre o texto e o ícone
-      "&:hover": {
-        transform: "scale(1.05)",
-        boxShadow: "0 8px 20px rgba(0,0,0,0.22)",
-        background: "linear-gradient(90deg, #f7a41c, #b5770a)",
-      },
-    }}
-  >
-    Enviar link de recuperação
-    <ArrowRight size={26} />
-</Button>
-  <Stack 
-    direction="row"
-    alignItems="center"
-    justifyContent="center"
-    spacing={1}
-    sx={{
-      cursor: "pointer",
-      color: "text.secondary",
-      mt: 2,
-      mx: "auto",       // faz o stack centralizar
-      width: "fit-content",
-      "&:hover": { textDecoration: "underline" ,
-      background: "linear-gradient(90deg, #f7a41c, #b5770a)",
-      WebkitBackgroundClip: "text",
-      WebkitTextFillColor: "transparent",
-      boxShadow: "none",
-      transform: "scale(1.05)", }
-    }}
-    onClick={() => onChagendCurrentPage(CurrentPageEnum.Signin)}
-  >
-<ArrowLeft size={20} />
-<Typography
-  variant="body1"
-  fontWeight="bold"
->
-  Voltar ao login
-</Typography>
-  </Stack>
-</Box>
-    );
+          startAdornment: (
+            <Mail size={24} style={{ marginRight: "10px", opacity: 0.6 }} />
+          ),
+        }}
+      />
+
+      {/* Botão */}
+      <Button
+        fullWidth
+        variant="contained"
+        onClick={submit}
+        disabled={isLoading}
+        sx={{
+          mt: 3,
+          mb: 4,
+          height: "60px",
+          fontSize: "1.2rem",
+          color: "#FFF",
+          fontWeight: "bold",
+          background: "linear-gradient(90deg, #f49c0a, #ec8d09, #df7109)",
+          transition: "0.2s",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 1.5,
+          "&:hover": {
+            transform: "scale(1.05)",
+            boxShadow: "0 8px 20px rgba(0,0,0,0.22)",
+            background: "linear-gradient(90deg, #f7a41c, #b5770a)",
+          },
+        }}
+      >
+        {isLoading ? <Loader2 className="spin" size={26} /> : "Enviar link de recuperação"}
+        {!isLoading && <ArrowRight size={26} />}
+      </Button>
+
+      {/* Voltar */}
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="center"
+        spacing={1}
+        sx={{
+          cursor: "pointer",
+          color: "text.secondary",
+          mt: 2,
+          width: "fit-content",
+          mx: "auto",
+          "&:hover": {
+            textDecoration: "underline",
+            background: "linear-gradient(90deg, #f7a41c, #b5770a)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            transform: "scale(1.05)",
+          },
+        }}
+        onClick={() => onChagendCurrentPage(CurrentPageEnum.Signin)}
+      >
+        <ArrowLeft size={20} />
+        <Typography variant="body1" fontWeight="bold">
+          Voltar ao login
+        </Typography>
+      </Stack>
+
+      {/* Toast */}
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        open={toastOpen}
+        autoHideDuration={2500}
+        onClose={() => setToastOpen(false)}
+      >
+        <Alert severity={toastType} sx={{ width: "100%" }}>
+          {toastMsg}
+        </Alert>
+      </Snackbar>
+    </Box>
+  );
 }
