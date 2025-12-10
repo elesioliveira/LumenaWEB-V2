@@ -6,3 +6,12 @@ export interface CompanyEntityRegister {
   email: string,
   senha: string
 }
+
+export interface User {
+  id: number;
+  empresaid: number;
+  datacadastro: string;
+  nome: string;
+  email: string;
+  ativo: boolean;
+}

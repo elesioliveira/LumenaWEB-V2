@@ -1,0 +1,34 @@
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { User } from "../entities/AuthEntities";
+
+interface SessionState {
+  user: User | null;
+  isAuthenticated: boolean;
+  setUser: (user: User) => void;
+  clearUser: () => void;
+}
+
+export const useSessionController = create<SessionState>()(
+  persist(
+    (set) => ({
+      user: null,
+      isAuthenticated: false,
+
+      setUser: (user) =>
+        set({
+          user,
+          isAuthenticated: true,
+        }),
+
+      clearUser: () =>
+        set({
+          user: null,
+          isAuthenticated: false,
+        }),
+    }),
+    {
+      name: "session-storage", // chave no localStorage
+    }
+  )
+);

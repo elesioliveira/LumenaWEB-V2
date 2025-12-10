@@ -7,6 +7,6 @@ export function useAuthController() {
     function onChagendCurrentPage(currentPage: CurrentPageEnum){
         setPage(currentPage);
     }
-return {currentPage, onChagendCurrentPage};
+    return {currentPage, onChagendCurrentPage};
 
 }

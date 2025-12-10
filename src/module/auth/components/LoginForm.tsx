@@ -1,6 +1,8 @@
+import CircularProgress from "@mui/material/CircularProgress";
+import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -8,18 +10,76 @@ import {
   Button,
   Stack,
   Divider,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { useAuth } from "../provider/AuthProvider";
 import { CurrentPageEnum } from "../enums/CurrentPageEnum";
+import { submitLogin } from "../repository/AuthRepository";
+import { useSessionController } from "../controller/SessionController";
 
 export function LoginForm() {
+const navigate = useNavigate();
 const [showPassword, setShowPassword] = useState(false);
-  const { onChagendCurrentPage } = useAuth();
+const { onChagendCurrentPage } = useAuth();
+const [isLoading, setLoading] = useState(false);
+const [email, setEmail] = useState<string | null>(null);
+const [password, setPassword] = useState<string | null>(null);
+const [error, setError] = useState<string | null>(null);
+const [toastOpen, setToastOpen] = useState(false);
+const [toastMsg, setToastMsg] = useState("");
+const [toastType, setToastType] = useState<"success" | "error">("error");
+
+
+  // Mostrar erros no toast automaticamente
+  useEffect(() => {
+    if (error) {
+      setToastMsg(error);
+      setToastType("error");
+      setToastOpen(true);
+      setError(null);
+    }
+  }, [error]);
+
+
+const handleLogin = async () => {
+try {
+if ((!email || email.trim() === "") || !password || password.trim() === "") {
+      setError("Campo(s) vazio");
+        return false;}
+setLoading(true);
+await new Promise(resolve => setTimeout(resolve, 5000));
+ const result = await submitLogin(email, password);
+
+if (!result.success) {
+  setError(result.message ?? "Erro. Contate o administrador.");
+  return;
+}
+// seta o usuário globalmente
+useSessionController.getState().setUser(result);
+  // redireciona
+  navigate("/Home");
+} catch (err: any) {
+      setError(err.message);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+};
 
 
     return (
    <Box width="100%" sx={{ py: 2, mt:20}}> {/* aumentei de 400 → 480 */}
-
+      <Snackbar
+            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            open={toastOpen}
+            autoHideDuration={2500}
+            onClose={() => setToastOpen(false)}
+          >
+            <Alert severity={toastType} sx={{ width: "100%" }}>
+              {toastMsg}
+            </Alert>
+          </Snackbar>
     {/* Títulos */}
     <Typography variant="h4" fontWeight="bold" color="text.primary" mb={1}>
       Bem-vindo de volta
@@ -39,6 +99,8 @@ const [showPassword, setShowPassword] = useState(false);
       placeholder="seu@email.com"
       margin="dense"
       variant="outlined"
+      value={email}
+      onChange={(e) => setEmail(e.target.value.trim())}
       InputProps={{
         sx: { height: 60, fontSize: "1.1rem" }, // input maior
         startAdornment: (
@@ -58,6 +120,8 @@ const [showPassword, setShowPassword] = useState(false);
       placeholder="*****"
       margin="dense"
       variant="outlined"
+      value={password}
+      onChange={(e) => setPassword(e.target.value.trim())}
       InputProps={{
         sx: { height: 60, fontSize: "1.1rem" },
         startAdornment: (
@@ -94,6 +158,8 @@ const [showPassword, setShowPassword] = useState(false);
     {/* === Botão Entrar (Com animação hover) === */}
 <Button
   fullWidth
+  onClick={handleLogin}
+  disabled={isLoading}
   variant="contained"
   sx={{
     mt: 5,
@@ -114,10 +180,10 @@ const [showPassword, setShowPassword] = useState(false);
       boxShadow: "0 8px 20px rgba(0,0,0,0.22)",
       background: "linear-gradient(90deg, #f7a41c, #b5770a)",
     },
-  }}
->
-  Entrar
-  <ArrowRight size={26} />
+  }}>
+   {isLoading ? <CircularProgress size={28} color="inherit" /> : "Entrar"}
+    {isLoading ? null : <ArrowRight size={26} />}
+  
 </Button>
 
 

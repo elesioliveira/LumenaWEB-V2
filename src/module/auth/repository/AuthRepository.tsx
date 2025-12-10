@@ -19,5 +19,18 @@ try {
 } catch (error: any) {
   return error?.response?.data ?? null;
 }
+};
 
+export const submitLogin = async (email: string, password: string) => {
+  try {
+    const response = await api.post(
+      "Auth/Login",
+      { email, senha: password },
+      { withCredentials: true }
+    );
+
+    return response.data; // ← objeto User
+  } catch (error: any) {
+    return error?.response?.data ?? null;
+  }
 };
