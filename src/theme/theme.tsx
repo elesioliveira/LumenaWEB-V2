@@ -1,5 +1,29 @@
 import { createTheme } from "@mui/material/styles";
 
+export const primaryColor = "#f59f0a"
+export const bordasComponents = "#283d6b"
+export const bgComponents = "#1a2849ff"
+export const colorOpacity = "#8a98b8ff"
+export const bgView = "#0f1729"
+export const bgColorCardsDashBoard = "#131d34"
+export const bgColorNegative = "#99423e75";
+export const colorNegative = "#9b0800";
+export const colorGray = "#94a3b8";
+
+
+//colors icons
+export const shopIconColor = "#197DFA";
+export const bgshopColor = "#197efa2a";
+
+export const colorPositive = "#0FFA98"
+export const bgColorPositive = "#0ffa9823"
+
+export const userColorIcon = "#AD0FFA";
+export const userBgColorIcon = "#ac0ffa1e";
+
+export const productColorIcon = "#FAE10F";
+export const productBgColorIcon ="#fae20f23";
+
 export const customTheme = createTheme({
   palette: {
     mode: "light",

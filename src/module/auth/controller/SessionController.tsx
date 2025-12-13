@@ -28,7 +28,7 @@ export const useSessionController = create<SessionState>()(
         }),
     }),
     {
-      name: "session-storage", // chave no localStorage
+      name: "session-storage",
     }
   )
 );

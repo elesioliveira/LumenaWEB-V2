@@ -48,7 +48,7 @@ if ((!email || email.trim() === "") || !password || password.trim() === "") {
       setError("Campo(s) vazio");
         return false;}
 setLoading(true);
-await new Promise(resolve => setTimeout(resolve, 5000));
+await new Promise(resolve => setTimeout(resolve, 1000));
  const result = await submitLogin(email, password);
 
 if (!result.success) {
@@ -102,7 +102,7 @@ useSessionController.getState().setUser(result);
       value={email}
       onChange={(e) => setEmail(e.target.value.trim())}
       InputProps={{
-        sx: { height: 60, fontSize: "1.1rem" }, // input maior
+        sx: { height: 60, fontSize: "1.1rem", mb:2 }, // input maior
         startAdornment: (
           <Mail size={24} style={{ marginRight: "10px", opacity: 0.6 }} />
         ),
