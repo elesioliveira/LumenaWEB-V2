@@ -6,9 +6,10 @@ export const bgComponents = "#1a2849ff"
 export const colorOpacity = "#8a98b8ff"
 export const bgView = "#0f1729"
 export const bgColorCardsDashBoard = "#131d34"
-export const bgColorNegative = "#99423e75";
+export const bgColorNegative = "#9b5d5950";
 export const colorNegative = "#9b0800";
 export const colorGray = "#94a3b8";
+export const bgColorTopSellers = "#182543";
 
 
 //colors icons
