@@ -161,3 +161,26 @@ shadows: [
     },
   },
 });
+
+
+export const textFieldStyle = {
+  "& .MuiOutlinedInput-root": {
+    backgroundColor: bgColorTopSellers,
+    color: "#fff",
+    "& fieldset": {
+      borderColor: colorOpacity,
+    },
+    "&:hover fieldset": {
+      borderColor: primaryColor,
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: primaryColor,
+    },
+  },
+  "& label": {
+    color: colorOpacity,
+  },
+  "& label.Mui-focused": {
+    color: primaryColor,
+  },
+};

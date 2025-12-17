@@ -1,7 +1,6 @@
-import {ResponsiveContainer,Line,XAxis,YAxis,Tooltip,CartesianGrid, Area, ComposedChart,
-} from "recharts";
-import { Bell, Building2, Calculator, ChartColumn, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, DollarSign, LayoutDashboard, LogOut, Package, Plus, Settings, ShoppingCart, TrendingDown, TrendingUp, Truck, User, User2, Users, UsersRound, Wallet } from "lucide-react";
-import {
+
+  import { Bell, Building2, ChartColumn, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, LayoutDashboard, LogOut, Package, Pencil, Plus, Ruler, Settings, ShoppingBag, ShoppingCart,  Tag,  Trash2,  Truck, User, Users, Wallet } from "lucide-react";
+  import {
   Box,
   Drawer,
   List,
@@ -14,48 +13,46 @@ import {
   Stack,
   Badge,
   Avatar,
+  TextField,
   Button,
-  Table, TableHead, TableRow, TableCell, TableBody, TableContainer
-} from "@mui/material";
-import { useState } from "react";
-import { bgColorCardsDashBoard, bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, bgshopColor, bgView, colorGray, colorNegative, colorOpacity, colorPositive, primaryColor, productBgColorIcon, productColorIcon, shopIconColor, userBgColorIcon, userColorIcon } from "../../../theme/theme";
+  TableHead,
+  TableRow,
+  TableCell,
+  TableContainer,
+  Table,
+  TableBody,
+  CircularProgress,
+  Snackbar,
+  Alert,
+  } from "@mui/material";
+  import { useEffect, useState } from "react";
+  import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, bgView, colorNegative, colorOpacity, colorPositive, primaryColor } from "../../../theme/theme";
+  import { cellStyle, cellStyleBold } from "../../../theme/cellTable";
+  import { CreateFornecedorModal } from "../produto/fornecedor/modal";
+  import type { FornecedorEntity } from "../produto/fornecedor/entity/FornecedorEntity";
+  import { useSessionController } from "../../auth/controller/SessionController";
+  import { getFornecedor } from "../produto/fornecedor/repository/FornecedorRepository";
 
-  const pedidos = [
-  { pedido: "001", cliente: "João Silva", produto: "Produto A", valor: "R$ 100,00", status: "Concluído", data: "10/01/2025" },
-  { pedido: "002", cliente: "Maria Oliveira", produto: "Produto B", valor: "R$ 150,00", status: "Em andamento", data: "12/01/2025" },
-  { pedido: "003", cliente: "Carlos Souza", produto: "Produto C", valor: "R$ 200,00", status: "Cancelado", data: "15/01/2025" },
-  { pedido: "001", cliente: "João Silva", produto: "Produto A", valor: "R$ 100,00", status: "Concluído", data: "10/01/2025" },
-  { pedido: "001", cliente: "João Silva", produto: "Produto A", valor: "R$ 100,00", status: "Concluído", data: "10/01/2025" },
-  { pedido: "001", cliente: "João Silva", produto: "Produto A", valor: "R$ 100,00", status: "Concluído", data: "10/01/2025" },
-  { pedido: "002", cliente: "Maria Oliveira", produto: "Produto B", valor: "R$ 150,00", status: "Em andamento", data: "12/01/2025" },
-  { pedido: "003", cliente: "Carlos Souza", produto: "Produto C", valor: "R$ 200,00", status: "Cancelado", data: "15/01/2025" },
-  { pedido: "001", cliente: "João Silva", produto: "Produto A", valor: "R$ 100,00", status: "Concluído", data: "10/01/2025" },
-  { pedido: "001", cliente: "João Silva", produto: "Produto A", valor: "R$ 100,00", status: "Concluído", data: "10/01/2025" },
+  const fornecedores = [
+  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
+  {label:"Eletrônicos Brasil S.A.", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
+  {label:"Importadora Global", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
+  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
+  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
+  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
+  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
+  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
+  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
+  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
+  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
+  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
+  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
+  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
   // Add more rows as needed
   ];
 
-const topSelles = [
-  {top:1 , product:"iPhone 15 Pro Max", total:"342", value:"R$ 3.248.658", porcentagem:"+12.5"},
-  {top:2 , product:"MacBook Air M3", total:"189", value:"R$ 2.456.811", porcentagem:"+8.2"},
-  {top:3 , product:"Samsung Galaxy S24", total:"134 vendas", value:"R$ 1.205.866", porcentagem:"-2.4"},
-  {top:4 , product:"iPad Pro 12.9", total:"342", value:"R$ 3.248.658", porcentagem:"+12.5"},
-  {top:5 , product:"AirPods Pro 2", total:"521", value:"R$ 989.499", porcentagem:"+22.1"},
-];
 
-const cellStyle = {
-  color: colorOpacity,
-  fontSize: "0.85rem",
-  fontWeight: 400,
-  borderBottom: "1px solid rgba(40, 61, 107, 0.25)",
-};
-const cellStyleBold = {
-  color: "#fff",
-  fontSize: "0.85rem",
-  fontWeight: "bold",
-  borderBottom: "1px solid rgba(40, 61, 107, 0.25)",
-};
-
-const menuItems = [
+  const menuItems = [
   { label: "Dashboard", icon: LayoutDashboard },
   { label: "Vendas", icon: ShoppingCart },
   { label: "Produto", icon: Package },
@@ -66,855 +63,605 @@ const menuItems = [
   { label: "Análise", icon: ChartColumn },
   { label: "Empresa", icon: Building2 },
   { label: "Configurações", icon: Settings },
-];
+  ];
 
-const enumStatus = {
-  concluido: "Concluído",
-  andamento: "Em andamento",
-  cancelado: "Cancelado"
-}
-
-const chartData = [
-  { mes: "Jan", receita: 12000, despesas: 8000 },
-  { mes: "Fev", receita: 15000, despesas: 9000 },
-  { mes: "Mar", receita: 14000, despesas: 10000 },
-  { mes: "Abr", receita: 18000, despesas: 12000 },
-  { mes: "Mai", receita: 20000, despesas: 15000 },
-  { mes: "Jun", receita: 22000, despesas: 17000 },
-  { mes: "Jul", receita: 21000, despesas: 16000 },
-  { mes: "Ago", receita: 24000, despesas: 19000 },
-  { mes: "Set", receita: 26000, despesas: 20000 },
-  { mes: "Out", receita: 28000, despesas: 23000 },
-  { mes: "Nov", receita: 30000, despesas: 25000 },
-  { mes: "Dez", receita: 32000, despesas: 27000 },
-];
+  const subModulesProduct= [
+  {label:"Produtos", icon:Package},
+  {label:"Fornecedores", icon:Users},
+  {label:"Categorias", icon:Tag},
+  {label:"Marcas", icon:Package},
+  {label:"Canais de Venda", icon:ShoppingBag},
+  {label:"Métodos de Entrega", icon:Truck},
+  ];
 
 
-const cardsDashBoard = [
-  {label:"Receita Total", value: "R\$ 248.590", porcentagem:"12.5%", icon: <DollarSign color={colorPositive} size={27}></DollarSign>, postive:true},
-  {label:"Pedidos", value: "1.429", porcentagem:"8.2%", icon: <ShoppingCart color={shopIconColor} size={27}></ShoppingCart>,postive:true},
-  {label:"Clientes", value: "3.847", porcentagem:"2.4%", icon: <UsersRound color={userColorIcon} size={27}></UsersRound>,postive:false},
-  {label:"Produtos", value: "847", porcentagem:"15.3%", icon: <Package color={productColorIcon} size={27}></Package>,postive:true},
-];
+  export default function HomePage() {
+  const [collapsed, setCollapsed] = useState(false);
+  const [currentModule, setModule] =useState<number>(0);
+  const drawerWidth = collapsed ? 80 : 280;
+  const [activeSubModule, setActiveSubModule] = useState(0);
+  const [openFornecedorModal, setOpenFornecedorModal] = useState(false);
+  const [fornecedores, setFornecedores] = useState<FornecedorEntity[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [toastOpen, setToastOpen] = useState(false);
+const [toastMsg, setToastMsg] = useState("");
+const [toastType, setToastType] = useState<"success" | "error">("error");
 
-const acoesRapidas = [
-  {label:"Nova Venda", icon:<Plus color={"#FFFF"}></Plus>, onClick: () => {console.log("object");},},
-  {label:"Novo Cliente", icon:<UsersRound color={"#FFFF"}></UsersRound>, onClick: () => {console.log("object");},},
-  {label:"Novo Produto", icon:<Package color={"#FFFF"}></Package>, onClick: () => {console.log("object");},},
-  {label:"Conta a Pagar", icon:<Calculator color={"#FFFF"}></Calculator>, onClick: () => {console.log("object");},},
-  {label:"Nova Compra", icon:<Truck color={"#FFFF"}></Truck>, onClick: () => {console.log("object");},},
-];
+  const { user } = useSessionController();
 
-function currentBgColorIconDashBoard(label: string) {
-  switch (label) {
-    case "Receita Total":
-      return bgColorPositive;
 
-    case "Pedidos":
-      return bgshopColor;
+const fetchFornecedores = async () => {
+  try {
+    setLoading(true);
 
-    case "Clientes":
-      return userBgColorIcon;
+    const response = await getFornecedor(user!.empresaid);
 
-    case "Produtos":
-      return productBgColorIcon;
+    if (!response?.success) {
+      setToastType("error");
+      setToastMsg(response?.message ?? "Erro ao buscar fornecedores.");
+      setToastOpen(true);
+      return;
+    }
 
-    default:
-      return "#ffffff"; // fallback
+    setFornecedores(response.data);
+  } finally {
+    setLoading(false);
   }
 }
 
+useEffect(() => {
+  if (user) {
+    fetchFornecedores();
+  }
+}, [user]);
 
-export default function HomePage() {
-const [collapsed, setCollapsed] = useState(false);
-const [currentModule, setModule] =useState<number>(0);
-const drawerWidth = collapsed ? 80 : 280;
+  const handleEdit = (row: any) => {
+  console.log("Editar:", row);
+  };
+
+  const handleDelete = (row: any) => {
+  console.log("Excluir:", row);
+  };
+
   return (
-    <Box
+  <Box
   sx={{
-    display: "flex",
-    height: "100vh",   // viewport inteira
-    width: "100vw",
-    overflow: "hidden" //  nunca scroll aqui
-  }}
->
-      {/* AppBar */}
+  display: "flex",
+  height: "100vh",   // viewport inteira
+  width: "100vw",
+  overflow: "hidden" //  nunca scroll aqui
+  }}>
+  <Snackbar
+  open={toastOpen}
+  autoHideDuration={2500}
+  onClose={() => setToastOpen(false)}
+  anchorOrigin={{ vertical: "top", horizontal: "center" }}
+  >
+  <Alert
+  severity={toastType}
+  onClose={() => setToastOpen(false)}
+  sx={{ width: "100%" }}
+  >
+  {toastMsg}
+  </Alert>
+  </Snackbar>
+<CreateFornecedorModal
+  open={openFornecedorModal}
+  onClose={() => setOpenFornecedorModal(false)}
+  onSuccess={fetchFornecedores} //  AQUI
+/>
+  {/* AppBar */}
   <AppBar position="fixed"   sx={{
-    background: "#131d34",
-    borderRadius: 0,
-    p: 0.35,
-   border: "1px solid rgba(40, 61, 107, 0.4)" //  borda aplicada corretamente
+  background: "#131d34",
+  borderRadius: 0,
+  p: 0.35,
+  border: "1px solid rgba(40, 61, 107, 0.4)" //  borda aplicada corretamente
   }}>
   <Toolbar>
   <Stack
-    direction="row"
-    sx={{
-      width: "100%",          // ← ocupa 100% da largura
-      justifyContent: "flex-end", // ← empurra os filhos para a direita
-      alignItems: "center",
-      gap:2,
-      borderRadius:0
-    }}>
-    <Badge badgeContent={4} color="primary">
-      <Bell  color={colorOpacity}/>
-    </Badge>
-    <Divider
-    orientation="vertical"
-    flexItem
-    sx={{
-      display:"flex",
-      height:"50px",
-     border: "1px solid rgba(40, 61, 107, 0.4)",
-    opacity: 0.7,
-    mx: 1,               
-    }}/>
-<Avatar
+  direction="row"
   sx={{
-    bgcolor: bgComponents,  // fundo
-    width: 45,
-    height: 45,
+  width: "100%",          // ← ocupa 100% da largura
+  justifyContent: "flex-end", // ← empurra os filhos para a direita
+  alignItems: "center",
+  gap:2,
+  borderRadius:0
   }}>
-<User size={22} color={colorOpacity} />
-</Avatar>
-<Stack flexDirection={"column"} gap={0}>
+  <Badge badgeContent={4} color="primary">
+  <Bell  color={colorOpacity}/>
+  </Badge>
+  <Divider
+  orientation="vertical"
+  flexItem
+  sx={{
+  display:"flex",
+  height:"50px",
+  border: "1px solid rgba(40, 61, 107, 0.4)",
+  opacity: 0.7,
+  mx: 1,               
+  }}/>
+  <Avatar
+  sx={{
+  bgcolor: bgComponents,  // fundo
+  width: 45,
+  height: 45,
+  }}>
+  <User size={22} color={colorOpacity} />
+  </Avatar>
+  <Stack flexDirection={"column"} gap={0}>
   <Typography gutterBottom variant="body1" component="div" mb={0}mt={0} fontSize={"0.8rem"}>
-    Elesio Oliveira
+  Elesio Oliveira
   </Typography>
   <Typography gutterBottom variant="body1" component="div" color={colorOpacity}mb={0} mt={0} fontSize={"0.8rem"}>
-    Administrador
+  Administrador
   </Typography>
-</Stack>
-<Box sx={{ display: "flex", alignItems: "center", ml:1 }}>
+  </Stack>
+  <Box sx={{ display: "flex", alignItems: "center", ml:1 }}>
   <ChevronDown size={20} color={colorOpacity} />
-</Box>
+  </Box>
   </Stack>
   </Toolbar>
   </AppBar>
-    {/* Drawer lateral */}
-    <Drawer
-    variant="permanent"
-    sx={{
-    width: drawerWidth,
-    flexShrink: 0,
-    whiteSpace: "nowrap",
-     border: "1px solid rgba(40, 61, 107, 0.4)",
-    transition: "width 0.3s ease",
-    "& .MuiDrawer-paper": {
-    width: drawerWidth,
-    transition: "width 0.3s ease",
-    boxSizing: "border-box",
-    borderRight: "1px solid rgba(40, 61, 107, 0.4)",
-    borderRadius: 0,
-    backgroundColor: (theme) => theme.palette.text.primary,
-    color: (theme) => theme.palette.background.paper,
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-between",
-    },
-    }}>
-    {/* Logo */}
-    {<Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 4, px: 2 }}>
-    <Box
-    sx={{
-    width: 45,
-    height: 45,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 1,
-    background: "linear-gradient(to right, #f59f0a 0%, #e68a00 100%)",
-    boxShadow: "0 0 25px rgba(245,159,10,0.35)",
-    }}
-    >
-    <Typography variant="h6" fontWeight="bold">
-    L
-    </Typography>
-    </Box>
-
-    {!collapsed && (
-    <Box>
-    <Typography variant="h6" fontWeight="bold">Lumena</Typography>
-    <Typography variant="body2" color={colorOpacity}>
-    ERP System
-    </Typography>
-    </Box>
-    )}
-    </Box>}
-    <Divider sx={{ width: "100%",height:"1px", backgroundColor: "#283d6b", opacity: 0.7}} />
-    <List sx={{ width: "100%", pl: 2, pr:2, display: "flex", flexDirection: "column", gap: 2}}>
-    {menuItems.map((item, index) => (
-    <ListItemButton
-      key={item.label}
-      onClick={() => setModule(index)}
-      sx={{
-        width: "100%",
-        display: "flex",
-        alignItems: "center",
-        px: 2,
-        borderRadius: 1,
-        transition: "all 0.25s ease",
-
-        // Fundo do item ativo
-        background:
-          currentModule === index
-            ? "linear-gradient(to right, #f39b0a 0%, #de6f09 100%)"
-            : "transparent",
-
-        // Borda esquerda animada
-        borderLeft: currentModule === index ? "4px solid #f59f0a" : "4px solid transparent",
-
-        "&:hover": {
-          background:
-            currentModule === index
-              ? "linear-gradient(to right, #f4a51c 0%, #c76007 100%)" // reforça o ativo
-              : "rgba(255,255,255,0.08)",
-
-          borderLeft:
-            currentModule === index
-              ? "4px solid #f59f0a"
-              : "4px solid rgba(255,255,255,0.3)",
-        },
-      }}
-    >
-      {/* Ícone com Glow opcional */}
-      <item.icon
-        size={20}
-        color={currentModule === index ? "#fff" :"#94a3b8"}
-        style={{
-          marginRight: collapsed ? 0 : 12,
-          filter: currentModule === index ? "drop-shadow(0 0 6px rgba(245,159,10,0.9))" : "none",
-          transition: "all 0.25s ease",
-        }}
-      />
-
-      {!collapsed && (
-        <ListItemText
-          primary={item.label}
-          sx={{ ml: 2 }}
-          primaryTypographyProps={{
-            color:currentModule === index ? "#fff" :"text.secondary",
-            fontWeight: currentModule === index ? 700 : 400,
-            letterSpacing: currentModule === index ? "0.3px" : "0px",
-          }}
-        />
-      )}
-    </ListItemButton>
-    ))}
-    </List>
-    <Divider sx={{ width: "100%",height:"1px", backgroundColor: "#283d6b", opacity: 0.7}} /> 
-    {/* Rodapé do Drawer */}
-    <Box sx={{ width: "100%",  display: "flex",pl:2,pr:2, flexDirection: "column", gap: 1 }}>
-    {/* Botão Recolher/Expandir */}
-    <ListItemButton
-    sx={{
-    width: "100%",
-    borderRadius: 1,
-    color:"text.secondary",
-    display: "flex",
-    alignItems: "center",
-    "&:hover": {
-            background: "rgba(255,255,255,0.12)"
-          },
-    }}
-    onClick={() => setCollapsed((prev) => !prev)}
-    >
-    {collapsed ? (
-    <ChevronRight color="#fff" size={20} />
-    ) : (
-    <ChevronLeft color="#fff" size={20} />
-    )}
-
-    {!collapsed && (
-    <ListItemText
-    primary={collapsed ? "Expandir" : "Recolher"}
-    primaryTypographyProps={{ color: {colorOpacity}, fontWeight: 400 }}
-    sx={{ ml: 2}}
-    />
-    )}
-    </ListItemButton>
-
-    {/* Botão Sair */}
-    <ListItemButton
-    sx={{
-    width: "100%",
-    borderRadius: 1,
-    display: "flex",
-    alignItems: "center",
-    "&:hover": {
-            background: "rgba(255,50,50,0.25)",
-            color:"#FFFF"
-          },
-    }}
-    onClick={() => {}}
-    >
-    <LogOut color="#fff" size={20} />
-    {!collapsed && (
-    <ListItemText
-    primary="Sair"
-    primaryTypographyProps={{ color: "#8a98b8ff", fontWeight: 400 }}
-    sx={{ ml: 2 
-     }} />
-    )}
-    </ListItemButton>
-    </Box>
-    </Drawer>
-
-    {/* Conteúdo principal */}
-    <Box
-    component="main"
-    sx={{
-    flexGrow: 1,
-    bgcolor: bgView,
-    pl:2.5,
-    // SCROLL ÚNICO AQUI
-    overflowY: "auto",
-    overflowX: "hidden",
-
-    // ESSENCIAL para Flexbox
-    minHeight: 0,
-    }}
-    >
-    <Toolbar />  {/* Esse toolbar empurra o conteúdo pra baixo do AppBar */}
-    <Typography gutterBottom variant="h2" component="div" mb={0}mt={0} fontSize={"2rem"} color={"#FFFF"} marginTop={7} fontWeight={"bold"}>
-    Dashboard
-    </Typography>
-    <Typography gutterBottom variant="body1" component="div" mb={0}mt={0} fontSize={"1.2rem"} color={colorOpacity} marginTop={1} >
-    Bem-vindo de volta, João! Aqui está o resumo do seu negócio.
-    </Typography>
-    <Stack direction="row" display={"flex"} spacing={2} sx={{ overflowX: "auto",mt:4, mr:2}} flexGrow={1}>
-    {cardsDashBoard.map((item, index) => (
-    <Box flexDirection={"row"} flexGrow={1}   minHeight={180} display={"flex"} borderRadius={1} bgcolor={bgColorCardsDashBoard} p={2}  gap={10} border={"1px solid rgba(40, 61, 107, 0.4)"} 
-    sx={{
-  position: "relative",
-  overflow: "hidden",
-  transition: "0.3s ease",
-
-  "&:hover": {
-    boxShadow: "0 0 25px rgba(40, 61, 107, 0.6)",
-    borderColor: "rgba(40, 61, 107, 0.9)",
-    transform: "translateY(0px)",
-  },
-
-  "&:before": {
-    content: '""',
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    borderRadius: "inherit",
-    background: "radial-gradient(circle at 30% 20%, rgba(40,61,107,0.35), transparent)",
-    opacity: 0,
-    transition: "0.3s ease",
-  },
-
-  "&:hover:before": {
-    opacity: 1,
-  },
-}} >
-      <Box flexDirection={"column"} display={"flex"} gap={1.5}>
-        <Typography gutterBottom variant="body1" component="div" mb={0}mt={0} fontSize={"1rem"} color={colorOpacity} marginTop={1} >
-        {item.label}
-        </Typography>
-        <Typography gutterBottom variant="h2" component="div" mb={0}mt={0} fontSize={"2rem"} color={"#FFFF"} marginTop={1} fontWeight={"bold"} >
-        {item.value}
-        </Typography>
-      <Stack display={"flex"} flexDirection={"row"}  alignContent={"center"} justifyContent={"center"} justifyItems={"center"} alignItems={"center"} gap={1}>
-      <Box bgcolor={item.postive ===true? bgColorPositive :bgColorNegative } width={65} height={10} display={"flex"} alignContent={"center"} justifyContent={"center"} justifyItems={"center"} alignItems={"center"} borderRadius={10} pt={1.5} pb={1.5} pl={0} pr={0}>
-      <Stack flexDirection={"row"} display={"flex"} alignContent={"center"} justifyContent={"center"} justifyItems={"center"} alignItems={"center"} >
-      {item.postive ? (
-        <TrendingUp size={13} color={colorPositive} />
-      ) : (
-        <TrendingDown size={13} color={colorNegative} />
-      )}
-      <Typography gutterBottom variant="body1" component="div" mb={0}mt={0} ml={0.5} fontSize={"0.75rem"} color={item.postive ===true? colorPositive : colorNegative} >
-      {item.porcentagem}
-      </Typography>
-      </Stack>
-      </Box>
-      <Typography gutterBottom variant="body1" component="div" mb={0}mt={0} fontSize={"0.8rem"} color={colorOpacity} >
-      vs mês anterior
-      </Typography>
-      </Stack>
-      </Box>
-      <Box display={"flex"} alignContent={"center"} justifyContent={"center"} justifyItems={"center"} alignItems={"center"} borderRadius={1} width={55} height={55} bgcolor={currentBgColorIconDashBoard(item.label)} mt={2} ml={collapsed === true? 12: 5}>
-      {item.icon}
-      </Box>
-    </Box>
-    ))}
-    </Stack>
-    <Box display={"flex"} width={"100%"} height={"50%"} flexGrow={1} mt={4}>
-    <Box flexDirection={"column"} flex={2} gridRow={1}  minHeight={180} display={"flex"} borderRadius={1} bgcolor={bgColorCardsDashBoard} pl={4} pt={1}  gap={0} border={"1px solid rgba(40, 61, 107, 0.4)"} 
-    sx={{
-  position: "relative",
-  overflow: "hidden",
-  transition: "0.3s ease",
-
-  "&:hover": {
-    boxShadow: "0 0 25px rgba(40, 61, 107, 0.6)",
-    borderColor: "rgba(40, 61, 107, 0.9)",
-    transform: "translateY(0px)",
-  },
-
-   "&:before": {
-  content: '""',
-  position: "absolute",
-  top: 0,
-  left: 0,
-  width: "100%",
-  height: "100%",
-  borderRadius: "inherit",
-  background: "radial-gradient(circle at 30% 20%, rgba(40,61,107,0.35), transparent)",
-  opacity: 0,
-  transition: "0.3s ease",
-  pointerEvents: "none", //PERMITE FILHOS TRABALHAR COM ONHOVER TAMBÉM
-},
-
-  "&:hover:before": {
-    opacity: 1,
-  },
-}} >
-<Stack flexDirection={"row"} display={"flex"} flexGrow={1} alignContent={"center"} justifyContent={"space-between"} justifyItems={"center"} alignItems={"start"} marginTop={3} mb={2}>
-  <Box flexDirection={"column"} display={"flex"}>
-    <Typography gutterBottom variant="h2" component="div" mb={0}mt={0} fontSize={"1.3rem"} color={"#FFFF"}  fontWeight={"bold"}>
-    Receita vs Despesas
-    </Typography>
-    <Typography gutterBottom variant="h2" component="div" mb={0}mt={0} fontSize={"1rem"} color={colorOpacity} marginTop={1} fontWeight={400}>
-    Visão anual do fluxo financeiro
-    </Typography>
-  </Box>
-  <Stack flexDirection={"row"} display={"flex"} gap={3} mr={4}>
-    <Stack flexDirection={"row"} display={"flex"}>
-      <Avatar sx={{ bgcolor: primaryColor, width:15, height:15, color:'transparent' }}>
-      </Avatar>
-    <Typography gutterBottom variant="h2" component="div" mb={0}mt={0} fontSize={"0.9rem"} color={colorOpacity} ml={1} fontWeight={400} alignItems={"start"} justifyItems={"start"} justifyContent={"start"} alignContent={"center"}>
-    Receita
-    </Typography>
-    </Stack>
-    <Stack flexDirection={"row"} display={"flex"}>
-      <Avatar sx={{ bgcolor: colorGray, width:15, height:15, color:'transparent' }}>
-      </Avatar>
-    <Typography gutterBottom variant="h2" component="div" mb={0}mt={0} fontSize={"0.9rem"} color={colorOpacity} ml={1} fontWeight={400} alignItems={"start"} justifyItems={"start"} justifyContent={"start"} alignContent={"center"}>
-    Despesas
-    </Typography>
-    </Stack>
-  </Stack>
-</Stack>
-  <Box display={"flex"}  pr={2} height={"100%"}>
-  <ResponsiveContainer width="100%" height={"100%"}>
-  <ComposedChart data={chartData}>
-
-  {/* GRADIENT */}
-  <defs>
-  <linearGradient id="gradientFill" x1="0" y1="0" x2="0" y2="1">
-  <stop offset="0%" stopColor="#f59f0a" stopOpacity={0.45} />
-  <stop offset="70%" stopColor="#f59f0a" stopOpacity={0.15} />
-  <stop offset="100%" stopColor="#f59f0a" stopOpacity={0} />
-  </linearGradient>
-  </defs>
-  <defs>
-  <linearGradient id="gradientDespesas" x1="0" y1="0" x2="0" y2="1">
-  <stop offset="0%" stopColor={colorGray} stopOpacity={0.35} />
-  <stop offset="70%" stopColor={colorGray} stopOpacity={0.12} />
-  <stop offset="100%" stopColor={colorGray} stopOpacity={0} />
-  </linearGradient>
-  </defs>
-
-  {/* GRID */}
-  <CartesianGrid
-  stroke="#283d6b"
-  strokeDasharray="3 3"
-  opacity={0.25}
-  />
-
-  {/* EIXOS */}
-  <XAxis dataKey="mes" stroke="#94a3b8" />
-  <YAxis
-  stroke="#94a3b8"
-  fontSize={"0.7rem"}
-  tickFormatter={(value: number) =>
-  new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-  maximumFractionDigits: 0, // remove centavos (opcional)
-  }).format(value)
-  }
-  />
-  <Tooltip
-  formatter={(value: number, name: string) => {
-  const formatted = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-  }).format(value);
-
-  const label =
-  name === "receita" ? "Receita" :
-  name === "despesas" ? "Despesas" :
-  name;
-
-  return [formatted, label];
-  }}
-  contentStyle={{
-  backgroundColor: "#131d34",
-  border: "1px solid #283d6b",
-  borderRadius: 8,
-  color: "#fff",
-  }}
-  labelStyle={{ color: "#94a3b8" }}
-  />
-
-  {/* ÁREA (FILL) */}
-  <Area
-  type="monotone"
-  dataKey="receita"
-  fill="url(#gradientFill)"
-  stroke="none"
-  isAnimationActive
-  animationDuration={1200}
-  tooltipType="none"
-  />
-  {/* ÁREA (FILL) */}
-  <Area
-  type="monotone"
-  dataKey="despesas"
-  fill="url(#gradientDespesas)"
-  stroke="none"
-  isAnimationActive
-  animationDuration={1200}
-  tooltipType="none"
-  />
-
-  {/* LINHA */}
-  <Line
-  type="monotone"
-  dataKey="receita"
-  stroke="#f59f0a"
-  strokeWidth={3}
-  dot={false}
-  activeDot={{ r: 6 }}
-  isAnimationActive
-  animationDuration={1400}
-  />
-  <Line
-  type="monotone"
-  dataKey="despesas"
-  stroke={colorGray}
-  strokeWidth={3}
-  dot={false}
-  activeDot={{ r: 6 }}
-  isAnimationActive
-  animationDuration={1400}
-  />
-  </ComposedChart>
-  </ResponsiveContainer>
-
-  </Box>
-  </Box>
-  <Box flexDirection={"column"} ml={4} mr={2} flex={1} gridRow={1}  height={"100%"} display={"flex"} borderRadius={1} bgcolor={bgColorCardsDashBoard} pl={4} pt={3}  gap={3} border={"1px solid rgba(40, 61, 107, 0.4)"} 
+  {/* Drawer lateral */}
+  <Drawer
+  variant="permanent"
   sx={{
-  position: "relative",
-  overflow: "hidden",
-  transition: "0.3s ease",
-  "&:hover": {
-  boxShadow: "0 0 25px rgba(40, 61, 107, 0.6)",
-  borderColor: "rgba(40, 61, 107, 0.9)",
-  transform: "translateY(0px)",
-  },
-  "&:before": {
-  content: '""',
-  position: "absolute",
-  top: 0,
-  left: 0,
-  width: "100%",
-  height: "100%",
-  borderRadius: "inherit",
-  background: "radial-gradient(circle at 30% 20%, rgba(40,61,107,0.35), transparent)",
-  opacity: 0,
-  transition: "0.3s ease",
-  pointerEvents: "none", // 
-  },
-
-  "&:hover:before": {
-  opacity: 1,
-  },
-  }} >
-  <Typography gutterBottom variant="h2" component="div" mb={0}mt={0} fontSize={"1.3rem"} color={"#FFFF"}  fontWeight={"bold"}>
-  Ações Rápidas
-  </Typography>
-  <Box
-  display="grid"
-  gridTemplateColumns="repeat(auto-fill, minmax(120px, 1fr))"
-  mr={2}
-  gap={2 }
-  sx={{
-  overflow: {
-  minHeight: 0,
-  md: "visible" // desktop → SEM scroll
-  }
-  }}
-  >
-  {acoesRapidas.map((acao) => (
-  <Box
-  key={acao.label}
-  onClick={acao.onClick}
-  sx={{
-  cursor: "pointer",
+  width: drawerWidth,
+  flexShrink: 0,
+  whiteSpace: "nowrap",
+  border: "1px solid rgba(40, 61, 107, 0.4)",
+  transition: "width 0.3s ease",
+  "& .MuiDrawer-paper": {
+  width: drawerWidth,
+  transition: "width 0.3s ease",
+  boxSizing: "border-box",
+  borderRight: "1px solid rgba(40, 61, 107, 0.4)",
+  borderRadius: 0,
+  backgroundColor: (theme) => theme.palette.text.primary,
+  color: (theme) => theme.palette.background.paper,
   display: "flex",
   flexDirection: "column",
+  justifyContent: "space-between",
+  },
+  }}>
+  {/* Logo */}
+  {<Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 4, px: 2 }}>
+  <Box
+  sx={{
+  width: 45,
+  height: 45,
+  display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  gap: 1,
-  height: 90,
   borderRadius: 1,
-  background: "#182543",
-  transition: "0.25s ease",
+  background: "linear-gradient(to right, #f59f0a 0%, #e68a00 100%)",
+  boxShadow: "0 0 25px rgba(245,159,10,0.35)",
+  }}
+  >
+  <Typography variant="h6" fontWeight="bold">
+  L
+  </Typography>
+  </Box>
+
+  {!collapsed && (
+  <Box>
+  <Typography variant="h6" fontWeight="bold">Lumena</Typography>
+  <Typography variant="body2" color={colorOpacity}>
+  ERP System
+  </Typography>
+  </Box>
+  )}
+  </Box>}
+  <Divider sx={{ width: "100%",height:"1px", backgroundColor: "#283d6b", opacity: 0.7}} />
+  <List sx={{ width: "100%", pl: 2, pr:2, display: "flex", flexDirection: "column", gap: 2}}>
+  {menuItems.map((item, index) => (
+  <ListItemButton
+  key={item.label}
+  onClick={() => setModule(index)}
+  sx={{
+  width: "100%",
+  display: "flex",
+  alignItems: "center",
+  px: 2,
+  borderRadius: 1,
+  transition: "all 0.25s ease",
+
+  // Fundo do item ativo
+  background:
+  currentModule === index
+  ? "linear-gradient(to right, #f39b0a 0%, #de6f09 100%)"
+  : "transparent",
+
+  // Borda esquerda animada
+  borderLeft: currentModule === index ? "4px solid #f59f0a" : "4px solid transparent",
 
   "&:hover": {
-  background: "linear-gradient(to right, #f39b0a 0%, #de6f09 100%)",
-  transform: "translateY(-2px)",
+  background:
+  currentModule === index
+  ? "linear-gradient(to right, #f4a51c 0%, #c76007 100%)" // reforça o ativo
+  : "rgba(255,255,255,0.08)",
+
+  borderLeft:
+  currentModule === index
+  ? "4px solid #f59f0a"
+  : "4px solid rgba(255,255,255,0.3)",
   },
   }}
   >
-  {acao.icon}
-  <Typography fontSize="0.8rem" color="#fff">
-  {acao.label}
-  </Typography>
-  </Box>
+  {/* Ícone com Glow opcional */}
+  <item.icon
+  size={20}
+  color={currentModule === index ? "#fff" :"#94a3b8"}
+  style={{
+  marginRight: collapsed ? 0 : 12,
+  filter: currentModule === index ? "drop-shadow(0 0 6px rgba(245,159,10,0.9))" : "none",
+  transition: "all 0.25s ease",
+  }}
+  />
+
+  {!collapsed && (
+  <ListItemText
+  primary={item.label}
+  sx={{ ml: 2 }}
+  primaryTypographyProps={{
+  color:currentModule === index ? "#fff" :"text.secondary",
+  fontWeight: currentModule === index ? 700 : 400,
+  letterSpacing: currentModule === index ? "0.3px" : "0px",
+  }}
+  />
+  )}
+  </ListItemButton>
   ))}
-  </Box>
-  </Box>
-  </Box>
-  {/* PEDIDOS RECENTES*/}
-    <Box display={"flex"} flexDirection={"row"} width={"100%"} height={"60%"} flexGrow={1} mt={4} mb={4}>
-    <Box flexDirection={"column"} flex={2} gridRow={1}  minHeight={180} display={"flex"} borderRadius={1} bgcolor={bgColorCardsDashBoard} pl={4} pt={1}  gap={0} border={"1px solid rgba(40, 61, 107, 0.4)"} 
-    sx={{
-    position: "relative",
-    overflow: "hidden",
-    transition: "0.3s ease",
-
-    "&:hover": {
-    boxShadow: "0 0 25px rgba(40, 61, 107, 0.6)",
-    borderColor: "rgba(40, 61, 107, 0.9)",
-    transform: "translateY(0px)",
-    },
-
-    "&:before": {
-    content: '""',
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    borderRadius: "inherit",
-    background: "radial-gradient(circle at 30% 20%, rgba(40,61,107,0.35), transparent)",
-    opacity: 0,
-    transition: "0.3s ease",
-    pointerEvents: "none", //PERMITE FILHOS TRABALHAR COM ONHOVER TAMBÉM
-    },
-
-    "&:hover:before": {
-    opacity: 1,
-    },
-    }} >
-    <Stack display={"flex"} flexDirection={"row"} pt={2.5} pr={3} justifyContent={"space-between"}  >
-    <Box display={"flex"} flexDirection={"column"}>
-    <Typography gutterBottom variant="h2" component="div" mb={0}mt={0} fontSize={"1.3rem"} color={"#FFFF"}  fontWeight={"bold"}>
-    Pedidos Recentes
-    </Typography>
-    <Typography gutterBottom variant="body1" component="div" mb={0}mt={0} fontSize={"1rem"} color={colorOpacity}  fontWeight={400}>
-    Últimas transações realizadas
-    </Typography>
-    </Box>
-    <Button
-    variant="outlined"
-    sx={{
-    width: "110px",
-    height: "45px",
-    color: "#fff",
-    border: "2px solid rgba(40, 61, 107, 0.4)", // 👈 todos os lados
-    transition: "0.3s ease",
-    "&:hover": {
-    boxShadow: "0 0 25px rgba(40, 61, 107, 0.6)",
-    borderColor: "linear-gradient(to right, #f59f0a 0%, #e68a00 100%)",
-    transform: "translateY(0px)",
-    },
-    "&:before": {
-    content: '""',
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    borderRadius: "inherit",
-    background: "radial-gradient(circle at 30% 20%, rgba(40,61,107,0.35), transparent)",
-    opacity: 0,
-    transition: "0.3s ease",
-    },
-    }}
-    >
-    Ver todos
-    </Button>
-    </Stack>
- {/* Tabela */}
-<Box mr={2} flexGrow={1}>
-  <TableContainer sx={{ maxHeight: "450px", mr:5, mt:2}}>
-  <Table
-    stickyHeader//se tirar some o header da table
-    aria-label="Pedidos Recentes"
-    sx={{
-      mt: 2,
-      bgcolor: "transparent",
-      borderCollapse: "separate",
-      borderSpacing: "0 8px", // espaço entre linhas (opcional)
-    }}
-  >
-    {/* HEADER */}
-    <TableHead>
-      <TableRow>
-        {["Pedido", "Cliente", "Produto", "Valor", "Status", "Data"].map(
-          (col) => (
-            <TableCell
-              key={col}
-              sx={{
-                backgroundColor: "transparent", // 👈 remove fundo
-                color: colorOpacity,
-                fontSize: "0.9rem",
-                fontWeight: 600,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                borderBottom: "1px solid rgba(40, 61, 107, 0.4)",
-              }}
-            >
-              {col}
-            </TableCell>
-          )
-        )}
-      </TableRow>
-    </TableHead>
-
-    {/* BODY */}
-    <TableBody>
-      {pedidos.map((row) => (
-        <TableRow
-          key={row.pedido}
-          sx={{
-            backgroundColor: "rgba(255,255,255,0.02)",
-            transition: "0.25s ease",
-
-            "&:hover": {
-              backgroundColor: "rgba(245,159,10,0.08)",
-            },
-          }}
-        >
-          <TableCell sx={cellStyle}>{row.pedido}</TableCell>
-          <TableCell sx={cellStyleBold}>{row.cliente}</TableCell>
-          <TableCell sx={cellStyle}>{row.produto}</TableCell>
-          <TableCell sx={cellStyleBold}>{row.valor}</TableCell>
-          <TableCell sx={cellStyle}>
-            <Box
-              sx={{
-                width: 100,
-                height: 22,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: 10,
-                fontSize: "0.7rem",
-                fontWeight: 600,
-                color:  row.status === enumStatus.andamento
-                    ? shopIconColor
-                    : row.status === enumStatus.concluido
-                    ? colorPositive
-                    : colorNegative,
-                bgcolor:
-                  row.status === enumStatus.andamento
-                    ? bgshopColor
-                    : row.status === enumStatus.concluido
-                    ? bgColorPositive
-                    : bgColorNegative,
-              }}>
-              {row.status}
-            </Box>
-          </TableCell>
-          <TableCell sx={cellStyle}>{row.data}</TableCell>
-        </TableRow>
-      ))}
-    </TableBody>
-  </Table>
-</TableContainer>
-</Box>
-
-    </Box>
-  <Box flexDirection={"column"} ml={4} mr={2} flex={1} gridRow={1}  height={"100%"} display={"flex"} borderRadius={1} bgcolor={bgColorCardsDashBoard} pl={4} pt={3}  gap={0} border={"1px solid rgba(40, 61, 107, 0.4)"} 
+  </List>
+  <Divider sx={{ width: "100%",height:"1px", backgroundColor: "#283d6b", opacity: 0.7}} /> 
+  {/* Rodapé do Drawer */}
+  <Box sx={{ width: "100%",  display: "flex",pl:2,pr:2, flexDirection: "column", gap: 1 }}>
+  {/* Botão Recolher/Expandir */}
+  <ListItemButton
   sx={{
-  position: "relative",
-  overflow: "hidden",
-  transition: "0.3s ease",
+  width: "100%",
+  borderRadius: 1,
+  color:"text.secondary",
+  display: "flex",
+  alignItems: "center",
   "&:hover": {
-  boxShadow: "0 0 25px rgba(40, 61, 107, 0.6)",
-  borderColor: "rgba(40, 61, 107, 0.9)",
-  transform: "translateY(0px)",
+  background: "rgba(255,255,255,0.12)"
   },
-  "&:before": {
+  }}
+  onClick={() => setCollapsed((prev) => !prev)}
+  >
+  {collapsed ? (
+  <ChevronRight color="#fff" size={20} />
+  ) : (
+  <ChevronLeft color="#fff" size={20} />
+  )}
+
+  {!collapsed && (
+  <ListItemText
+  primary={collapsed ? "Expandir" : "Recolher"}
+  primaryTypographyProps={{ color: {colorOpacity}, fontWeight: 400 }}
+  sx={{ ml: 2}}
+  />
+  )}
+  </ListItemButton>
+
+  {/* Botão Sair */}
+  <ListItemButton
+  sx={{
+  width: "100%",
+  borderRadius: 1,
+  display: "flex",
+  alignItems: "center",
+  "&:hover": {
+  background: "rgba(255,50,50,0.25)",
+  color:"#FFFF"
+  },
+  }}
+  onClick={() => {}}
+  >
+  <LogOut color="#fff" size={20} />
+  {!collapsed && (
+  <ListItemText
+  primary="Sair"
+  primaryTypographyProps={{ color: "#8a98b8ff", fontWeight: 400 }}
+  sx={{ ml: 2 
+  }} />
+  )}
+  </ListItemButton>
+  </Box>
+  </Drawer>
+
+  {/* Conteúdo principal */}
+  <Box
+  component="main"
+  sx={{
+  flexGrow: 1,
+  bgcolor: bgView,
+  flexDirection:"column",
+  pl:2.5,
+  // SCROLL ÚNICO AQUI
+  overflowY: "auto",
+  overflowX: "hidden",
+
+  // ESSENCIAL para Flexbox
+  minHeight: 0,
+  }}
+  >
+  <Toolbar> </Toolbar>
+
+  <Stack
+  direction="row"
+  flexGrow={1}
+  gap={5}
+  ml={2}
+  height={100}
+  mt={2}
+  sx={{
+  borderBottom: "1px solid rgba(40, 61, 107, 0.4)",
+  mb: 3,
+  }}
+  >
+  {subModulesProduct.map((item, index) => {
+  const isActive = index === activeSubModule;
+  const Icon = item.icon;
+  return (
+  <Box
+  key={item.label}
+  onClick={() => setActiveSubModule(index)}
+  sx={{
+  width: 150,
+  height: "100%",
+  cursor: "pointer",
+  display: "flex", 
+  alignItems: "center", 
+  justifyContent: "center",
+  position: "relative",
+  transition: "0.25s ease",
+
+  "&::after": {
   content: '""',
   position: "absolute",
-  top: 0,
   left: 0,
-  width: "100%",
-  height: "100%",
-  borderRadius: "inherit",
-  background: "radial-gradient(circle at 30% 20%, rgba(40,61,107,0.35), transparent)",
-  opacity: 0,
-  transition: "0.3s ease",
-  pointerEvents: "none", // 
+  bottom: 0,
+  width: isActive ? "100%" : "0%",
+  height: "2px",
+  background:
+  "linear-gradient(to right, #f59f0a 0%, #e68a00 100%)",
+  transition: "0.25s ease",
   },
 
-  "&:hover:before": {
+  "&:hover::after": {
+  width: "100%",
+  transform: "translateY(-1px)",
+  },
+  }}
+  >
+  {/* ICON + LABEL */}
+  <Stack direction="row" spacing={1.2} alignItems="center">
+  <Icon
+  size={18}
+  color={isActive ? "#fff" : "#94a3b8"}
+  />
+  <Typography
+  fontSize="0.95rem"
+  fontWeight={isActive ? 600 : 400}
+  color={isActive ? "#fff" : "#94a3b8"}
+  whiteSpace="nowrap" 
+  sx={{
+  "&:hover": {
+  transform: "translateY(-1.5px)",
+  fontWeight: "500"
+  },
+  }}
+  >
+  {item.label}
+  </Typography>
+  </Stack>
+  </Box>
+  );
+  })}
+  </Stack>
+  <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={2}>
+  <Stack display={"flex"} flexDirection={"row"} flexGrow={2} justifyContent={"space-between"} >
+  <Typography sx={{fontWeight:"bold", fontSize:"1.5rem", color:"#ffff"}}>
+  Fornecedores
+  </Typography>
+  <Stack display={"flex"} flexDirection={"row"} gap={2} mr={3} >
+  <TextField
+  placeholder="Buscar fornecedor"
+  size="small"
+  sx={{
+  width: 270,
+
+  // INPUT ROOT
+  "& .MuiOutlinedInput-root": {
+  backgroundColor: bgColorTopSellers, // fundo
+  color: "#fff",
+
+  // BORDA PADRÃO
+  "& fieldset": {
+  borderColor: colorOpacity,
+  },
+
+  // HOVER
+  "&:hover fieldset": {
+  borderColor: primaryColor,
+  },
+
+  // FOCUS
+  "&.Mui-focused fieldset": {
+  borderColor: primaryColor,
+  borderWidth: 2,
+  },
+  },
+
+  // TEXTO DO INPUT
+  "& input": {
+  color: "#fff",
+  fontSize: "0.9rem",
+  },
+
+  // PLACEHOLDER
+  "& input::placeholder": {
+  color: colorOpacity,
   opacity: 1,
   },
-  }} >
-     <Typography gutterBottom variant="h2" component="div" mb={0}mt={0} fontSize={"1.3rem"} color={"#FFFF"}  fontWeight={"bold"}>
-    Produtos Mais Vendidos
-    </Typography>
-    <Typography gutterBottom variant="body1" component="div" mb={0}mt={0} fontSize={"1rem"} color={colorOpacity}  fontWeight={400}>
-    Top 5 do mês atual
-    </Typography>
-    {topSelles.map((row) => (
-      <Stack display={"flex"} flexDirection={"row"}  alignItems={"center"} justifyContent={"start"} alignContent={"center"} justifyItems={"center"} gap={2} >
-      <Box flex={1}
-      alignItems={"start"} justifyContent={"start"} alignContent={"center"} justifyItems={"center"} 
-      sx={{
-      borderRadius:1,
-      bgcolor: bgColorTopSellers,
-      width:60,
-      height:60,mt:3
-      }}>
-      <Typography gutterBottom variant="h1" component="div" mb={0}mt={0} fontSize={"1.4rem"} color={colorOpacity}  fontWeight={"bold"}>
-      {row.top}
-      </Typography>
-      </Box>
-      <Box flex={3} display={"flex"} flexDirection={"column"} alignItems={"start"} justifyContent={"start"} alignContent={"start"} justifyItems={"start"} height={15}>
-          <Typography gutterBottom variant="h1" component="div" mb={0}mt={0} fontSize={"1.2rem"} color={"#FFFF"}  fontWeight={"bold"}>
-      {row.product}
-      </Typography>
-      <Typography gutterBottom variant="body1" component="div" mb={0}mt={0} fontSize={"1rem"} color={colorOpacity}  fontWeight={400}>
-      {row.total}
-      </Typography>
-      </Box>
-      <Box flex={2} display={"flex"} flexDirection={"column"} alignItems={"end"} justifyContent={"start"} alignContent={"start"} justifyItems={"start"} height={15} mr={2}>
-          <Typography gutterBottom variant="h1" component="div" mb={0}mt={0} fontSize={"1.2rem"} color={"#FFFF"}  fontWeight={"bold"}>
-      {row.value}
-      </Typography>
-      <Typography gutterBottom variant="body1" component="div" mb={0}mt={0} fontSize={"1rem"} color={row.porcentagem.includes("+")? colorPositive : colorNegative}  fontWeight={400}>
-      {row.porcentagem}%
-      </Typography>
-      </Box>
-      </Stack>
-      
-    ))}
+  }}
+  />
+  <Button
+  startIcon={<Plus />}
+  onClick={() => setOpenFornecedorModal(true)}
+  sx={{
+  height: 40,
+  width:100,
+  px: 3,
+  color: "#fff",
+  fontWeight: 600,
+  textTransform: "none",
+  borderRadius: 1,
+  background: "linear-gradient(to right, #f59f0a 0%, #e68a00 100%)",
+  boxShadow: "0 0 20px rgba(245,159,10,0.35)",
+  transition: "0.25s ease",
+  "&:hover": {
+  background: "linear-gradient(to right, #f4a51c 0%, #c76007 100%)",
+  boxShadow: "0 0 25px rgba(245,159,10,0.55)",
+  transform: "translateY(-1px)",
+  },
+  }}>
+  Novo
+  </Button>
+  </Stack>
+  </Stack>
+
+  {/* Tabela */}
+  <Box mr={2} flexGrow={1}>
+  {/* LOADING */}
+  {loading && (
+  <Stack
+  height={200}
+  alignItems="center"
+  justifyContent="center"
+  >
+  <CircularProgress color="inherit" />
+  <Typography mt={2} color={colorOpacity}>
+  Carregando fornecedores...
+  </Typography>
+  </Stack>
+  )}
+
+  {/* LISTA VAZIA */}
+  {!loading && fornecedores.length === 0 && (
+  <Stack
+  height={200}
+  alignItems="center"
+  justifyContent="center"
+  >
+  <Typography color={colorOpacity}>
+  Nenhum fornecedor encontrado.
+  </Typography>
+  </Stack>
+  )}
+
+  {/* TABELA */}
+  {!loading && fornecedores.length > 0 && (
+  <TableContainer
+  sx={{
+  maxHeight: "100%",
+  mr: 5,
+  mt: 2,
+  }}
+  >
+  <Table
+  stickyHeader
+  sx={{
+  bgcolor: "transparent",
+  borderCollapse: "separate",
+  borderSpacing: "0 8px",
+  }}
+  >
+  {/* HEADER */}
+  <TableHead>
+  <TableRow>
+  {["Nome", "CNPJ", "E-mail", "Telefone", "Cidade", "Status", "Ações"].map(
+  (col) => (
+  <TableCell
+  key={col}
+  sx={{
+  backgroundColor: "transparent",
+  color: colorOpacity,
+  fontSize: "0.9rem",
+  fontWeight: 600,
+  textTransform: "uppercase",
+  borderBottom: "1px solid rgba(40, 61, 107, 0.4)",
+  }}
+  >
+  {col}
+  </TableCell>
+  )
+  )}
+  </TableRow>
+  </TableHead>
+
+  {/* BODY */}
+  <TableBody>
+  {fornecedores.map((row) => (
+  <TableRow
+  key={row.id}
+  sx={{
+  backgroundColor: "rgba(255,255,255,0.02)",
+  transition: "0.25s ease",
+  "&:hover": {
+  backgroundColor: "rgba(245,159,10,0.08)",
+  },
+  }}
+  >
+  <TableCell sx={cellStyleBold}>
+  {row.razao_social}
+  </TableCell>
+
+  <TableCell sx={cellStyle}>{row.cnpj}</TableCell>
+  <TableCell sx={cellStyle}>{row.email ?? "-"}</TableCell>
+  <TableCell sx={cellStyle}>{row.telefone ?? "-"}</TableCell>
+  <TableCell sx={cellStyle}>{row.cidade ?? "-"}</TableCell>
+
+  <TableCell sx={cellStyle}>
+  <Box
+  sx={{
+  width: 80,
+  height: 22,
+  borderRadius: 10,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "0.7rem",
+  fontWeight: 600,
+  color: row.ativo ===true? colorPositive : colorNegative,
+  bgcolor:row.ativo ===true? bgColorPositive : bgColorNegative ,
+  }}
+  >
+ {row.ativo ===true? "ativo" : "desativado"}
   </Box>
-    </Box>
-    </Box>
-    </Box>
-    );
-    }
+  </TableCell>
+  <TableCell sx={cellStyle}> <Stack direction="row" spacing={1} justifyContent="start" alignItems="start" > 
+    {/* EDITAR */} 
+    <Box onClick={() => handleEdit(row)} sx={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 1, cursor: "pointer", color: colorOpacity, transition: "0.25s ease", "&:hover": { color: primaryColor, backgroundColor: "rgba(245,159,10,0.15)", boxShadow: "0 0 12px rgba(245,159,10,0.45)", transform: "translateY(-1px)", }, }} >
+    <Pencil size={16} /> </Box> 
+    {/* EXCLUIR */} 
+    <Box onClick={() => handleDelete(row)} sx={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 1, cursor: "pointer", color: colorOpacity, transition: "0.25s ease", "&:hover": { color: colorNegative, backgroundColor: "rgba(255,50,50,0.15)", boxShadow: "0 0 12px rgba(255,50,50,0.45)", transform: "translateY(-1px)", }, }} >
+    <Trash2 size={16} /> 
+    </Box> 
+    </Stack> 
+    </TableCell>
+  </TableRow>
+  ))}
+  </TableBody>
+  </Table>
+  </TableContainer>
+  )}
+  </Box>
+
+  </Box>
+  </Box>
+  </Box>
+  );
+  }
