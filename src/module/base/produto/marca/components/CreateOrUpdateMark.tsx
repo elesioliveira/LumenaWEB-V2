@@ -10,31 +10,31 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Controller, useForm } from "react-hook-form";
-import type { CategoryEntity } from "../entity/CategoryEntity";
-import type { CategoryDTO } from "../dto/CategoryDTO";
-import { createCategory, updateCategory } from "../repository/CategoryRepository";
+import { useForm } from "react-hook-form";
 import { bgColorCardsDashBoard, colorOpacity, textFieldStyle } from "../../../../../theme/theme";
+import type { MarkEntity } from "../entity/MarkEntity";
+import type { MarkDTO } from "../dto/MarkDTO";
+import { createMark, updateMark } from "../repository/MarkRepository";
 
 interface CreateOrUpdateCategoryModadlProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => Promise<void>;
-  category: CategoryEntity | null
+  mark: MarkEntity | null
 }
 
-export function CreateOrUpdateCategoryModal({
+export function CreateOrUpdateMarkModal({
   open,
   onClose,
   onSuccess,
-  category: category
+  mark: category
 }: CreateOrUpdateCategoryModadlProps) {
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<CategoryDTO>();
+  } = useForm<MarkDTO>();
 
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
@@ -44,12 +44,12 @@ useEffect(() => {
   if (category) {
     reset({
       nome: category.nome,
-      descricao: category.descricao,
+      website: category.website,
     });
   } else {
     reset({
        nome: null,
-      descricao: null,
+      website: null,
     }); //garante modal limpa ao criar novo
   }
 
@@ -60,34 +60,34 @@ useEffect(() => {
   /* =========================
      SUBMIT
      ========================= */
-const onSubmit = async (data: CategoryDTO) => {
+const onSubmit = async (data: MarkDTO) => {
   let result;
 
   if (category === null) {
     // 🔹 CREATE
-    const payload: CategoryDTO = {
+    const payload: MarkDTO = {
       nome: data.nome,
-      descricao: data.descricao
+      website: data.website
     };
-    result = await createCategory(payload);
+    result = await createMark(payload);
   } else {
     // UPDATE
-    const payload: CategoryEntity = {
+    const payload: MarkEntity = {
       id: category.id, // vem da entidade selecionada
       nome: data.nome,
-      descricao: data.descricao,
+      website: data.website,
       ativo: category.ativo,
       empresa_id: category.empresa_id,
       data_cadastro: null,
       qtd: null
     };
 
-    result = await updateCategory(payload);
+    result = await updateMark(payload);
   }
 
   if (!result?.success) {
     setToastType("error");
-    setToastMsg(result?.message ?? "Erro ao salvar categoria.");
+    setToastMsg(result?.message ?? "Erro ao salvar marca.");
     setToastOpen(true);
     return;
   }
@@ -128,7 +128,7 @@ flexDirection={"column"}
   </Snackbar>
 
   <Typography fontSize="1.4rem" fontWeight={700} color="#fff" mb={3}>
-    {category ? "Editar Categoria" : "Nova Categoria"}
+    {category ? "Editar Marca" : "Nova Marca"}
   </Typography>
 
   <form onSubmit={handleSubmit(onSubmit)}>
@@ -154,9 +154,9 @@ flexDirection={"column"}
       <TextField
 fullWidth
 multiline
-rows={4} // 🔑 controla a altura
-placeholder="Descrição"
-{...register("descricao")}
+rows={1} // 🔑 controla a altura
+placeholder="Website"
+{...register("website")}
 sx={textFieldStyle}
 />
       </Box>

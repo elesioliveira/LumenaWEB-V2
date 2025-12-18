@@ -1,4 +1,5 @@
 
+
   import {  ChevronLeft, ChevronRight, Pencil, Plus, ToggleLeft,  ToggleRight } from "lucide-react";
   import {
   Box,
@@ -17,18 +18,18 @@
   Alert,
   } from "@mui/material";
   import { useEffect, useRef, useState } from "react";
-import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, bgView, colorNegative, colorOpacity, colorPositive, primaryColor } from "../../../../theme/theme";
+import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, colorNegative, colorOpacity, colorPositive, primaryColor } from "../../../../theme/theme";
 import { cellStyle, cellStyleBold } from "../../../../theme/cellTable";
-import type { CategoryEntity } from "./entity/CategoryEntity";
-import { PaginationButton } from "../fornecedor/components/PaginationButton";
-import { getCategory, updateCategory } from "./repository/CategoryRepository";
-import { CreateOrUpdateCategoryModal } from "./components/CategoryModalCreateOrUpdate";
 import { formatDateTime } from "../../../../shared/MaskUtils";
+import type { MarkEntity } from "./entity/MarkEntity";
+import { getMark, updateMark } from "./repository/MarkRepository";
+import { PaginationButton } from "../fornecedor/components/PaginationButton";
+import { CreateOrUpdateMarkModal } from "./components/CreateOrUpdateMark";
 
-export function CategoriaPage() {
-  const [openCategoryModal, setOpenCategoryModal] = useState(false);
-const [selectedCategory, selectCategory] =useState<CategoryEntity | null>(null);
-const [categories, setCategories] = useState<CategoryEntity[]>([]);
+export function MarkPage() {
+  const [openMarkModal, setOpenMarkModal] = useState(false);
+const [selectedMark, selectMark] =useState<MarkEntity | null>(null);
+const [markes, setMarkes] = useState<MarkEntity[]>([]);
 const [toastOpen, setToastOpen] = useState(false);
 const [toastMsg, setToastMsg] = useState("");
 const [toastType, setToastType] = useState<"success" | "error">("error");
@@ -39,8 +40,8 @@ const jaCarregouRef = useRef(false);
 const [page, setPage] = useState(0);
 const rowsPerPage = 10;
 
-const totalPages = Math.ceil(categories.length / rowsPerPage);
-const fornecedoresPaginados = categories.slice(
+const totalPages = Math.ceil(markes.length / rowsPerPage);
+const fornecedoresPaginados = markes.slice(
 page * rowsPerPage,
 page * rowsPerPage + rowsPerPage
 );
@@ -49,10 +50,10 @@ page * rowsPerPage + rowsPerPage
     setLoading(true);
 
     try {
-    const response = await getCategory(search);
+    const response = await getMark(search);
 
     if (response?.success) {
-    setCategories(response.data);
+    setMarkes(response.data);
     if (page >= totalPages && totalPages > 0) {
     setPage(0);
     }
@@ -77,14 +78,14 @@ page * rowsPerPage + rowsPerPage
     };
 
 
-    const onChangedAtivo = async (f: CategoryEntity)=> {
+    const onChangedAtivo = async (f: MarkEntity)=> {
     try {
     f.ativo = !f.ativo;
     setLoading(true);
-    const response = await updateCategory(f);
+    const response = await updateMark(f);
     if (!response?.success) {
     setToastType("error");
-    setToastMsg(response?.message ?? "Erro ao mudar status do fornecedor.");
+    setToastMsg(response?.message ?? "Erro ao mudar status da marca.");
     setToastOpen(true);
     return;
     }
@@ -92,7 +93,7 @@ page * rowsPerPage + rowsPerPage
     setPage(0);
     } catch (error) {
     setToastType("error");
-    setToastMsg("Erro ao mudar status do fornecedor.");
+    setToastMsg("Erro ao mudar status da marca.");
     setToastOpen(true);
     return;
     }finally {
@@ -107,9 +108,9 @@ page * rowsPerPage + rowsPerPage
     fetchCategories("");
     }, []);
 
-    const handleEdit = (row: CategoryEntity) => {
-    selectCategory(row);      //  passa a categoria
-    setOpenCategoryModal(true);    //  abre modal
+    const handleEdit = (row: MarkEntity) => {
+    selectMark(row);      //  passa a marca
+    setOpenMarkModal(true);    //  abre modal
     };
 
 
@@ -131,23 +132,23 @@ page * rowsPerPage + rowsPerPage
     {toastMsg}
     </Alert>
     </Snackbar>
-    <CreateOrUpdateCategoryModal
-    open={openCategoryModal}
+    <CreateOrUpdateMarkModal
+    open={openMarkModal}
     onClose={() => {
-    setOpenCategoryModal(false);
-    selectCategory(null);   //  limpa ao fechar
+    setOpenMarkModal(false);
+    selectMark(null);   //  limpa ao fechar
     }}
     onSuccess={() => fetchCategories(searchRef.current)}   //  recarrega lista
-    category={selectedCategory}  //  passa via props
+    mark={selectedMark}  //  passa via props
     />
     <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={2}>
     <Stack display={"flex"} flexDirection={"row"} flexGrow={2} justifyContent={"space-between"} >
     <Typography sx={{fontWeight:"bold", fontSize:"1.5rem", color:"#ffff"}}>
-    Categorias
+    Marcas
     </Typography>
     <Stack display={"flex"} flexDirection={"row"} gap={2} mr={3} >
     <TextField
-    placeholder="Buscar categoria"
+    placeholder="Buscar marca..."
     onChange={(e) => {
     searchRef.current = e.target.value;
     debounceSearch();
@@ -193,7 +194,7 @@ page * rowsPerPage + rowsPerPage
     />
     <Button
     startIcon={<Plus />}
-    onClick={() => setOpenCategoryModal(true)}
+    onClick={() => setOpenMarkModal(true)}
     sx={{
     height: 40,
     width:100,
@@ -227,26 +228,26 @@ page * rowsPerPage + rowsPerPage
     >
     <CircularProgress color="inherit" />
     <Typography mt={2} color={colorOpacity}>
-    Carregando categorias...
+    Carregando marcas...
     </Typography>
     </Stack>
     )}
 
     {/* LISTA VAZIA */}
-    {!loading && categories.length === 0 && (
+    {!loading && markes.length === 0 && (
     <Stack
     height={200}
     alignItems="center"
     justifyContent="center"
     >
     <Typography color={colorOpacity}>
-    Nenhuma categoria encontrada.
+    Nenhuma marca encontrada.
     </Typography>
     </Stack>
     )}
 
     {/* TABELA */}
-    {!loading && categories.length > 0 && (
+    {!loading && markes.length > 0 && (
     <TableContainer
     sx={{
     maxHeight: "100%",
@@ -303,7 +304,7 @@ page * rowsPerPage + rowsPerPage
     }}
     >
     <TableCell sx={cellStyleBold}>{row.nome}</TableCell>
-    <TableCell sx={cellStyle}>{row.descricao ?? "-"}</TableCell>
+    <TableCell sx={cellStyle}>{row.website ?? "-"}</TableCell>
     <TableCell sx={cellStyle}>{row.qtd ?? "-"}</TableCell>
     <Box
     sx={{
@@ -362,7 +363,7 @@ page * rowsPerPage + rowsPerPage
     </Table>
     </TableContainer>
     )}
-    {!loading && categories.length > rowsPerPage && (
+    {!loading && markes.length > rowsPerPage && (
     <Box
     mt={3}
     display="flex"

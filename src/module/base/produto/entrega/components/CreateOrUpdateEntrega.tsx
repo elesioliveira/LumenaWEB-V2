@@ -10,84 +10,86 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Controller, useForm } from "react-hook-form";
-import type { CategoryEntity } from "../entity/CategoryEntity";
-import type { CategoryDTO } from "../dto/CategoryDTO";
-import { createCategory, updateCategory } from "../repository/CategoryRepository";
+import { useForm } from "react-hook-form";
 import { bgColorCardsDashBoard, colorOpacity, textFieldStyle } from "../../../../../theme/theme";
+import type { EntregaDTO } from "../dto/EntregaDTO";
+import type { EntregaEntity } from "../entity/EntregaEntity";
+import { createEntrega, updateEntrega } from "../repository/EntregaRepository";
+import { maskCurrency, parseCurrencyBR } from "../../../../../shared/MaskUtils";
 
-interface CreateOrUpdateCategoryModadlProps {
+interface CreateOrUpdateEntregaModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => Promise<void>;
-  category: CategoryEntity | null
+  entrega: EntregaEntity | null
 }
 
-export function CreateOrUpdateCategoryModal({
+export function CreateOrUpdateEntregaModal({
   open,
   onClose,
   onSuccess,
-  category: category
-}: CreateOrUpdateCategoryModadlProps) {
+  entrega: entrega
+}: CreateOrUpdateEntregaModalProps) {
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<CategoryDTO>();
+  } = useForm<EntregaDTO>();
 
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
   const [toastType, setToastType] = useState<"success" | "error">("error");
 
 useEffect(() => {
-  if (category) {
+  if (entrega) {
     reset({
-      nome: category.nome,
-      descricao: category.descricao,
+      nome: entrega.nome,
+      prazo: entrega.prazo,
+        custo_base: maskCurrency(entrega.custo_base),
     });
   } else {
     reset({
        nome: null,
-      descricao: null,
+      prazo: null,
+        custo_base: 0,
     }); //garante modal limpa ao criar novo
   }
 
-}, [category, reset]);
+}, [entrega, reset]);
 
 
 
   /* =========================
      SUBMIT
      ========================= */
-const onSubmit = async (data: CategoryDTO) => {
+const onSubmit = async (data: EntregaDTO) => {
   let result;
 
-  if (category === null) {
-    // 🔹 CREATE
-    const payload: CategoryDTO = {
+  if (entrega === null) {
+    // CREATE
+    const payload: EntregaDTO = {
       nome: data.nome,
-      descricao: data.descricao
+      prazo: data.prazo,
+      custo_base: parseCurrencyBR(`${data.custo_base}`),
     };
-    result = await createCategory(payload);
+    result = await createEntrega(payload);
   } else {
     // UPDATE
-    const payload: CategoryEntity = {
-      id: category.id, // vem da entidade selecionada
+    const payload: EntregaEntity = {
+      id: entrega.id,
       nome: data.nome,
-      descricao: data.descricao,
-      ativo: category.ativo,
-      empresa_id: category.empresa_id,
+      prazo: data.prazo,
+      ativo: entrega.ativo,
       data_cadastro: null,
-      qtd: null
+      custo_base: parseCurrencyBR(`${data.custo_base}`),
     };
-
-    result = await updateCategory(payload);
+    result = await updateEntrega(payload);
   }
 
   if (!result?.success) {
     setToastType("error");
-    setToastMsg(result?.message ?? "Erro ao salvar categoria.");
+    setToastMsg(result?.message ?? "Erro ao salvar entrega.");
     setToastOpen(true);
     return;
   }
@@ -96,6 +98,7 @@ const onSubmit = async (data: CategoryDTO) => {
   onSuccess();
   onClose();
 };
+
 
 
 return (
@@ -128,17 +131,16 @@ flexDirection={"column"}
   </Snackbar>
 
   <Typography fontSize="1.4rem" fontWeight={700} color="#fff" mb={3}>
-    {category ? "Editar Categoria" : "Nova Categoria"}
+    {entrega ? "Editar Entrega" : "Nova Entrega"}
   </Typography>
 
   <form onSubmit={handleSubmit(onSubmit)}>
 <Box display={"flex"} flexDirection={"column"}>
         {/* Nome */}
-                  <Typography fontSize="1rem" fontWeight={400} color="#fff" mb={1} mt={3}>
-    Nome
-  </Typography>
+        <Typography fontSize="1rem" fontWeight={400} color="#fff" mb={1} mt={3}>
+        Nome
+        </Typography>
       <TextField 
-      
         placeholder="Nome"
         {...register("nome", { required: "Campo obrigatório" })}
         error={!!errors.nome}
@@ -146,20 +148,39 @@ flexDirection={"column"}
         sx={textFieldStyle}
       />
 </Box>
-      <Box display={"flex"} flexDirection={"column"}>
-        {/* Descricao */}
-    <Typography fontSize="1rem" fontWeight={400} color="#fff" mb={1} mt={3}>
-    Descrição
-  </Typography>
-      <TextField
+<Stack display={"flex"} flexDirection={"row"} flexGrow={1} gap={2}>
+<Box display={"flex"} flexDirection={"column"} flex={1}>
+<Typography fontSize="1rem" fontWeight={400} color="#fff" mb={1} mt={3}>
+Prazo de Entrega
+</Typography>
+<TextField
 fullWidth
 multiline
-rows={4} // 🔑 controla a altura
-placeholder="Descrição"
-{...register("descricao")}
+rows={1} // 🔑 controla a altura
+placeholder="Ex: 5 a 7 dias úteis"
+{...register("prazo")}
 sx={textFieldStyle}
 />
-      </Box>
+</Box>
+<Box display={"flex"} flexDirection={"column"} flex={1}>
+<Typography fontSize="1rem" fontWeight={400} color="#fff" mb={1} mt={3}>
+Custo Base (R$)
+</Typography>
+<TextField
+fullWidth
+multiline
+placeholder="Ex: R$ 1.250,00"
+rows={1} // 🔑 controla a altura
+inputMode="numeric"
+{...register("custo_base")}
+  onChange={(e) => {
+    const formatted = maskCurrency(e.target.value);
+    e.target.value = formatted;
+  }}
+sx={textFieldStyle}
+/>
+</Box>
+</Stack>
     {/* AÇÕES */}
     <Stack direction="row" spacing={2} justifyContent="flex-end" mt={4}>
       <Button
@@ -190,7 +211,7 @@ sx={textFieldStyle}
         px: 3,}}>
       {isSubmitting ? (
       <CircularProgress size={26} />
-      ) : category ? (
+      ) : entrega ? (
       "Atualizar"
       ) : (
       "Salvar"

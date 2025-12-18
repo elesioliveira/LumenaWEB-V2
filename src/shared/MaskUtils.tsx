@@ -101,3 +101,15 @@ export const formatDateTime = (value?: string | Date) => {
     minute: "2-digit",
   });
 };
+
+
+
+export const parseCurrencyBR = (value: string) => {
+  return Number(
+    value
+      .replace(/\./g, "")
+      .replace(",", ".")
+      .replace("R$", "")
+      .trim()
+  );
+};

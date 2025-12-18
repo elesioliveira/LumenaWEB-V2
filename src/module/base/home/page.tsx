@@ -1,5 +1,5 @@
 
-  import { Bell, Building2, ChartColumn, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, LayoutDashboard, LogOut, Package, Pencil, Plus, Ruler, Settings, ShoppingBag, ShoppingCart,  Tag,  ToggleLeft,  ToggleRight,  Trash2,  Truck, User, Users, Wallet } from "lucide-react";
+  import { Bell, Building2, ChartColumn, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, Layers, LayoutDashboard, LogOut, Package, Pencil, Plus, Ruler, Settings, ShoppingBag, ShoppingCart,  Tag,  ToggleLeft,  ToggleRight,  Trash2,  Truck, User, Users, Wallet } from "lucide-react";
   import {
   Box,
   Drawer,
@@ -18,6 +18,10 @@
   import { bgComponents, bgView, colorOpacity, } from "../../../theme/theme";
 import { FornecedorPage } from "../produto/fornecedor/Page";
 import { CategoriaPage } from "../produto/categoria/Page";
+import { MarkPage } from "../produto/marca/Page";
+import { CanalVendaPage } from "../produto/canalVenda/CanalVendaPage";
+import { EntregaPage } from "../produto/entrega/EntregaPage";
+import { CurrentPageHome } from "./enums/HomeEnums";
 
   const menuItems = [
   { label: "Dashboard", icon: LayoutDashboard },
@@ -32,20 +36,65 @@ import { CategoriaPage } from "../produto/categoria/Page";
   { label: "Configurações", icon: Settings },
   ];
 
-  const subModulesProduct= [
-  {label:"Produtos", icon:Package},
-  {label:"Fornecedores", icon:Users},
-  {label:"Categorias", icon:Tag},
-  {label:"Marcas", icon:Package},
-  {label:"Canais de Venda", icon:ShoppingBag},
-  {label:"Métodos de Entrega", icon:Truck},
-  ];
+const subModulesProduct = [
+  {
+    label: "Fornecedor",
+    icon: Truck,
+    page: CurrentPageHome.supplier,
+  },
+  {
+    label: "Categoria",
+    icon: Layers,
+    page: CurrentPageHome.Category,
+  },
+  {
+    label: "Marca",
+    icon: Tag,
+    page: CurrentPageHome.Mark,
+  },
+  {
+    label: "Canal de Venda",
+    icon: ShoppingCart,
+    page: CurrentPageHome.SalesChannel,
+  },
+  {
+    label: "Entrega",
+    icon: Package,
+    page: CurrentPageHome.Delivery,
+  },
+];
+
 
 export default function HomePage() {
 const [collapsed, setCollapsed] = useState(false);
-const [currentModule, setModule] =useState<number>(0);
+const [currentModule, setModule] =useState<number>(2);
 const drawerWidth = collapsed ? 80 : 280;
-const [activeSubModule, setActiveSubModule] = useState(0);
+const [currentPage, setPage] = useState<CurrentPageHome>(
+  CurrentPageHome.supplier
+);
+
+  const currentPageView = () => {
+    switch (currentPage) {
+      // case CurrentPageHome.Product:
+      //   return <ProductPage />;
+      case CurrentPageHome.supplier:
+        return <FornecedorPage />;
+      case CurrentPageHome.Category:
+        return <CategoriaPage />;
+      case CurrentPageHome.Mark:
+        return <MarkPage />;
+      case CurrentPageHome.SalesChannel:
+        return <CanalVendaPage />;
+      case CurrentPageHome.Delivery:
+        return <EntregaPage />;
+      default:
+        return null;
+    }
+  };
+
+const handleOnChagentPage = (page: CurrentPageHome) => {
+  setPage(page);
+};
 
 
   return (
@@ -306,67 +355,59 @@ const [activeSubModule, setActiveSubModule] = useState(0);
   mb: 3,
   }}
   >
-  {subModulesProduct.map((item, index) => {
-  const isActive = index === activeSubModule;
+{subModulesProduct.map((item) => {
+  const isActive = item.page === currentPage;
   const Icon = item.icon;
+
   return (
-  <Box
-  key={item.label}
-  onClick={() => setActiveSubModule(index)}
-  sx={{
-  width: 150,
-  height: "100%",
-  cursor: "pointer",
-  display: "flex", 
-  alignItems: "center", 
-  justifyContent: "center",
-  position: "relative",
-  transition: "0.25s ease",
+    <Box
+      key={item.label}
+      onClick={() => handleOnChagentPage(item.page)}
+      sx={{
+        width: 150,
+        height: "100%",
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        position: "relative",
+        transition: "0.25s ease",
 
-  "&::after": {
-  content: '""',
-  position: "absolute",
-  left: 0,
-  bottom: 0,
-  width: isActive ? "100%" : "0%",
-  height: "2px",
-  background:
-  "linear-gradient(to right, #f59f0a 0%, #e68a00 100%)",
-  transition: "0.25s ease",
-  },
+        "&::after": {
+          content: '""',
+          position: "absolute",
+          left: 0,
+          bottom: 0,
+          width: isActive ? "100%" : "0%",
+          height: "2px",
+          background:
+            "linear-gradient(to right, #f59f0a 0%, #e68a00 100%)",
+          transition: "0.25s ease",
+        },
 
-  "&:hover::after": {
-  width: "100%",
-  transform: "translateY(-1px)",
-  },
-  }}
-  >
-  {/* ICON + LABEL */}
-  <Stack direction="row" spacing={1.2} alignItems="center">
-  <Icon
-  size={18}
-  color={isActive ? "#fff" : "#94a3b8"}
-  />
-  <Typography
-  fontSize="0.95rem"
-  fontWeight={isActive ? 600 : 400}
-  color={isActive ? "#fff" : "#94a3b8"}
-  whiteSpace="nowrap" 
-  sx={{
-  "&:hover": {
-  transform: "translateY(-1.5px)",
-  fontWeight: "500"
-  },
-  }}
-  >
-  {item.label}
-  </Typography>
-  </Stack>
-  </Box>
+        "&:hover::after": {
+          width: "100%",
+          transform: "translateY(-1px)",
+        },
+      }}
+    >
+      <Stack direction="row" spacing={1.2} alignItems="center">
+        <Icon size={18} color={isActive ? "#fff" : "#94a3b8"} />
+        <Typography
+          fontSize="0.95rem"
+          fontWeight={isActive ? 600 : 400}
+          color={isActive ? "#fff" : "#94a3b8"}
+          whiteSpace="nowrap"
+        >
+          {item.label}
+        </Typography>
+      </Stack>
+    </Box>
   );
-  })}
+})}
+
   </Stack>
-  <CategoriaPage></CategoriaPage>
+  {currentPageView()}
   </Box>
   </Box>
   );

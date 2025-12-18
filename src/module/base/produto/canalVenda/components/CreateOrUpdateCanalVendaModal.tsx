@@ -10,84 +10,83 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Controller, useForm } from "react-hook-form";
-import type { CategoryEntity } from "../entity/CategoryEntity";
-import type { CategoryDTO } from "../dto/CategoryDTO";
-import { createCategory, updateCategory } from "../repository/CategoryRepository";
+import { useForm } from "react-hook-form";
 import { bgColorCardsDashBoard, colorOpacity, textFieldStyle } from "../../../../../theme/theme";
+import type { CanalVendaEntity } from "../entity/CanalVendaEntity";
+import type { CanalVendaDTO } from "../dto/CanalVendaDTO";
+import { createCanalVenda, updateCanalVenda } from "../repository/CanalVendaRepository";
 
-interface CreateOrUpdateCategoryModadlProps {
+interface CreateOrUpdateCanalVendaModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => Promise<void>;
-  category: CategoryEntity | null
+  canalVenda: CanalVendaEntity | null
 }
 
-export function CreateOrUpdateCategoryModal({
+export function CreateOrUpdateCanalVendaModal({
   open,
   onClose,
   onSuccess,
-  category: category
-}: CreateOrUpdateCategoryModadlProps) {
+  canalVenda: canal
+}: CreateOrUpdateCanalVendaModalProps) {
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<CategoryDTO>();
+  } = useForm<CanalVendaDTO>();
 
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
   const [toastType, setToastType] = useState<"success" | "error">("error");
 
 useEffect(() => {
-  if (category) {
+  if (canal) {
     reset({
-      nome: category.nome,
-      descricao: category.descricao,
+      nome: canal.nome,
+      tipo: canal.tipo,
     });
   } else {
     reset({
        nome: null,
-      descricao: null,
+      tipo: null,
     }); //garante modal limpa ao criar novo
   }
 
-}, [category, reset]);
+}, [canal, reset]);
 
 
 
   /* =========================
      SUBMIT
      ========================= */
-const onSubmit = async (data: CategoryDTO) => {
+const onSubmit = async (data: CanalVendaDTO) => {
   let result;
 
-  if (category === null) {
+  if (canal === null) {
     // 🔹 CREATE
-    const payload: CategoryDTO = {
+    const payload: CanalVendaDTO = {
       nome: data.nome,
-      descricao: data.descricao
+      tipo: data.tipo
     };
-    result = await createCategory(payload);
+    result = await createCanalVenda(payload);
   } else {
     // UPDATE
-    const payload: CategoryEntity = {
-      id: category.id, // vem da entidade selecionada
+    const payload: CanalVendaEntity = {
+      id: canal.id, // vem da entidade selecionada
       nome: data.nome,
-      descricao: data.descricao,
-      ativo: category.ativo,
-      empresa_id: category.empresa_id,
+      tipo: data.tipo,
+      ativo: canal.ativo,
+      empresa_id: canal.empresa_id,
       data_cadastro: null,
-      qtd: null
     };
 
-    result = await updateCategory(payload);
+    result = await updateCanalVenda(payload);
   }
 
   if (!result?.success) {
     setToastType("error");
-    setToastMsg(result?.message ?? "Erro ao salvar categoria.");
+    setToastMsg(result?.message ?? "Erro ao salvar marca.");
     setToastOpen(true);
     return;
   }
@@ -128,7 +127,7 @@ flexDirection={"column"}
   </Snackbar>
 
   <Typography fontSize="1.4rem" fontWeight={700} color="#fff" mb={3}>
-    {category ? "Editar Categoria" : "Nova Categoria"}
+    {canal ? "Editar Canal de Venda" : "Novo Canal de Venda"}
   </Typography>
 
   <form onSubmit={handleSubmit(onSubmit)}>
@@ -154,9 +153,9 @@ flexDirection={"column"}
       <TextField
 fullWidth
 multiline
-rows={4} // 🔑 controla a altura
-placeholder="Descrição"
-{...register("descricao")}
+rows={1} // 🔑 controla a altura
+placeholder="Tipo"
+{...register("tipo")}
 sx={textFieldStyle}
 />
       </Box>
@@ -190,7 +189,7 @@ sx={textFieldStyle}
         px: 3,}}>
       {isSubmitting ? (
       <CircularProgress size={26} />
-      ) : category ? (
+      ) : canal ? (
       "Atualizar"
       ) : (
       "Salvar"

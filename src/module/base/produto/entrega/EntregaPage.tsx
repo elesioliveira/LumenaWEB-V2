@@ -1,4 +1,5 @@
 
+
   import {  ChevronLeft, ChevronRight, Pencil, Plus, ToggleLeft,  ToggleRight } from "lucide-react";
   import {
   Box,
@@ -17,18 +18,18 @@
   Alert,
   } from "@mui/material";
   import { useEffect, useRef, useState } from "react";
-import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, bgView, colorNegative, colorOpacity, colorPositive, primaryColor } from "../../../../theme/theme";
+import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, colorNegative, colorOpacity, colorPositive, primaryColor } from "../../../../theme/theme";
 import { cellStyle, cellStyleBold } from "../../../../theme/cellTable";
-import type { CategoryEntity } from "./entity/CategoryEntity";
+import { formatDateTime, maskCurrency } from "../../../../shared/MaskUtils";
+import type { EntregaEntity } from "./entity/EntregaEntity";
+import { getEntrega, updateEntrega } from "./repository/EntregaRepository";
 import { PaginationButton } from "../fornecedor/components/PaginationButton";
-import { getCategory, updateCategory } from "./repository/CategoryRepository";
-import { CreateOrUpdateCategoryModal } from "./components/CategoryModalCreateOrUpdate";
-import { formatDateTime } from "../../../../shared/MaskUtils";
+import { CreateOrUpdateEntregaModal } from "./components/CreateOrUpdateEntrega";
 
-export function CategoriaPage() {
-  const [openCategoryModal, setOpenCategoryModal] = useState(false);
-const [selectedCategory, selectCategory] =useState<CategoryEntity | null>(null);
-const [categories, setCategories] = useState<CategoryEntity[]>([]);
+export function EntregaPage() {
+  const [openEntregaModal, setOpenEntregaModal] = useState(false);
+const [selectedEntrega, selectEntrega] =useState<EntregaEntity | null>(null);
+const [entregas, setEntregas] = useState<EntregaEntity[]>([]);
 const [toastOpen, setToastOpen] = useState(false);
 const [toastMsg, setToastMsg] = useState("");
 const [toastType, setToastType] = useState<"success" | "error">("error");
@@ -39,20 +40,20 @@ const jaCarregouRef = useRef(false);
 const [page, setPage] = useState(0);
 const rowsPerPage = 10;
 
-const totalPages = Math.ceil(categories.length / rowsPerPage);
-const fornecedoresPaginados = categories.slice(
+const totalPages = Math.ceil(entregas.length / rowsPerPage);
+const entregasPaginadas = entregas.slice(
 page * rowsPerPage,
 page * rowsPerPage + rowsPerPage
 );
 
-    const fetchCategories = async (search: string) => {
+    const fetchEntregas = async (search: string) => {
     setLoading(true);
 
     try {
-    const response = await getCategory(search);
+    const response = await getEntrega(search);
 
     if (response?.success) {
-    setCategories(response.data);
+    setEntregas(response.data);
     if (page >= totalPages && totalPages > 0) {
     setPage(0);
     }
@@ -72,27 +73,27 @@ page * rowsPerPage + rowsPerPage
 
     if ( value !=='' && value.length < 3) return;
 
-    fetchCategories(value);
+    fetchEntregas(value);
     }, 1000);
     };
 
 
-    const onChangedAtivo = async (f: CategoryEntity)=> {
+    const onChangedAtivo = async (f: EntregaEntity)=> {
     try {
     f.ativo = !f.ativo;
     setLoading(true);
-    const response = await updateCategory(f);
+    const response = await updateEntrega(f);
     if (!response?.success) {
     setToastType("error");
-    setToastMsg(response?.message ?? "Erro ao mudar status do fornecedor.");
+    setToastMsg(response?.message ?? "Erro ao mudar status entrega.");
     setToastOpen(true);
     return;
     }
-    await fetchCategories(searchRef.current);
+    await fetchEntregas(searchRef.current);
     setPage(0);
     } catch (error) {
     setToastType("error");
-    setToastMsg("Erro ao mudar status do fornecedor.");
+    setToastMsg("Erro ao mudar status do status entrega.");
     setToastOpen(true);
     return;
     }finally {
@@ -104,12 +105,12 @@ page * rowsPerPage + rowsPerPage
     if (jaCarregouRef.current) return;
 
     jaCarregouRef.current = true;
-    fetchCategories("");
+    fetchEntregas("");
     }, []);
 
-    const handleEdit = (row: CategoryEntity) => {
-    selectCategory(row);      //  passa a categoria
-    setOpenCategoryModal(true);    //  abre modal
+    const handleEdit = (row: EntregaEntity) => {
+    selectEntrega(row);      //  passa o entrega de venda
+    setOpenEntregaModal(true);    //  abre modal
     };
 
 
@@ -131,23 +132,23 @@ page * rowsPerPage + rowsPerPage
     {toastMsg}
     </Alert>
     </Snackbar>
-    <CreateOrUpdateCategoryModal
-    open={openCategoryModal}
+    <CreateOrUpdateEntregaModal
+    open={openEntregaModal}
     onClose={() => {
-    setOpenCategoryModal(false);
-    selectCategory(null);   //  limpa ao fechar
+    setOpenEntregaModal(false);
+    selectEntrega(null);   //  limpa ao fechar
     }}
-    onSuccess={() => fetchCategories(searchRef.current)}   //  recarrega lista
-    category={selectedCategory}  //  passa via props
+    onSuccess={() => fetchEntregas(searchRef.current)}   //  recarrega lista
+    entrega={selectedEntrega}  //  passa via props
     />
     <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={2}>
     <Stack display={"flex"} flexDirection={"row"} flexGrow={2} justifyContent={"space-between"} >
     <Typography sx={{fontWeight:"bold", fontSize:"1.5rem", color:"#ffff"}}>
-    Categorias
+    Métodos de Entrega
     </Typography>
     <Stack display={"flex"} flexDirection={"row"} gap={2} mr={3} >
     <TextField
-    placeholder="Buscar categoria"
+    placeholder="Buscar métodos de entrega..."
     onChange={(e) => {
     searchRef.current = e.target.value;
     debounceSearch();
@@ -193,7 +194,7 @@ page * rowsPerPage + rowsPerPage
     />
     <Button
     startIcon={<Plus />}
-    onClick={() => setOpenCategoryModal(true)}
+    onClick={() => setOpenEntregaModal(true)}
     sx={{
     height: 40,
     width:100,
@@ -227,26 +228,26 @@ page * rowsPerPage + rowsPerPage
     >
     <CircularProgress color="inherit" />
     <Typography mt={2} color={colorOpacity}>
-    Carregando categorias...
+    Carregando métodos de entrega...
     </Typography>
     </Stack>
     )}
 
     {/* LISTA VAZIA */}
-    {!loading && categories.length === 0 && (
+    {!loading && entregas.length === 0 && (
     <Stack
     height={200}
     alignItems="center"
     justifyContent="center"
     >
     <Typography color={colorOpacity}>
-    Nenhuma categoria encontrada.
+    Nenhum método de entrega encontrado.
     </Typography>
     </Stack>
     )}
 
     {/* TABELA */}
-    {!loading && categories.length > 0 && (
+    {!loading && entregas.length > 0 && (
     <TableContainer
     sx={{
     maxHeight: "100%",
@@ -265,7 +266,7 @@ page * rowsPerPage + rowsPerPage
     {/* HEADER */}
     <TableHead>
     <TableRow>
-    {["Nome", "Descrição", "Produtos", "Status", "Cadastro", "Ações"].map(
+    {["Nome", "Prazo", "Custo Base", "Cadastro", "Ações"].map(
     (col) => (
     <TableCell
     key={col}
@@ -287,7 +288,7 @@ page * rowsPerPage + rowsPerPage
 
     {/* BODY */}
     <TableBody>
-    {fornecedoresPaginados.map((row) => (
+    {entregasPaginadas.map((row) => (
     <TableRow
     key={row.id}
     sx={{
@@ -303,8 +304,8 @@ page * rowsPerPage + rowsPerPage
     }}
     >
     <TableCell sx={cellStyleBold}>{row.nome}</TableCell>
-    <TableCell sx={cellStyle}>{row.descricao ?? "-"}</TableCell>
-    <TableCell sx={cellStyle}>{row.qtd ?? "-"}</TableCell>
+    <TableCell sx={cellStyle}>{row.prazo ?? "-"}</TableCell>
+    <TableCell sx={cellStyle}>{maskCurrency(row.custo_base)}</TableCell>
     <Box
     sx={{
     width: 80,
@@ -362,7 +363,7 @@ page * rowsPerPage + rowsPerPage
     </Table>
     </TableContainer>
     )}
-    {!loading && categories.length > rowsPerPage && (
+    {!loading && entregas.length > rowsPerPage && (
     <Box
     mt={3}
     display="flex"
