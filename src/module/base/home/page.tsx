@@ -1,5 +1,5 @@
-
-  import { Bell, Building2, ChartColumn, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, LayoutDashboard, LogOut, Package, Pencil, Plus, Ruler, Settings, ShoppingBag, ShoppingCart,  Tag,  Trash2,  Truck, User, Users, Wallet } from "lucide-react";
+import { TablePagination } from "@mui/material";
+  import { Bell, Building2, ChartColumn, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, LayoutDashboard, LogOut, Package, Pencil, Plus, Ruler, Settings, ShoppingBag, ShoppingCart,  Tag,  ToggleLeft,  ToggleRight,  Trash2,  Truck, User, Users, Wallet } from "lucide-react";
   import {
   Box,
   Drawer,
@@ -25,31 +25,15 @@
   Snackbar,
   Alert,
   } from "@mui/material";
-  import { useEffect, useState } from "react";
+  import { useCallback, useEffect, useRef, useState } from "react";
   import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, bgView, colorNegative, colorOpacity, colorPositive, primaryColor } from "../../../theme/theme";
   import { cellStyle, cellStyleBold } from "../../../theme/cellTable";
-  import { CreateFornecedorModal } from "../produto/fornecedor/modal";
+  import { CreateFornecedorModal } from "../produto/fornecedor/modalCreateOrUpdate";
   import type { FornecedorEntity } from "../produto/fornecedor/entity/FornecedorEntity";
-  import { useSessionController } from "../../auth/controller/SessionController";
-  import { getFornecedor } from "../produto/fornecedor/repository/FornecedorRepository";
+  import { getFornecedor, updateFornecedor } from "../produto/fornecedor/repository/FornecedorRepository";
+import { PaginationButton } from "../produto/fornecedor/components/PaginationButton";
+  
 
-  const fornecedores = [
-  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
-  {label:"Eletrônicos Brasil S.A.", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
-  {label:"Importadora Global", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
-  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
-  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
-  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
-  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
-  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
-  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
-  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
-  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
-  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
-  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
-  {label:"Tech Distribuidor LTDA", cnpj: "12.345.678/0001-90", email: "contato@techdist.com", telefone: "(11) 99999-0001", city:"São Paulo", status: "ativo"},
-  // Add more rows as needed
-  ];
 
 
   const menuItems = [
@@ -76,52 +60,96 @@
 
 
   export default function HomePage() {
-  const [collapsed, setCollapsed] = useState(false);
-  const [currentModule, setModule] =useState<number>(0);
-  const drawerWidth = collapsed ? 80 : 280;
-  const [activeSubModule, setActiveSubModule] = useState(0);
-  const [openFornecedorModal, setOpenFornecedorModal] = useState(false);
-  const [fornecedores, setFornecedores] = useState<FornecedorEntity[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [toastOpen, setToastOpen] = useState(false);
+const [collapsed, setCollapsed] = useState(false);
+const [currentModule, setModule] =useState<number>(0);
+const drawerWidth = collapsed ? 80 : 280;
+const [activeSubModule, setActiveSubModule] = useState(0);
+const [openFornecedorModal, setOpenFornecedorModal] = useState(false);
+const [selectedFornecedor, setSelectedFornecedor] =useState<FornecedorEntity | null>(null);
+const [fornecedores, setFornecedores] = useState<FornecedorEntity[]>([]);
+const [toastOpen, setToastOpen] = useState(false);
 const [toastMsg, setToastMsg] = useState("");
 const [toastType, setToastType] = useState<"success" | "error">("error");
+const searchRef = useRef("");
+const [loading, setLoading] = useState(false);
+const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+const jaCarregouRef = useRef(false);
+const [page, setPage] = useState(0);
+const rowsPerPage = 10;
 
-  const { user } = useSessionController();
+const totalPages = Math.ceil(fornecedores.length / rowsPerPage);
+const fornecedoresPaginados = fornecedores.slice(
+  page * rowsPerPage,
+  page * rowsPerPage + rowsPerPage
+);
 
+const fetchFornecedores = async (search: string) => {
+  setLoading(true);
 
-const fetchFornecedores = async () => {
   try {
-    setLoading(true);
+    const response = await getFornecedor(search);
 
-    const response = await getFornecedor(user!.empresaid);
+    if (response?.success) {
+      setFornecedores(response.data);
+      if (page >= totalPages && totalPages > 0) {
+      setPage(0);
+      }
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
-    if (!response?.success) {
+const debounceSearch = () => {
+if (debounceTimeout.current) {
+  clearTimeout(debounceTimeout.current);
+}
+
+  debounceTimeout.current = setTimeout(() => {
+    const value = searchRef.current.trim();
+
+    if ( value !=='' && value.length < 3) return;
+
+    fetchFornecedores(value);
+  }, 1000);
+};
+
+
+const onChangedAtivo = async (f: FornecedorEntity)=> {
+  try {
+    f.ativo = !f.ativo;
+     setLoading(true);
+    const response = await updateFornecedor(f);
+       if (!response?.success) {
       setToastType("error");
-      setToastMsg(response?.message ?? "Erro ao buscar fornecedores.");
+      setToastMsg(response?.message ?? "Erro ao mudar status do fornecedor.");
       setToastOpen(true);
       return;
     }
-
-    setFornecedores(response.data);
-  } finally {
+    await fetchFornecedores(searchRef.current);
+  } catch (error) {
+      setToastType("error");
+      setToastMsg("Erro ao mudar status do fornecedor.");
+      setToastOpen(true);
+      return;
+  }finally {
     setLoading(false);
   }
 }
 
 useEffect(() => {
-  if (user) {
-    fetchFornecedores();
-  }
-}, [user]);
+  if (jaCarregouRef.current) return;
 
-  const handleEdit = (row: any) => {
-  console.log("Editar:", row);
-  };
+  jaCarregouRef.current = true;
+  fetchFornecedores("");
+}, []);
 
-  const handleDelete = (row: any) => {
-  console.log("Excluir:", row);
-  };
+const handleEdit = (row: FornecedorEntity) => {
+  setSelectedFornecedor(row);      //  passa o fornecedor
+  setOpenFornecedorModal(true);    //  abre modal
+};
+
+
 
   return (
   <Box
@@ -147,8 +175,12 @@ useEffect(() => {
   </Snackbar>
 <CreateFornecedorModal
   open={openFornecedorModal}
-  onClose={() => setOpenFornecedorModal(false)}
-  onSuccess={fetchFornecedores} //  AQUI
+  onClose={() => {
+    setOpenFornecedorModal(false);
+    setSelectedFornecedor(null);   //  limpa ao fechar
+  }}
+ onSuccess={() => fetchFornecedores(searchRef.current)}   //  recarrega lista
+  fornecedor={selectedFornecedor}  //  passa via props
 />
   {/* AppBar */}
   <AppBar position="fixed"   sx={{
@@ -469,6 +501,10 @@ useEffect(() => {
   <Stack display={"flex"} flexDirection={"row"} gap={2} mr={3} >
   <TextField
   placeholder="Buscar fornecedor"
+ onChange={(e) => {
+    searchRef.current = e.target.value;
+    debounceSearch();
+  }}
   size="small"
   sx={{
   width: 270,
@@ -604,7 +640,7 @@ useEffect(() => {
 
   {/* BODY */}
   <TableBody>
-  {fornecedores.map((row) => (
+  {fornecedoresPaginados.map((row) => (
   <TableRow
   key={row.id}
   sx={{
@@ -616,7 +652,7 @@ useEffect(() => {
   }}
   >
   <TableCell sx={cellStyleBold}>
-  {row.razao_social}
+  {row.nome}
   </TableCell>
 
   <TableCell sx={cellStyle}>{row.cnpj}</TableCell>
@@ -646,10 +682,31 @@ useEffect(() => {
     {/* EDITAR */} 
     <Box onClick={() => handleEdit(row)} sx={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 1, cursor: "pointer", color: colorOpacity, transition: "0.25s ease", "&:hover": { color: primaryColor, backgroundColor: "rgba(245,159,10,0.15)", boxShadow: "0 0 12px rgba(245,159,10,0.45)", transform: "translateY(-1px)", }, }} >
     <Pencil size={16} /> </Box> 
-    {/* EXCLUIR */} 
-    <Box onClick={() => handleDelete(row)} sx={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 1, cursor: "pointer", color: colorOpacity, transition: "0.25s ease", "&:hover": { color: colorNegative, backgroundColor: "rgba(255,50,50,0.15)", boxShadow: "0 0 12px rgba(255,50,50,0.45)", transform: "translateY(-1px)", }, }} >
-    <Trash2 size={16} /> 
-    </Box> 
+    {/* Ativar ou Desativar */} 
+   <Box
+    onClick={() => onChangedAtivo(row)}
+    sx={{
+      width: 32,
+      height: 32,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 1,
+      cursor: "pointer",
+      color: row.ativo ? colorPositive : colorNegative,
+      transition: "0.25s ease",
+      "&:hover": {
+        backgroundColor: row.ativo
+          ? "rgba(0,200,83,0.15)"
+          : "rgba(255,50,50,0.15)",
+        boxShadow: row.ativo
+          ? "0 0 12px rgba(0,200,83,0.45)"
+          : "0 0 12px rgba(255,50,50,0.45)",
+        transform: "translateY(-1px)",
+      },
+    }}>
+    {row.ativo ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
+  </Box>
     </Stack> 
     </TableCell>
   </TableRow>
@@ -658,6 +715,53 @@ useEffect(() => {
   </Table>
   </TableContainer>
   )}
+ {!loading && fornecedores.length > rowsPerPage && (
+  <Box
+    mt={3}
+    display="flex"
+    justifyContent="center"
+    alignItems="center"
+    gap={2}
+    mb={2}
+  >
+    {/* LEFT */}
+    <PaginationButton
+      disabled={page === 0}
+      onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+    >
+      <ChevronLeft size={20} />
+    </PaginationButton>
+
+    {/* PAGE NUMBER */}
+    <Box
+      sx={{
+        minWidth: 48,
+        height: 36,
+        borderRadius: 2,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontWeight: 700,
+        fontSize: "0.9rem",
+        color: "#fff",
+        background: bgComponents,
+      }}
+    >
+      {page + 1}
+    </Box>
+
+    {/* RIGHT */}
+    <PaginationButton
+      disabled={page >= totalPages - 1}
+      onClick={() =>
+        setPage((prev) => Math.min(prev + 1, totalPages - 1))
+      }
+    >
+      <ChevronRight size={20} />
+    </PaginationButton>
+  </Box>
+)}
+
   </Box>
 
   </Box>

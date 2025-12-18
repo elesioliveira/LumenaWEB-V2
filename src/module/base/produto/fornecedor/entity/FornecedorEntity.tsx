@@ -1,8 +1,8 @@
 export interface FornecedorEntity {
-      id: number ,
-      empresa_id:  number,
-      razao_social:  string,
-      cnpj: string,
+      id: number | null,
+      empresa_id:  number | null,
+      nome:  string | null,
+      cnpj: string| null,
       telefone:  string | null,
       email: string | null,
       cidade: string | null,

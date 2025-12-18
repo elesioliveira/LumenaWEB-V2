@@ -56,7 +56,7 @@ if (!result.success) {
   return;
 }
 // seta o usuário globalmente
-useSessionController.getState().setUser(result.data);
+// useSessionController.getState().setUser(result.data);
   // redireciona
   navigate("/Home");
 } catch (err: any) {
