@@ -17,20 +17,18 @@
   Alert,
   } from "@mui/material";
   import { useEffect, useRef, useState } from "react";
-import { CreateFornecedorModal } from "./modalCreateOrUpdate";
-import type { FornecedorEntity } from "./entity/FornecedorEntity";
-import { getFornecedor, updateFornecedor } from "./repository/FornecedorRepository";
 import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, bgView, colorNegative, colorOpacity, colorPositive, primaryColor } from "../../../../theme/theme";
 import { cellStyle, cellStyleBold } from "../../../../theme/cellTable";
-import { PaginationButton } from "./components/PaginationButton";
+import type { CategoryEntity } from "./entity/CategoryEntity";
+import { PaginationButton } from "../fornecedor/components/PaginationButton";
+import { getCategory, updateCategory } from "./repository/CategoryRepository";
+import { CreateOrUpdateCategoryModal } from "./components/CategoryModalCreateOrUpdate";
+import { formatDateTime } from "../../../../shared/MaskUtils";
 
-
-
-
-export function FornecedorPage() {
-const [openFornecedorModal, setOpenFornecedorModal] = useState(false);
-const [selectedFornecedor, setSelectedFornecedor] =useState<FornecedorEntity | null>(null);
-const [fornecedores, setFornecedores] = useState<FornecedorEntity[]>([]);
+export function CategoriaPage() {
+  const [openCategoryModal, setOpenCategoryModal] = useState(false);
+const [selectedCategory, selectCategory] =useState<CategoryEntity | null>(null);
+const [categories, setCategories] = useState<CategoryEntity[]>([]);
 const [toastOpen, setToastOpen] = useState(false);
 const [toastMsg, setToastMsg] = useState("");
 const [toastType, setToastType] = useState<"success" | "error">("error");
@@ -41,20 +39,20 @@ const jaCarregouRef = useRef(false);
 const [page, setPage] = useState(0);
 const rowsPerPage = 10;
 
-const totalPages = Math.ceil(fornecedores.length / rowsPerPage);
-const fornecedoresPaginados = fornecedores.slice(
+const totalPages = Math.ceil(categories.length / rowsPerPage);
+const fornecedoresPaginados = categories.slice(
 page * rowsPerPage,
 page * rowsPerPage + rowsPerPage
 );
 
-    const fetchFornecedores = async (search: string) => {
+    const fetchCategories = async (search: string) => {
     setLoading(true);
 
     try {
-    const response = await getFornecedor(search);
+    const response = await getCategory(search);
 
     if (response?.success) {
-    setFornecedores(response.data);
+    setCategories(response.data);
     if (page >= totalPages && totalPages > 0) {
     setPage(0);
     }
@@ -74,23 +72,24 @@ page * rowsPerPage + rowsPerPage
 
     if ( value !=='' && value.length < 3) return;
 
-    fetchFornecedores(value);
+    fetchCategories(value);
     }, 1000);
     };
 
 
-    const onChangedAtivo = async (f: FornecedorEntity)=> {
+    const onChangedAtivo = async (f: CategoryEntity)=> {
     try {
     f.ativo = !f.ativo;
     setLoading(true);
-    const response = await updateFornecedor(f);
+    const response = await updateCategory(f);
     if (!response?.success) {
     setToastType("error");
     setToastMsg(response?.message ?? "Erro ao mudar status do fornecedor.");
     setToastOpen(true);
     return;
     }
-    await fetchFornecedores(searchRef.current);
+    await fetchCategories(searchRef.current);
+    setPage(0);
     } catch (error) {
     setToastType("error");
     setToastMsg("Erro ao mudar status do fornecedor.");
@@ -105,12 +104,12 @@ page * rowsPerPage + rowsPerPage
     if (jaCarregouRef.current) return;
 
     jaCarregouRef.current = true;
-    fetchFornecedores("");
+    fetchCategories("");
     }, []);
 
-    const handleEdit = (row: FornecedorEntity) => {
-    setSelectedFornecedor(row);      //  passa o fornecedor
-    setOpenFornecedorModal(true);    //  abre modal
+    const handleEdit = (row: CategoryEntity) => {
+    selectCategory(row);      //  passa a categoria
+    setOpenCategoryModal(true);    //  abre modal
     };
 
 
@@ -132,23 +131,23 @@ page * rowsPerPage + rowsPerPage
     {toastMsg}
     </Alert>
     </Snackbar>
-    <CreateFornecedorModal
-    open={openFornecedorModal}
+    <CreateOrUpdateCategoryModal
+    open={openCategoryModal}
     onClose={() => {
-    setOpenFornecedorModal(false);
-    setSelectedFornecedor(null);   //  limpa ao fechar
+    setOpenCategoryModal(false);
+    selectCategory(null);   //  limpa ao fechar
     }}
-    onSuccess={() => fetchFornecedores(searchRef.current)}   //  recarrega lista
-    fornecedor={selectedFornecedor}  //  passa via props
+    onSuccess={() => fetchCategories(searchRef.current)}   //  recarrega lista
+    fornecedor={selectedCategory}  //  passa via props
     />
     <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={2}>
     <Stack display={"flex"} flexDirection={"row"} flexGrow={2} justifyContent={"space-between"} >
     <Typography sx={{fontWeight:"bold", fontSize:"1.5rem", color:"#ffff"}}>
-    Fornecedores
+    Categorias
     </Typography>
     <Stack display={"flex"} flexDirection={"row"} gap={2} mr={3} >
     <TextField
-    placeholder="Buscar fornecedor"
+    placeholder="Buscar categoria"
     onChange={(e) => {
     searchRef.current = e.target.value;
     debounceSearch();
@@ -194,7 +193,7 @@ page * rowsPerPage + rowsPerPage
     />
     <Button
     startIcon={<Plus />}
-    onClick={() => setOpenFornecedorModal(true)}
+    onClick={() => setOpenCategoryModal(true)}
     sx={{
     height: 40,
     width:100,
@@ -234,20 +233,20 @@ page * rowsPerPage + rowsPerPage
     )}
 
     {/* LISTA VAZIA */}
-    {!loading && fornecedores.length === 0 && (
+    {!loading && categories.length === 0 && (
     <Stack
     height={200}
     alignItems="center"
     justifyContent="center"
     >
     <Typography color={colorOpacity}>
-    Nenhum fornecedor encontrado.
+    Nenhuma categoria encontrada.
     </Typography>
     </Stack>
     )}
 
     {/* TABELA */}
-    {!loading && fornecedores.length > 0 && (
+    {!loading && categories.length > 0 && (
     <TableContainer
     sx={{
     maxHeight: "100%",
@@ -266,7 +265,7 @@ page * rowsPerPage + rowsPerPage
     {/* HEADER */}
     <TableHead>
     <TableRow>
-    {["Nome", "CNPJ", "E-mail", "Telefone", "Cidade", "Status", "Ações"].map(
+    {["Nome", "Descrição", "Produtos", "Status", "Cadastro", "Ações"].map(
     (col) => (
     <TableCell
     key={col}
@@ -292,31 +291,31 @@ page * rowsPerPage + rowsPerPage
     <TableRow
     key={row.id}
     sx={{
-    backgroundColor: "rgba(255,255,255,0.02)",
-    transition: "0.25s ease",
-    "&:hover": {
-    backgroundColor: "rgba(245,159,10,0.08)",
+      alignContent:"center",
+      justifyContent:"center",
+      alignItems:"center",
+      justifyItems:"center",
+      backgroundColor: "rgba(255,255,255,0.02)",
+      transition: "0.25s ease",
+      "&:hover": {
+      backgroundColor: "rgba(245,159,10,0.08)",
     },
     }}
     >
-    <TableCell sx={cellStyleBold}>
-    {row.nome}
-    </TableCell>
-
-    <TableCell sx={cellStyle}>{row.cnpj}</TableCell>
-    <TableCell sx={cellStyle}>{row.email ?? "-"}</TableCell>
-    <TableCell sx={cellStyle}>{row.telefone ?? "-"}</TableCell>
-    <TableCell sx={cellStyle}>{row.cidade ?? "-"}</TableCell>
-
-    <TableCell sx={cellStyle}>
+    <TableCell sx={cellStyleBold}>{row.nome}</TableCell>
+    <TableCell sx={cellStyle}>{row.descricao ?? "-"}</TableCell>
+    <TableCell sx={cellStyle}>{row.qtd ?? "-"}</TableCell>
     <Box
     sx={{
     width: 80,
     height: 22,
     borderRadius: 10,
+    mt:2.5,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    alignContent:"center",
+    justifyItems:"center",
     fontSize: "0.7rem",
     fontWeight: 600,
     color: row.ativo ===true? colorPositive : colorNegative,
@@ -325,7 +324,7 @@ page * rowsPerPage + rowsPerPage
     >
     {row.ativo ===true? "ativo" : "desativado"}
     </Box>
-    </TableCell>
+    <TableCell sx={cellStyle}>{formatDateTime(row.data_cadastro!)}</TableCell>
     <TableCell sx={cellStyle}> <Stack direction="row" spacing={1} justifyContent="start" alignItems="start" > 
     {/* EDITAR */} 
     <Box onClick={() => handleEdit(row)} sx={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 1, cursor: "pointer", color: colorOpacity, transition: "0.25s ease", "&:hover": { color: primaryColor, backgroundColor: "rgba(245,159,10,0.15)", boxShadow: "0 0 12px rgba(245,159,10,0.45)", transform: "translateY(-1px)", }, }} >
@@ -363,7 +362,7 @@ page * rowsPerPage + rowsPerPage
     </Table>
     </TableContainer>
     )}
-    {!loading && fornecedores.length > rowsPerPage && (
+    {!loading && categories.length > rowsPerPage && (
     <Box
     mt={3}
     display="flex"

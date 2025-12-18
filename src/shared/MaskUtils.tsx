@@ -86,4 +86,18 @@ export function maskQuilometragem(value: string): string {
 
   // adiciona sufixo " km" se houver número
   return formatted;
-}
+}   
+
+export const formatDateTime = (value?: string | Date) => {
+  if (!value) return "-";
+
+  const date = new Date(value);
+
+  return date.toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
