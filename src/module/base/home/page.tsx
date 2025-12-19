@@ -1,5 +1,5 @@
 
-  import { Bell, Building2, ChartColumn, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, Layers, LayoutDashboard, LogOut, Package, Pencil, Plus, Ruler, Settings, ShoppingBag, ShoppingCart,  Tag,  ToggleLeft,  ToggleRight,  Trash2,  Truck, User, Users, Wallet } from "lucide-react";
+  import { Bell, Building2, ChartColumn, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, Layers, LayoutDashboard, LogOut, Package, Pencil, Plus, Ruler, Settings, ShoppingBag, ShoppingCart,  Tag,  ToggleLeft,  ToggleRight,  Trash2,  Truck, User, Users, Users2, Wallet } from "lucide-react";
   import {
   Box,
   Drawer,
@@ -15,13 +15,14 @@
   Avatar,
   } from "@mui/material";
   import {  useState } from "react";
-  import { bgComponents, bgView, colorOpacity, } from "../../../theme/theme";
+  import { bgComponents, bgView, bordasComponents, colorOpacity, } from "../../../theme/theme";
 import { FornecedorPage } from "../produto/fornecedor/Page";
 import { CategoriaPage } from "../produto/categoria/Page";
 import { MarkPage } from "../produto/marca/Page";
 import { CanalVendaPage } from "../produto/canalVenda/CanalVendaPage";
 import { EntregaPage } from "../produto/entrega/EntregaPage";
 import { CurrentPageHome } from "./enums/HomeEnums";
+import { ProdutoPage } from "../produto/produto/ProdutoPage";
 
   const menuItems = [
   { label: "Dashboard", icon: LayoutDashboard },
@@ -38,8 +39,13 @@ import { CurrentPageHome } from "./enums/HomeEnums";
 
 const subModulesProduct = [
   {
+    label: "Produto",
+    icon: Package,
+    page: CurrentPageHome.Product,
+  },
+  {
     label: "Fornecedor",
-    icon: Truck,
+    icon: Users2,
     page: CurrentPageHome.supplier,
   },
   {
@@ -59,7 +65,7 @@ const subModulesProduct = [
   },
   {
     label: "Entrega",
-    icon: Package,
+    icon: Truck,
     page: CurrentPageHome.Delivery,
   },
 ];
@@ -77,6 +83,8 @@ const [currentPage, setPage] = useState<CurrentPageHome>(
     switch (currentPage) {
       // case CurrentPageHome.Product:
       //   return <ProductPage />;
+      case CurrentPageHome.Product:
+        return <ProdutoPage />;
       case CurrentPageHome.supplier:
         return <FornecedorPage />;
       case CurrentPageHome.Category:
@@ -111,7 +119,7 @@ const handleOnChagentPage = (page: CurrentPageHome) => {
   background: "#131d34",
   borderRadius: 0,
   p: 0.35,
-  border: "1px solid rgba(40, 61, 107, 0.4)" //  borda aplicada corretamente
+  border: bordasComponents //  borda aplicada corretamente
   }}>
   <Toolbar>
   <Stack
@@ -132,7 +140,7 @@ const handleOnChagentPage = (page: CurrentPageHome) => {
   sx={{
   display:"flex",
   height:"50px",
-  border: "1px solid rgba(40, 61, 107, 0.4)",
+  border: bordasComponents,
   opacity: 0.7,
   mx: 1,               
   }}/>
@@ -158,6 +166,7 @@ const handleOnChagentPage = (page: CurrentPageHome) => {
   </Stack>
   </Toolbar>
   </AppBar>
+  
   {/* Drawer lateral */}
   <Drawer
   variant="permanent"
@@ -165,13 +174,13 @@ const handleOnChagentPage = (page: CurrentPageHome) => {
   width: drawerWidth,
   flexShrink: 0,
   whiteSpace: "nowrap",
-  border: "1px solid rgba(40, 61, 107, 0.4)",
+  border: bordasComponents,
   transition: "width 0.3s ease",
   "& .MuiDrawer-paper": {
   width: drawerWidth,
   transition: "width 0.3s ease",
   boxSizing: "border-box",
-  borderRight: "1px solid rgba(40, 61, 107, 0.4)",
+  borderRight: bordasComponents,
   borderRadius: 0,
   backgroundColor: (theme) => theme.palette.text.primary,
   color: (theme) => theme.palette.background.paper,
@@ -326,6 +335,7 @@ const handleOnChagentPage = (page: CurrentPageHome) => {
   </ListItemButton>
   </Box>
   </Drawer>
+
   {/* Conteúdo principal */}
   <Box
   component="main"
@@ -351,7 +361,7 @@ const handleOnChagentPage = (page: CurrentPageHome) => {
   height={100}
   mt={2}
   sx={{
-  borderBottom: "1px solid rgba(40, 61, 107, 0.4)",
+  borderBottom: bordasComponents,
   mb: 3,
   }}
   >

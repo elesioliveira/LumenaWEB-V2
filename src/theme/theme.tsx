@@ -1,7 +1,7 @@
 import { createTheme } from "@mui/material/styles";
 
 export const primaryColor = "#f59f0a"
-export const bordasComponents = "#283d6b"
+export const bordasComponents = "1px solid rgba(40, 61, 107, 0.4)"
 export const bgComponents = "#1a2849ff"
 export const colorOpacity = "#8a98b8ff"
 export const bgView = "#0f1729"
