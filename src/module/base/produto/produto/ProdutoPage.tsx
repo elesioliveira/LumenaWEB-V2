@@ -284,7 +284,7 @@ const fetchFormProduct = async () => {
     {/* HEADER */}
     <TableHead>
     <TableRow>
-    {["Nome", "Prazo", "Custo Base", "Cadastro", "Ações"].map(
+    {["EanCode", "Nome", "Categoria", "Marca", "Preço", "Preço Venda", "Estoque", "Status","Cadastro", "Ações"].map(
     (col) => (
     <TableCell
     key={col}
@@ -321,7 +321,13 @@ const fetchFormProduct = async () => {
     },
     }}
     >
+    <TableCell sx={cellStyle}>{row.eanCode}</TableCell>
     <TableCell sx={cellStyleBold}>{row.nome}</TableCell>
+    <TableCell sx={cellStyle}>{row.categoria}</TableCell>
+    <TableCell sx={cellStyle}>{row.marca}</TableCell>
+    <TableCell sx={cellStyleBold}>{maskCurrency(row.preco_custo!)}</TableCell>
+    <TableCell sx={cellStyleBold}>{maskCurrency(row.preco_venda!)}</TableCell>
+    <TableCell sx={cellStyle}>{row.estoque_minimo}</TableCell>
     {/* <TableCell sx={cellStyle}>{row.prazo ?? "-"}</TableCell>
     <TableCell sx={cellStyle}>{maskCurrency(row.custo_base)}</TableCell> */}
     <Box

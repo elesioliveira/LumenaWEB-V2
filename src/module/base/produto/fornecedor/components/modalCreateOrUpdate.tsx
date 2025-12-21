@@ -11,13 +11,12 @@ import {
   Typography,
 } from "@mui/material";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { submitCreateFornecedor, updateFornecedor } from "./repository/FornecedorRepository";
-import { getFornecedorByCNPJ } from "./repository/FornecedorRepository";
-import { bgColorCardsDashBoard, colorOpacity,textFieldStyle, } from "../../../../theme/theme";
+import type { FornecedorEntity } from "../entity/FornecedorEntity";
+import type { FornecedorDTO } from "../dto/FornecedorDTO";
+import { maskCNPJ, maskTelefone, unmask } from "../../../../../shared/MaskUtils";
+import { getFornecedorByCNPJ, submitCreateFornecedor, updateFornecedor } from "../repository/FornecedorRepository";
+import { bgColorCardsDashBoard, colorOpacity, textFieldStyle } from "../../../../../theme/theme";
 
-import { maskCNPJ, maskTelefone, unmask } from "../../../../shared/MaskUtils";
-import type { FornecedorDTO } from "./dto/FornecedorDTO";
-import type { FornecedorEntity } from "./entity/FornecedorEntity";
 
 interface CreateFornecedorModalProps {
   open: boolean;

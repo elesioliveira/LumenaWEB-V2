@@ -76,7 +76,7 @@ const [collapsed, setCollapsed] = useState(false);
 const [currentModule, setModule] =useState<number>(2);
 const drawerWidth = collapsed ? 80 : 280;
 const [currentPage, setPage] = useState<CurrentPageHome>(
-  CurrentPageHome.supplier
+  CurrentPageHome.Product
 );
 
   const currentPageView = () => {

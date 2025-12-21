@@ -1,6 +1,5 @@
 export interface ProductEntity {
   id: number;
-  empresa_id: number;
   data_cadastro: string; // ISO string (DateTime no backend)
   nome?: string | null;
   descricao?: string | null;

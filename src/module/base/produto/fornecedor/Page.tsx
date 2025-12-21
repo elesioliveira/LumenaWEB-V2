@@ -17,12 +17,12 @@
   Alert,
   } from "@mui/material";
   import { useEffect, useRef, useState } from "react";
-import { CreateFornecedorModal } from "./modalCreateOrUpdate";
 import type { FornecedorEntity } from "./entity/FornecedorEntity";
 import { getFornecedor, updateFornecedor } from "./repository/FornecedorRepository";
 import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, bgView, colorNegative, colorOpacity, colorPositive, primaryColor } from "../../../../theme/theme";
 import { cellStyle, cellStyleBold } from "../../../../theme/cellTable";
 import { PaginationButton } from "./components/PaginationButton";
+import { CreateFornecedorModal } from "./components/modalCreateOrUpdate";
 
 
 

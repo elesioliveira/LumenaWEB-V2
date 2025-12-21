@@ -45,3 +45,15 @@ export const getFormProduct = async () => {
     return error?.response?.data ?? null;
   }
 }
+
+export const fetchProductByGtin = async (gtin: string) => {
+  try {
+    const response = await api.get("Get/Product/ByGtin", {
+      withCredentials: true,
+      params: { gtin },
+    });
+    return response.data;
+  } catch (error:any) {
+    return error.response.data ?? null;
+  }
+}  

@@ -1,4 +1,4 @@
-import { Controller } from "react-hook-form";
+import { Controller, useWatch } from "react-hook-form";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -17,28 +17,10 @@ import { useForm } from "react-hook-form";
 import { bgColorCardsDashBoard, colorOpacity, textFieldStyle } from "../../../../../theme/theme";
 import type { CategoryProduct, FornecedorProduct, MarkProduct, ProductEntity } from "../entity/ProductEntity";
 import type { ProductDTO } from "../dto/ProdutoDTO";
-import { createProduct, updateProduct } from "../repository/ProductRepository";
-import { maskCurrency } from "../../../../../shared/MaskUtils";
-import { unidadeMock } from "../../../../../shared/Mocks";
-import type { MarkEntity } from "../../marca/entity/MarkEntity";
-import type { FornecedorEntity } from "../../fornecedor/entity/FornecedorEntity";
-import type { CategoryEntity } from "../../categoria/entity/CategoryEntity";
-
-const categoriasMock = [
-  { id: 1, nome: "Eletrônicos" },
-  { id: 2, nome: "Alimentos" },
-  { id: 3, nome: "Vestuário" },
-];
-
-const marcasMock = [
-  { id: 1, nome: "Marca A" },
-  { id: 2, nome: "Marca B" },
-];
-const fornecedorMock = [
-  { id: 1, nome: "Marca A" },
-  { id: 2, nome: "Marca B" },
-];
-
+import { createProduct, fetchProductByGtin, updateProduct } from "../repository/ProductRepository";
+import { maskCurrency, parseCurrencyBR } from "../../../../../shared/MaskUtils";
+import { statusAtivoOptions, unidadeMock, type IUnidade } from "../../../../../shared/Mocks";
+import { getUnidadeDescricao } from "../helprs/Helpers";
 
 
 
@@ -66,22 +48,27 @@ export function CreateOrUpdateProductModal({
     handleSubmit,
     reset,    
   control,
+  setValue,
     formState: { errors, isSubmitting },
   } = useForm<ProductDTO>();
-
+const gtin = useWatch({ control, name: "eanCode" });
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
   const [toastType, setToastType] = useState<"success" | "error">("error");
+  const [loadingGtin, setLoadingGtin] = useState(false);
+  const [un, setUnidade] = useState<IUnidade | null>(null);
 
 useEffect(() => {
   if (product) {
+      const unidadeSelecionada = unidadeMock.find((u) => u.nome === product.un);
+      console.log("Unidade selecionada:", unidadeSelecionada);
     reset({
       eanCode: product.eanCode ?? null,
-      ativo: product.ativo ? true : false,
+       ativo: product.ativo,
       nome: product.nome ?? null,
       categoria_id: product.categoria_id ?? '',
       marca_id: product.marca_id ?? '',
-      un: product.un ?? '',
+      un: unidadeSelecionada?.id ??"",
       preco_custo: product.preco_custo ?? 0,
       preco_venda: product.preco_venda ?? 0,
       estoque_minimo: product.estoque_minimo ?? 0,
@@ -89,6 +76,7 @@ useEffect(() => {
       fornecedor_id: product.fornecedor_id ??'',
     
     });
+    setUnidade(unidadeSelecionada ?? null);
   } else {
  reset({
       eanCode:  null,
@@ -96,7 +84,7 @@ useEffect(() => {
       nome:  null,
       categoria_id:  '',
       marca_id: '',
-      un:  '',
+      un:  unidadeMock[0]?.nome ?? "",
       preco_custo:  0,
       preco_venda:  0,
       estoque_minimo:  0,
@@ -109,37 +97,70 @@ useEffect(() => {
 
 
 
+const handleFetchProductByGtin = async () => {
+  // Implementar busca de produto por GTIN se necessário
+   if (!gtin) return;
+  if (gtin.length < 13) return;
+
+  try {
+    setLoadingGtin(true);
+    const result = await fetchProductByGtin(gtin);
+    if(!result.success) {
+        setToastType("error");
+        setToastMsg(result.message ?? "Gtin inválido.");
+        setToastOpen(true);
+        return;
+    }
+    const data = result.data;
+    setValue("nome", data.nome ?? '');
+  } catch (error) {
+            setToastType("error");
+        setToastMsg("Erro ao buscar produto pelo GTIN.");
+        setToastOpen(true);
+  }
+   finally {
+      setLoadingGtin(false);
+    }
+}
+
   /* =========================
      SUBMIT
      ========================= */
 const onSubmit = async (data: ProductDTO) => {
   let result;
-
+  const unidadeDescricao = getUnidadeDescricao(data.un!);
   if (product === null) {
-    // 🔹 CREATE
-    const payload: ProductDTO = {
-      nome: data.nome,
-      descricao: data.descricao,
+    //  CREATE
+    const payload  = {
+      nome: data.nome?.trim(),
+      descricao: data.descricao?.trim(),
       ativo: data.ativo,
-      un: data.un ?? '',
-      eanCode: data.eanCode,
-      marca_id: data.marca_id,
-      fornecedor_id: data.fornecedor_id,
-      categoria_id: data.categoria_id,
-      preco_custo: data.preco_custo,
-      preco_venda: data.preco_venda,
-      estoque_minimo: data.estoque_minimo
+      un: unidadeDescricao?? "",
+      eanCode: data.eanCode?.trim(),
+      marca_id: Number(data.marca_id),
+      fornecedor_id: Number(data.fornecedor_id),
+      categoria_id: Number(data.categoria_id),
+      preco_custo: parseCurrencyBR(data.preco_custo as unknown as string),
+      preco_venda: parseCurrencyBR(data.preco_venda as unknown as string),
+      estoque_minimo: Number(data.estoque_minimo),
     };
     result = await createProduct(payload);
   } else {
     // UPDATE
     const payload: ProductEntity = {
       id: product.id, // vem da entidade selecionada
-      nome: data.nome,
-      descricao: data.descricao,
-      ativo: product.ativo,
-      empresa_id: product.empresa_id,
+      nome: data.nome?.trim(),
       data_cadastro: product.data_cadastro,
+      descricao: data.descricao?.trim(),
+      ativo: data.ativo,
+      un:unidadeDescricao ?? product.un,
+      eanCode: data.eanCode?.trim(),
+      marca_id: Number(data.marca_id),
+      fornecedor_id: Number(data.fornecedor_id),
+      categoria_id: Number(data.categoria_id),
+      preco_custo:typeof data.preco_custo === "string" ? parseCurrencyBR(data.preco_custo as unknown as string) : data.preco_custo,
+      preco_venda:typeof data.preco_venda === "string" ? parseCurrencyBR(data.preco_venda as unknown as string) : data.preco_venda,
+      estoque_minimo: Number(data.estoque_minimo),
     };
 
     result = await updateProduct(payload);
@@ -178,7 +199,7 @@ flexDirection={"column"}
   {/* TOAST */}
   <Snackbar
     open={toastOpen}
-    autoHideDuration={2500}
+    autoHideDuration={1000}
     onClose={() => setToastOpen(false)}
     anchorOrigin={{ vertical: "top", horizontal: "center" }}
   >
@@ -190,8 +211,19 @@ flexDirection={"column"}
   <Typography fontSize="1.4rem" fontWeight={700} color="#fff" mb={0}>
     {product ? "Editar Produto" : "Novo Produto"}
   </Typography>
-
-  <form onSubmit={handleSubmit(onSubmit)}>
+      {loadingGtin && (
+      <Stack
+      height={200}
+      alignItems="center"
+      justifyContent="center"
+      >
+      <CircularProgress color="inherit" />
+      <Typography mt={2} color={colorOpacity}>
+      Carregando produtos...
+      </Typography>
+      </Stack>
+      )}
+  {!loadingGtin && (   <form onSubmit={handleSubmit(onSubmit)}>
 <Stack gap={2} display={"flex"} flexDirection={"row"} flexGrow={1}>
   <Box display={"flex"} flexDirection={"column"} flex={1}>
       {/* Nome */}
@@ -203,36 +235,53 @@ flexDirection={"column"}
       placeholder="Código de barras"
       {...register("eanCode", { required: "Campo obrigatório" })}
       error={!!errors.eanCode}
+      onBlur={handleFetchProductByGtin}
       helperText={errors.eanCode?.message}
       sx={textFieldStyle}
     />
   </Box>
-  <Box display={"flex"} flexDirection={"column"} flex={1}>
-    {/* Nome */}
-              <Typography fontSize="1rem" fontWeight={400} color="#fff" mb={1} mt={3}>
-  Ativo
+
+<Box display={"flex"} flexDirection={"column"} flex={1}>
+  <Typography fontSize="1rem" fontWeight={400} color="#fff" mb={1} mt={3}>
+    Ativo
   </Typography>
-<TextField
-  select
-  sx={textFieldStyle}
-  SelectProps={{
-    MenuProps: {
-      PaperProps: {
-        sx: {
-          bgcolor: bgColorCardsDashBoard,
-          borderRadius: 1,
-          color:"#FFFF"
+
+ <Controller
+  name="ativo"
+  control={control}
+  render={({ field }) => (
+    <TextField
+      select
+      sx={textFieldStyle}
+      value={String(field.value)} // "true" | "false"
+      onChange={(e) => field.onChange(e.target.value === "true")}
+      SelectProps={{
+        MenuProps: {
+          PaperProps: {
+            sx: {
+              bgcolor: bgColorCardsDashBoard,
+              borderRadius: 1,
+              color: "#FFFF",
+            },
+          },
         },
-      },
-    },
-  }}
->
-  <MenuItem value="true">Ativo</MenuItem>
-  <MenuItem value="false">Inativo</MenuItem>
-</TextField>
+      }}
+    >
+      {statusAtivoOptions.map((item) => (
+        <MenuItem
+          key={item.key}
+          value={String(item.ativo)} // string
+        >
+          {item.label}
+        </MenuItem>
+      ))}
+    </TextField>
+  )}
+/>
+
+</Box>
 
 
-  </Box>
 </Stack>
     <Box display={"flex"} flexDirection={"column"}>
     {/* Descricao */}
@@ -379,12 +428,17 @@ flexDirection={"column"}
 <Typography fontSize="1rem" fontWeight={400} color="#fff" mb={1} mt={3}>
   Unidade
   </Typography>
-<TextField
-  select
-  {...register("un", { required: true })}
-   sx={textFieldStyle}
-  SelectProps={{
-    MenuProps: {
+<Controller
+  name="un"
+  control={control}
+  rules={{ required: true }}
+  render={({ field }) => (
+    <TextField
+      {...field}
+      select
+      sx={textFieldStyle}
+      SelectProps={{
+        MenuProps: {
       PaperProps: {
         sx: {
           bgcolor: bgColorCardsDashBoard,
@@ -393,14 +447,26 @@ flexDirection={"column"}
         },
       },
     },
-  }}
->
-  {unidadeMock.map((cat) => (
-    <MenuItem key={cat.nome} value={cat.nome}>
-      {cat.nome}
-    </MenuItem>
-  ))}
-</TextField>
+      }}
+      onChange={(e) => {
+        const id = Number(e.target.value);
+        field.onChange(id);
+
+        const unidadeSelecionada = unidadeMock.find(
+          (u) => u.id === id
+        );
+
+        setUnidade(unidadeSelecionada ?? null);
+      }}
+    >
+      {unidadeMock.map((u) => (
+        <MenuItem key={u.id} value={u.id}>
+          {u.nome}
+        </MenuItem>
+      ))}
+    </TextField>
+  )}
+/>
   </Box>
 </Stack>
 <Box
@@ -408,20 +474,54 @@ flexDirection={"column"}
   gridTemplateColumns="repeat(3, 1fr)"
   gap={2}
 >
-    <Box display={"flex"} flexDirection={"column"} flex={1}>  
-    {/* Nome */}
-              <Typography fontSize="1rem" fontWeight={400} color="#fff" mb={1} mt={3}>
-  Estoque
+<Box display={"flex"} flexDirection={"column"} flex={1}>
+  <Typography fontSize="1rem" fontWeight={400} color="#fff" mb={1} mt={3}>
+    Estoque
   </Typography>
-  <TextField 
 
+  <TextField
+    type="text"
     placeholder="0"
-    {...register("estoque_minimo", { required: "Campo obrigatório" })}
-    error={!!errors.estoque_minimo}
-    helperText={errors.estoque_minimo?.message}
+    disabled={!un}
     sx={textFieldStyle}
+    error={!!errors.estoque_minimo}
+    helperText={
+      !un
+        ? "Selecione uma unidade primeiro"
+        : errors.estoque_minimo?.message
+    }
+    {...register("estoque_minimo", {
+      required: "Campo obrigatório",
+      onChange: (e) => {
+        if (!un) return;
+
+        let value = e.target.value;
+
+        if (!un.fracionado) {
+          // Remove qualquer separador decimal
+          value = value.replace(/[.,]/g, "");
+        } else {
+          // Mantém apenas números e ponto
+          value = value.replace(/[^0-9.]/g, "");
+
+          // Garante apenas um ponto
+          const parts = value.split(".");
+          if (parts.length > 2) {
+            value = `${parts[0]}.${parts.slice(1).join("")}`;
+          }
+
+          // Limita a duas casas decimais
+          if (parts[1]?.length > 2) {
+            value = `${parts[0]}.${parts[1].slice(0, 2)}`;
+          }
+        }
+
+        e.target.value = value;
+      },
+    })}
   />
-  </Box>
+</Box>
+
 
   <Box display={"flex"} flexDirection={"column"} flex={1}>  
     {/* Nome */}
@@ -510,7 +610,7 @@ flexDirection={"column"}
       )}
       </Button>
     </Stack>
-  </form>
+  </form>)}
 </Box>
 </Modal>
 );
