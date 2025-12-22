@@ -25,7 +25,6 @@ import { PaginationButton } from "../fornecedor/components/PaginationButton";
 import type { FormProductData, ProductEntity } from "./entity/ProductEntity";
 import { getFormProduct, getProduct, updateProduct } from "./repository/ProductRepository";
 import { CreateOrUpdateProductModal } from "./components/CreateOrUpdateProduct";
-import { set } from "react-hook-form";
 
 export function ProdutoPage() {
   const [openProductModal, setOpenProductModal] = useState(false);

@@ -25,6 +25,17 @@ export const userBgColorIcon = "#ac0ffa1e";
 export const productColorIcon = "#FAE10F";
 export const productBgColorIcon ="#fae20f23";
 
+
+export const hoverGlow = {
+  "&:hover": {
+    boxShadow: "0 0 25px rgba(40, 61, 107, 0.6)",
+    borderColor: "rgba(40, 61, 107, 0.9)",
+    transform: "translateY(0px)",
+  },
+};
+
+
+
 export const customTheme = createTheme({
   palette: {
     mode: "light",

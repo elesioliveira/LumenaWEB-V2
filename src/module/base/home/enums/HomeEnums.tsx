@@ -1,4 +1,4 @@
-export const CurrentPageHome = {
+export const CurrentSubModuleProduct = {
     Product :0,
     supplier:1,
     Category:2,
@@ -7,4 +7,21 @@ export const CurrentPageHome = {
     Delivery:5
 } as const;
 
-export type CurrentPageHome = typeof CurrentPageHome[keyof typeof CurrentPageHome];
+export type CurrentSubModuleProduct = typeof CurrentSubModuleProduct[keyof typeof CurrentSubModuleProduct];
+
+export const CurrentModulePage = {
+    Dashboard :0,
+    seller:1,
+    Product:2,
+    Client:3,
+    Financial:4,
+    Stock:5,
+    Reports:6,
+    Analysis:7,
+    Company:8,
+    Settings:9
+} as const;
+
+export type CurrentModulePage = typeof CurrentModulePage[keyof typeof CurrentModulePage];
+
+

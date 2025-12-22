@@ -15,94 +15,96 @@
   Avatar,
   } from "@mui/material";
   import {  useState } from "react";
-  import { bgComponents, bgView, bordasComponents, colorOpacity, } from "../../../theme/theme";
-import { FornecedorPage } from "../produto/fornecedor/Page";
-import { CategoriaPage } from "../produto/categoria/Page";
-import { MarkPage } from "../produto/marca/Page";
-import { CanalVendaPage } from "../produto/canalVenda/CanalVendaPage";
-import { EntregaPage } from "../produto/entrega/EntregaPage";
-import { CurrentPageHome } from "./enums/HomeEnums";
-import { ProdutoPage } from "../produto/produto/ProdutoPage";
-
+  import { bgComponents, bordasComponents, colorOpacity, } from "../../../theme/theme";
+import { ModuleProduct } from "../produto/ModuleProductPage";
+import { CurrentModulePage } from "./enums/HomeEnums";
+import { DashBoardPage } from "../dashboard/DashBoardPage";
+import { StockPage } from "../fornecedor/StockPage";
   const menuItems = [
-  { label: "Dashboard", icon: LayoutDashboard },
-  { label: "Vendas", icon: ShoppingCart },
-  { label: "Produto", icon: Package },
-  { label: "Clientes", icon: Users },
-  { label: "Financeiro", icon: Wallet },
-  { label: "Estoque", icon: Truck },
-  { label: "Relatórios", icon: ClipboardList },
-  { label: "Análise", icon: ChartColumn },
-  { label: "Empresa", icon: Building2 },
-  { label: "Configurações", icon: Settings },
+  { label: "Dashboard", 
+    icon: LayoutDashboard, 
+    page: CurrentModulePage.Dashboard 
+  },
+  { label: "Vendas", 
+    icon: ShoppingCart, 
+    page: CurrentModulePage.seller 
+  },
+  { label: "Produto",
+     icon: Package, 
+     page: CurrentModulePage.Product 
+    },
+  { label: "Clientes", 
+    icon: Users, 
+    page: CurrentModulePage.Client 
+  },
+  { label: "Financeiro", 
+    icon: Wallet, 
+    page: CurrentModulePage.Financial 
+  },
+  { label: "Estoque", 
+    icon: Truck, 
+    page: CurrentModulePage.Stock 
+  },
+  { label: "Relatórios", 
+    icon: ClipboardList, 
+    page: CurrentModulePage.Reports 
+  },
+  { label: "Análise", 
+    icon: ChartColumn, 
+    page: CurrentModulePage.Analysis 
+  },
+  { label: "Empresa", 
+    icon: Building2, 
+    page: CurrentModulePage.Company 
+  },
+  { label: "Configurações", 
+    icon: Settings, 
+    page: CurrentModulePage.Settings 
+  },
   ];
 
-const subModulesProduct = [
-  {
-    label: "Produto",
-    icon: Package,
-    page: CurrentPageHome.Product,
-  },
-  {
-    label: "Fornecedor",
-    icon: Users2,
-    page: CurrentPageHome.supplier,
-  },
-  {
-    label: "Categoria",
-    icon: Layers,
-    page: CurrentPageHome.Category,
-  },
-  {
-    label: "Marca",
-    icon: Tag,
-    page: CurrentPageHome.Mark,
-  },
-  {
-    label: "Canal de Venda",
-    icon: ShoppingCart,
-    page: CurrentPageHome.SalesChannel,
-  },
-  {
-    label: "Entrega",
-    icon: Truck,
-    page: CurrentPageHome.Delivery,
-  },
-];
+
 
 
 export default function HomePage() {
 const [collapsed, setCollapsed] = useState(false);
-const [currentModule, setModule] =useState<number>(2);
+const [currentPage, setPage] = useState<CurrentModulePage>(CurrentModulePage.Dashboard);
 const drawerWidth = collapsed ? 80 : 280;
-const [currentPage, setPage] = useState<CurrentPageHome>(
-  CurrentPageHome.Product
-);
 
-  const currentPageView = () => {
+
+const handleOnChagentPage = (page: CurrentModulePage) => {
+  setPage(page);
+};
+
+  const currentModule = () => {
     switch (currentPage) {
-      // case CurrentPageHome.Product:
-      //   return <ProductPage />;
-      case CurrentPageHome.Product:
-        return <ProdutoPage />;
-      case CurrentPageHome.supplier:
-        return <FornecedorPage />;
-      case CurrentPageHome.Category:
-        return <CategoriaPage />;
-      case CurrentPageHome.Mark:
-        return <MarkPage />;
-      case CurrentPageHome.SalesChannel:
-        return <CanalVendaPage />;
-      case CurrentPageHome.Delivery:
-        return <EntregaPage />;
+      case CurrentModulePage.Product:
+        return <ModuleProduct />;
+        case CurrentModulePage.Dashboard:
+        return <DashBoardPage collapsed={collapsed} />;
+        case CurrentModulePage.Stock:
+        return <StockPage/>;
+      // case CurrentModulePage.Seller:
+      //   return <SellerPage />;
+      // case CurrentModulePage.Client:
+      //   return <ClientPage />;
+      // case CurrentModulePage.Financial:
+      //   return <FinancialPage />;
+      // case CurrentModulePage.Stock:
+      //   return <StockPage />;
+      // case CurrentModulePage.Reports:
+      //   return <ReportsPage />;
+      // case CurrentModulePage.Analysis:
+      //   return <AnalysisPage />;
+      // case CurrentModulePage.Company:
+      //   return <CompanyPage />;
+      // case CurrentModulePage.Settings:
+      //   return <SettingsPage />;
       default:
         return null;
     }
   };
-
-const handleOnChagentPage = (page: CurrentPageHome) => {
-  setPage(page);
-};
+     
 
 
   return (
@@ -218,66 +220,71 @@ const handleOnChagentPage = (page: CurrentPageHome) => {
   )}
   </Box>}
   <Divider sx={{ width: "100%",height:"1px", backgroundColor: "#283d6b", opacity: 0.7}} />
-  <List sx={{ width: "100%", pl: 2, pr:2, display: "flex", flexDirection: "column", gap: 2}}>
-  {menuItems.map((item, index) => (
-  <ListItemButton
-  key={item.label}
-  onClick={() => setModule(index)}
-  sx={{
-  width: "100%",
-  display: "flex",
-  alignItems: "center",
-  px: 2,
-  borderRadius: 1,
-  transition: "all 0.25s ease",
+<List sx={{ width: "100%", pl: 2, pr: 2, display: "flex", flexDirection: "column", gap: 2 }}>
+  {menuItems.map((item) => {
+    const isActive = item.page === currentPage;
+    const Icon = item.icon;
 
-  // Fundo do item ativo
-  background:
-  currentModule === index
-  ? "linear-gradient(to right, #f39b0a 0%, #de6f09 100%)"
-  : "transparent",
+    return (
+      <ListItemButton
+        key={item.label}
+        onClick={() => handleOnChagentPage(item.page)}
+        sx={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          px: 2,
+          borderRadius: 1,
+          transition: "all 0.25s ease",
 
-  // Borda esquerda animada
-  borderLeft: currentModule === index ? "4px solid #f59f0a" : "4px solid transparent",
+          background: isActive
+            ? "linear-gradient(to right, #f39b0a 0%, #de6f09 100%)"
+            : "transparent",
 
-  "&:hover": {
-  background:
-  currentModule === index
-  ? "linear-gradient(to right, #f4a51c 0%, #c76007 100%)" // reforça o ativo
-  : "rgba(255,255,255,0.08)",
+          borderLeft: isActive
+            ? "4px solid #f59f0a"
+            : "4px solid transparent",
 
-  borderLeft:
-  currentModule === index
-  ? "4px solid #f59f0a"
-  : "4px solid rgba(255,255,255,0.3)",
-  },
-  }}
-  >
-  {/* Ícone com Glow opcional */}
-  <item.icon
-  size={20}
-  color={currentModule === index ? "#fff" :"#94a3b8"}
-  style={{
-  marginRight: collapsed ? 0 : 12,
-  filter: currentModule === index ? "drop-shadow(0 0 6px rgba(245,159,10,0.9))" : "none",
-  transition: "all 0.25s ease",
-  }}
-  />
+          "&:hover": {
+            background: isActive
+              ? "linear-gradient(to right, #f4a51c 0%, #c76007 100%)"
+              : "rgba(255,255,255,0.08)",
 
-  {!collapsed && (
-  <ListItemText
-  primary={item.label}
-  sx={{ ml: 2 }}
-  primaryTypographyProps={{
-  color:currentModule === index ? "#fff" :"text.secondary",
-  fontWeight: currentModule === index ? 700 : 400,
-  letterSpacing: currentModule === index ? "0.3px" : "0px",
-  }}
-  />
-  )}
-  </ListItemButton>
-  ))}
-  </List>
+            borderLeft: isActive
+              ? "4px solid #f59f0a"
+              : "4px solid rgba(255,255,255,0.3)",
+          },
+        }}
+      >
+        {/* Ícone */}
+        <Icon
+          size={20}
+          color={isActive ? "#fff" : "#94a3b8"}
+          style={{
+            marginRight: collapsed ? 0 : 12,
+            filter: isActive
+              ? "drop-shadow(0 0 6px rgba(245,159,10,0.9))"
+              : "none",
+            transition: "all 0.25s ease",
+          }}
+        />
+
+        {!collapsed && (
+          <ListItemText
+            primary={item.label}
+            sx={{ ml: 2 }}
+            primaryTypographyProps={{
+              color: isActive ? "#fff" : "text.secondary",
+              fontWeight: isActive ? 700 : 400,
+              letterSpacing: isActive ? "0.3px" : "0px",
+            }}
+          />
+        )}
+      </ListItemButton>
+    );
+  })}
+</List>
+
   <Divider sx={{ width: "100%",height:"1px", backgroundColor: "#283d6b", opacity: 0.7}} /> 
   {/* Rodapé do Drawer */}
   <Box sx={{ width: "100%",  display: "flex",pl:2,pr:2, flexDirection: "column", gap: 1 }}>
@@ -337,88 +344,7 @@ const handleOnChagentPage = (page: CurrentPageHome) => {
   </Drawer>
 
   {/* Conteúdo principal */}
-  <Box
-  component="main"
-  sx={{
-  flexGrow: 1,
-  bgcolor: bgView,
-  flexDirection:"column",
-  pl:2.5,
-  // SCROLL ÚNICO AQUI
-  overflowY: "auto",
-  overflowX: "hidden",
-
-  // ESSENCIAL para Flexbox
-  minHeight: 0,
-  }}
-  >
-  <Toolbar></Toolbar>
-  <Stack
-  direction="row"
-  flexGrow={1}
-  gap={5}
-  ml={2}
-  height={100}
-  mt={2}
-  sx={{
-  borderBottom: bordasComponents,
-  mb: 3,
-  }}
-  >
-{subModulesProduct.map((item) => {
-  const isActive = item.page === currentPage;
-  const Icon = item.icon;
-
-  return (
-    <Box
-      key={item.label}
-      onClick={() => handleOnChagentPage(item.page)}
-      sx={{
-        width: 150,
-        height: "100%",
-        cursor: "pointer",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative",
-        transition: "0.25s ease",
-
-        "&::after": {
-          content: '""',
-          position: "absolute",
-          left: 0,
-          bottom: 0,
-          width: isActive ? "100%" : "0%",
-          height: "2px",
-          background:
-            "linear-gradient(to right, #f59f0a 0%, #e68a00 100%)",
-          transition: "0.25s ease",
-        },
-
-        "&:hover::after": {
-          width: "100%",
-          transform: "translateY(-1px)",
-        },
-      }}
-    >
-      <Stack direction="row" spacing={1.2} alignItems="center">
-        <Icon size={18} color={isActive ? "#fff" : "#94a3b8"} />
-        <Typography
-          fontSize="0.95rem"
-          fontWeight={isActive ? 600 : 400}
-          color={isActive ? "#fff" : "#94a3b8"}
-          whiteSpace="nowrap"
-        >
-          {item.label}
-        </Typography>
-      </Stack>
-    </Box>
-  );
-})}
-
-  </Stack>
-  {currentPageView()}
-  </Box>
+   {currentModule()}
   </Box>
   );
   }

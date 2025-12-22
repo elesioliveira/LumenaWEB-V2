@@ -111,7 +111,7 @@ interface DashBoardPageProps {
 
 export function DashBoardPage({ collapsed }: DashBoardPageProps) {
     return (
-            <Box
+      <Box
     component="main"
     sx={{
     flexGrow: 1,
