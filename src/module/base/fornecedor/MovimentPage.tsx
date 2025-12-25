@@ -12,25 +12,24 @@
   Table,
   TableBody,
   CircularProgress,
+  Snackbar,
+  Alert,
   } from "@mui/material";
-  import { useRef, useState } from "react";
+  import { useEffect, useRef, useState } from "react";
 import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, colorNegative, colorOpacity, colorPositive, hoverGlow, primaryColor } from "../../../theme/theme";
 import { cellStyle, cellStyleBold } from "../../../theme/cellTable";
 import { formatDateTime, maskCurrency } from "../../../shared/MaskUtils";
 import { PaginationButton } from "../produto/fornecedor/components/PaginationButton";
 import { PrimaryActionButton } from "../../../shared/PrimaryActionButtonProps";
+import { ModalViewMovimentation } from "./componentes/ModalViewMovimentation";
+import type { MovimetDetails, StockEntradaEntity } from "./entity/StockEntity";
+import { fetchStockDetails, fetchStockEntrada } from "./repository/StockRepository";
 
 
-const movimenations = [ 
-{tipo: "Entrada",numNota:"123",origem:'Fornecedor A', data: "2024-06-01 10:00", valor: 1500.00, isEntry: true},
-{tipo: "Saída",numNota:"123",origem:'Fornecedor A', data: "2024-06-01 10:00", valor: 1500.00, isEntry: false},
-{tipo: "Entrada",numNota:"123",origem:'Fornecedor A', data: "2024-06-01 10:00", valor: 1500.00, isEntry: true},
-];
+
 
 export function MovimentPage() {
-  const [openCategoryModal, setOpenCategoryModal] = useState(false);
-// const [selectedCategory, selectCategory] =useState<CategoryEntity | null>(null);
-// const [categories, setCategories] = useState<CategoryEntity[]>([]);
+const [openModalView, setOpenModalView] = useState(false);
 const [toastOpen, setToastOpen] = useState(false);
 const [toastMsg, setToastMsg] = useState("");
 const [toastType, setToastType] = useState<"success" | "error">("error");
@@ -40,30 +39,16 @@ const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 const jaCarregouRef = useRef(false);
 const [page, setPage] = useState(0);
 const [filter, setFilter] = useState<"all" | "entry" | "output">("all");
+const [movimentations, setMovimentations] = useState<StockEntradaEntity[]>([]);
+const [movimenDetails, setMovimentDetails] = useState<MovimetDetails| null>(null);
 const rowsPerPage = 10;
 
-const totalPages = Math.ceil(movimenations.length / rowsPerPage);
-const fornecedoresPaginados = movimenations.slice(
+const totalPages = Math.ceil(movimentations.length / rowsPerPage);
+const movimentationsPaginados = movimentations.slice(
 page * rowsPerPage,
 page * rowsPerPage + rowsPerPage
 );
 
-    // const fetchCategories = async (search: string) => {
-    // setLoading(true);
-
-    // try {
-    // const response = await getCategory(search);
-
-    // if (response?.success) {
-    // setCategories(response.data);
-    // if (page >= totalPages && totalPages > 0) {
-    // setPage(0);
-    // }
-    // }
-    // } finally {
-    // setLoading(false);
-    // }
-    // };
 
     const debounceSearch = () => {
     if (debounceTimeout.current) {
@@ -73,34 +58,92 @@ page * rowsPerPage + rowsPerPage
     debounceTimeout.current = setTimeout(() => {
     const value = searchRef.current.trim();
 
-    if ( value !=='' && value.length < 3) return;
+    if ( value !=='' && value.length < 0) return;
 
-    // fetchCategories(value);
-    }, 1000);
+     getStockEntrada(value);
+    }, 500);
     };
 
 
-    const openViewMoviment = async (r: any)=> {
-    // open modal view
+
+const fetchMoviment = async (row: StockEntradaEntity) => {
+  setLoading(true);
+  try {
+    const result = await fetchStockDetails(row.movimentacao_id);
+     if (!result?.success) {
+    setToastType("error");
+    setToastMsg(result?.message ?? "Erro ao mudar status do produto.");
+    setToastOpen(true);
+    return;
+    }
+    setMovimentDetails(result.data);
+    setOpenModalView(true);
+  } catch (error) {
+    setToastType("error");
+    setToastMsg("Erro ao mudar status do status do produto.");
+    setToastOpen(true);
+    return;
+  }finally {
+    setLoading(false);
+  }
+}
+
+
+const handleEdit = () => {
+  console.log('deletar');
+};
+
+const getStockEntrada = async (search?: string) => {
+  setLoading(true);
+  setPage(0);
+  try {
+    const result = await fetchStockEntrada(search);
+
+    if (!result?.success) {
+      setMovimentations([]);
+      return;
     }
 
-    // useEffect(() => {
-    // if (jaCarregouRef.current) return;
+    setMovimentations(result.data ?? []);
+  } catch (error) {
+    setMovimentations([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
-    // jaCarregouRef.current = true;
-    // fetchCategories("");
-    // }, []);
-
-    const handleEdit = (row: any) => {
-    // selectCategory(row);      //  passa a categoria
-    // setOpenCategoryModal(true);    //  abre modal
-    };
-
-
-
-
+useEffect(() => {
+   if (jaCarregouRef.current) return;
+    jaCarregouRef.current = true;
+  getStockEntrada("");
+}, []);
+ 
     return (
+    <>
+  <ModalViewMovimentation
+      open={openModalView}
+      data={movimenDetails}
+      onClose={() => {
+      setOpenModalView(false);
+      setMovimentDetails(null);
+      }}
+      />
+    <Snackbar
+    open={toastOpen}
+    autoHideDuration={2500}
+    onClose={() => setToastOpen(false)}
+    anchorOrigin={{ vertical: "top", horizontal: "center" }}
+    >
+    <Alert
+    severity={toastType}
+    onClose={() => setToastOpen(false)}
+    sx={{ width: "100%" }}
+    >
+    {toastMsg}
+    </Alert>
+    </Snackbar>
     <Box flexDirection={"column"}>
+   
     <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={2}>
     <Stack display={"flex"} flexDirection={"row"} flexGrow={2} justifyContent={"space-between"} >
     <Box display={"flex"} flexDirection={"column"}>
@@ -122,10 +165,10 @@ page * rowsPerPage + rowsPerPage
     <Stack display={"flex"} flexDirection={"row"} gap={1.2}>
     <TextField
     placeholder="Buscar por nº do documento"
-    onChange={(e) => {
-    searchRef.current = e.target.value;
-    debounceSearch();
-    }}
+  onChange={(e) => {
+      searchRef.current = e.target.value;
+      debounceSearch();
+      }}
     size="small"
     sx={{
     width: 270,
@@ -207,7 +250,7 @@ page * rowsPerPage + rowsPerPage
     )}
 
     {/* LISTA VAZIA */}
-    {!loading && movimenations.length === 0 && (
+    {!loading && movimentations.length === 0 && (
     <Stack
     height={200}
     alignItems="center"
@@ -220,7 +263,7 @@ page * rowsPerPage + rowsPerPage
     )}
 
     {/* TABELA */}
-    {!loading && movimenations.length > 0 && (
+    {!loading && movimentations.length > 0 && (
     <TableContainer
     sx={{
     maxHeight: "100%",
@@ -261,9 +304,9 @@ page * rowsPerPage + rowsPerPage
 
     {/* BODY */}
     <TableBody>
-    {fornecedoresPaginados.map((row) => (
+    {movimentationsPaginados.map((row) => (
     <TableRow
-    key={row.numNota}
+    key={row.nota}
     sx={{
       alignContent:"center",
       justifyContent:"center",
@@ -290,21 +333,21 @@ page * rowsPerPage + rowsPerPage
     justifyItems:"center",
     fontSize: "0.7rem",
     fontWeight: 600,
-    color: row.isEntry ===true? colorPositive : colorNegative,
-    bgcolor:row.isEntry ===true? bgColorPositive : bgColorNegative ,
+    color: row.tipo.toUpperCase() ==='ENTRADA'? colorPositive : colorNegative,
+    bgcolor:row.tipo.toUpperCase() ==='ENTRADA'? bgColorPositive : bgColorNegative ,
     }}
     >
-    {row.isEntry ===true? <LogIn size={12} />:<LogOut size={12} />}
-    {row.isEntry ===true? "Entrada" : "Saída"}
+    {row.tipo.toUpperCase() ==='ENTRADA'? <LogIn size={12} />:<LogOut size={12} />}
+    {row.tipo.toUpperCase() ==='ENTRADA'? "Entrada" : "Saída"}
     </Box>
-    <TableCell sx={cellStyleBold}>{row.numNota}</TableCell>
-    <TableCell sx={cellStyle}>{row.origem ?? "-"}</TableCell>
-    <TableCell sx={cellStyle}>{formatDateTime(row.data)}</TableCell>
-    <TableCell sx={cellStyleBold}>{maskCurrency(row.valor)}</TableCell>
+    <TableCell sx={cellStyleBold}>{row.nota}</TableCell>
+    <TableCell sx={cellStyle}>{row.fornecedor ?? "-"}</TableCell>
+    <TableCell sx={cellStyle}>{formatDateTime(row.data_ocorrencia)}</TableCell>
+    <TableCell sx={cellStyleBold}>{maskCurrency(row.valor_total)}</TableCell>
     <TableCell sx={cellStyle}> <Stack direction="row" spacing={1} justifyContent="start" alignItems="start" > 
      {/* Visualizar */} 
     <Box
-    onClick={() => openViewMoviment(row)}
+    onClick={() => fetchMoviment(row)}
     sx={{
     width: 32,
     height: 32,
@@ -325,7 +368,7 @@ page * rowsPerPage + rowsPerPage
     <Eye size={18} />
     </Box>   
     {/* Deletar */} 
-    <Box onClick={() => handleEdit(row)} sx={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 1, cursor: "pointer", color: colorOpacity, transition: "0.25s ease", 
+    <Box onClick={() => handleEdit()} sx={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 1, cursor: "pointer", color: colorOpacity, transition: "0.25s ease", 
       "&:hover": { color: colorNegative, backgroundColor: bgColorNegative, boxShadow: "0 0 12px rgba(255,50,50,0.45)", transform: "translateY(-1px)", }, }} >
     <Trash2 size={16} /> </Box> 
 
@@ -337,7 +380,7 @@ page * rowsPerPage + rowsPerPage
     </Table>
     </TableContainer>
     )}
-    {!loading && movimenations.length > rowsPerPage && (
+    {!loading && movimentations.length > rowsPerPage && (
     <Box
     mt={3}
     display="flex"
@@ -383,11 +426,9 @@ page * rowsPerPage + rowsPerPage
     </PaginationButton>
     </Box>
     )}
-
-    </Box>
-
     </Box>
     </Box>
-
+    </Box>
+    </>
     );
     }

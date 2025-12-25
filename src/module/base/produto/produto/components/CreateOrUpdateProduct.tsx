@@ -558,7 +558,6 @@ flexDirection={"column"}
 </Box>
 
 <Box display={"flex"} flexDirection={"column"} flex={1}>
-
 <Typography fontSize="1rem" fontWeight={400} color="#fff" mb={1} mt={3}>
   Descrição
   </Typography>
@@ -569,7 +568,7 @@ flexDirection={"column"}
       helperText={errors.descricao?.message}
       sx={textFieldStyle}
     />
-  </Box>
+</Box>
     {/* AÇÕES */}
     <Stack direction="row" spacing={2} justifyContent="flex-end" mt={4}>
       <Button

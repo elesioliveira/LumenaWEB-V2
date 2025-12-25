@@ -145,8 +145,8 @@ flexDirection={"column"}
         sx={textFieldStyle}
       />
 </Box>
-      <Box display={"flex"} flexDirection={"column"}>
-        {/* Descricao */}
+<Box display={"flex"} flexDirection={"column"}>
+{/* Descricao */}
     <Typography fontSize="1rem" fontWeight={400} color="#fff" mb={1} mt={3}>
     Descrição
   </Typography>
@@ -158,7 +158,7 @@ placeholder="Tipo"
 {...register("tipo")}
 sx={textFieldStyle}
 />
-      </Box>
+</Box>
     {/* AÇÕES */}
     <Stack direction="row" spacing={2} justifyContent="flex-end" mt={4}>
       <Button

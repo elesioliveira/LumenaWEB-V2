@@ -5,6 +5,7 @@ interface PrimaryActionButtonProps extends ButtonProps {
   label: string;
   background?: string;
   boxShadow?: string;
+  height?: number;
 }
 
 export function PrimaryActionButton({
@@ -12,13 +13,14 @@ export function PrimaryActionButton({
   sx,
   background,
   boxShadow,
+  height,
   ...props
 }: PrimaryActionButtonProps) {
   return (
     <Button
       {...props}
       sx={{
-        height: 40,
+        height:height?? 40,
         px: 3,
         color: "#fff",
         fontWeight: 600,

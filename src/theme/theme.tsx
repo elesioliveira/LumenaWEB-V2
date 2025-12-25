@@ -10,6 +10,7 @@ export const bgColorNegative = "#9b5d5950";
 export const colorNegative = "#9b0800";
 export const colorGray = "#94a3b8";
 export const bgColorTopSellers = "#182543";
+export const bgColorDatePicker ="#rgba(40, 61, 107, 0.9)";
 
 
 //colors icons
@@ -32,6 +33,12 @@ export const hoverGlow = {
     borderColor: "rgba(40, 61, 107, 0.9)",
     transform: "translateY(0px)",
   },
+};
+export const hoverPrimary = {
+ "&:hover": {
+            transform: "scale(1.05)",
+            color: "linear-gradient(90deg, #f7a41c, #b5770a)",
+          },
 };
 
 
@@ -178,20 +185,54 @@ export const textFieldStyle = {
   "& .MuiOutlinedInput-root": {
     backgroundColor: bgColorTopSellers,
     color: "#fff",
-    "& fieldset": {
-      borderColor: colorOpacity,
-    },
-    "&:hover fieldset": {
-      borderColor: primaryColor,
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: primaryColor,
-    },
   },
-  "& label": {
+
+  /* BORDA PADRÃO */
+  "& .MuiOutlinedInput-notchedOutline": {
+    border: bordasComponents,
+  },
+
+  /* HOVER */
+  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+    border: `1px solid ${primaryColor}`,
+  },
+
+  /* FOCUS */
+  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    border: `1px solid ${primaryColor}`,
+    boxShadow: "0 0 0 3px rgba(245,159,10,0.25)",
+  },
+
+  /* LABEL */
+  "& .MuiInputLabel-root": {
     color: colorOpacity,
   },
-  "& label.Mui-focused": {
+
+  "& .MuiInputLabel-root.Mui-focused": {
     color: primaryColor,
+  },
+
+  /* TEXTO */
+  "& .MuiInputBase-input": {
+    color: "#fff",
+  },
+
+  /* PLACEHOLDER */
+  "& .MuiInputBase-input::placeholder": {
+    color: colorOpacity,
+    opacity: 1,
+  },
+
+  /* ÍCONE */
+  "& .MuiIconButton-root": {
+    color: colorOpacity,
+  },
+
+  "& .MuiIconButton-root:hover": {
+    color: primaryColor,
+  },
+
+  "& .MuiFormHelperText-root": {
+    color: colorOpacity,
   },
 };
