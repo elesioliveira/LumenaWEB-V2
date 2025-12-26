@@ -13,28 +13,34 @@
   TableBody,
   CircularProgress,
   } from "@mui/material";
-  import { useRef, useState } from "react";
+  import { useEffect, useRef, useState } from "react";
 import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, colorNegative, colorOpacity, colorPositive, hoverGlow, primaryColor } from "../../../theme/theme";
 import { cellStyle, cellStyleBold } from "../../../theme/cellTable";
 import { formatDateTime, maskCurrency } from "../../../shared/MaskUtils";
 import { PaginationButton } from "../produto/fornecedor/components/PaginationButton";
 import { PrimaryActionButton } from "../../../shared/PrimaryActionButtonProps";
 import { data } from "react-router-dom";
+import { ModalSaidaStock } from "./componentes/ModalCreateSaida";
+import type { FornecedorProduct } from "../produto/produto/entity/ProductEntity";
+import { fetchFornecedor, fetchStock, fetchStockDetails } from "./repository/StockRepository";
+import type { MovimetDetails, StockEntradaEntity } from "./entity/StockEntity";
+import { ModalDeleteMovById } from "./componentes/ModalDeleteMov";
+import { ModalViewMovimentation } from "./componentes/ModalViewMovimentation";
 
 
-const movimenations = [ 
-{nNota:"123",origem:'Fornecedor A', dataEmissao: "2024-06-01 10:00", dataEntrada: "2024-06-01 10:00", itens: 4, valor: 1500.00},
-{nNota:"123",origem:'Fornecedor A', dataEmissao: "2024-06-01 10:00", dataEntrada: "2024-06-01 10:00", itens: 4, valor: 1500.00},
-{nNota:"123",origem:'Fornecedor A', dataEmissao: "2024-06-01 10:00", dataEntrada: "2024-06-01 10:05", itens: 4, valor: 1555.55},
-];
+
 
 export function SaidaEstoque() {
-  const [openCategoryModal, setOpenCategoryModal] = useState(false);
-// const [selectedCategory, selectCategory] =useState<CategoryEntity | null>(null);
-// const [categories, setCategories] = useState<CategoryEntity[]>([]);
+  const [openModalSaida, setModalSaida] = useState(false);
+  const [fornecedores, setFornecedores] = useState<FornecedorProduct[]>([]);
+const [movimentDelete, setMovimentDelete] =useState<number |null>(null);
+  const [openModalView, setOpenModalView] = useState(false);
+  const [movimenDetails, setMovimentDetails] = useState<MovimetDetails| null>(null);
+  const [movimentations, setMovimentations] = useState<StockEntradaEntity[]>([]);
 const [toastOpen, setToastOpen] = useState(false);
 const [toastMsg, setToastMsg] = useState("");
 const [toastType, setToastType] = useState<"success" | "error">("error");
+const [openModalDelete, setOpenModalDelete] = useState(false);
 const searchRef = useRef("");
 const [loading, setLoading] = useState(false);
 const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -42,11 +48,43 @@ const jaCarregouRef = useRef(false);
 const [page, setPage] = useState(0);
 const rowsPerPage = 10;
 
-const totalPages = Math.ceil(movimenations.length / rowsPerPage);
-const fornecedoresPaginados = movimenations.slice(
+const totalPages = Math.ceil(movimentations.length / rowsPerPage);
+const fornecedoresPaginados = movimentations.slice(
 page * rowsPerPage,
 page * rowsPerPage + rowsPerPage
 );
+const handleSelectMovDelete = (row: StockEntradaEntity) =>{
+  setMovimentDelete(row.movimentacao_id);
+  setOpenModalDelete(true);
+};
+
+const fetchMoviment = async (row: StockEntradaEntity) => {
+  setLoading(true);
+  try {
+    const result = await fetchStockDetails(row.movimentacao_id);
+     if (!result?.success) {
+    setToastType("error");
+    setToastMsg(result?.message ?? "Erro. Não foi possível encontrar a movimentação");
+    setToastOpen(true);
+    return;
+    }
+    setMovimentDetails(result.data);
+    setOpenModalView(true);
+  } catch (error) {
+    setToastType("error");
+    setToastMsg("Erro ao mudar status do status do produto.");
+    setToastOpen(true);
+    return;
+  }finally {
+    setLoading(false);
+  }
+}
+
+useEffect(() => {
+   if (jaCarregouRef.current) return;
+    jaCarregouRef.current = true;
+  getStockSaida("");
+}, []);
 
     // const fetchCategories = async (search: string) => {
     // setLoading(true);
@@ -96,10 +134,75 @@ page * rowsPerPage + rowsPerPage
     // setOpenCategoryModal(true);    //  abre modal
     };
 
+const getStockSaida = async (search?: string) => {
+  setLoading(true);
+
+  try {
+    const result = await fetchStock(search, "SAIDA");
+
+    if (!result?.success) {
+      setMovimentations([]);
+      return;
+    }
+
+    setMovimentations(result.data ?? []);
+  } catch (error) {
+    setMovimentations([]);
+  } finally {
+    setLoading(false);
+  }
+};
+
+const getFornecedor = async () => {
+  try {
+    setLoading(true);
+    const result = await fetchFornecedor();
+    if (!result?.success) {
+    setToastType("error");
+    setToastMsg(result?.message ?? "Erro ao mudar status do fornecedor.");
+    setToastOpen(true);
+    return;
+    }
+    setFornecedores(result.data);
+  } catch (error: any) {
+        setToastType("error");
+    setToastMsg(error.toString() ?? "Erro ao mudar status do fornecedor.");
+    setToastOpen(true);
+  } finally{
+    setLoading(false);
+  }
+}
 
 
 
     return (
+ <>
+     <ModalSaidaStock
+         open={openModalSaida}
+         fornecedores={fornecedores}
+         onSuccess={async()=> {}}
+         onClose={async() => {
+          await getStockSaida("");
+         setModalSaida(false);
+         }}
+         />
+  <ModalDeleteMovById
+      open={openModalDelete}
+      movId={movimentDelete}
+      onSuccess={async() => await getStockSaida("")}
+      onClose={() => {
+      setOpenModalDelete(false);
+      setMovimentDelete(null);
+      }}
+      />
+  <ModalViewMovimentation
+      open={openModalView}
+      data={movimenDetails}
+      onClose={() => {
+      setOpenModalView(false);
+      setMovimentDetails(null);
+      }}
+      />
     <Box flexDirection={"column"}>
     <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={2}>
     <Stack display={"flex"} flexDirection={"row"} flexGrow={2} justifyContent={"space-between"} mr={2} alignContent={"center"} justifyItems={"center"} alignItems={"center"} >
@@ -116,7 +219,10 @@ page * rowsPerPage + rowsPerPage
     boxShadow="0 0 20px rgba(245,159,10,0.35)"
     background="linear-gradient(to right, #f59f0a 0%, #e68a00 100%)"
     startIcon={<Plus />}
-    onClick={() =>{}}
+    onClick={async() => {
+      await getFornecedor();
+      setModalSaida(true)
+    }}
   />
     </Stack>
     <Stack display={"flex"} flexDirection={"row"} flexGrow={1} gap={1} justifyContent={"flex-start"} mt={8} mb={0} mr={2} justifyItems={"start"}  alignItems={"start"} alignContent={"start"}>
@@ -142,7 +248,7 @@ page * rowsPerPage + rowsPerPage
     )}
 
     {/* LISTA VAZIA */}
-    {!loading && movimenations.length === 0 && (
+    {!loading && movimentations.length === 0 && (
     <Stack
     height={200}
     alignItems="center"
@@ -155,7 +261,8 @@ page * rowsPerPage + rowsPerPage
     )}
 
     {/* TABELA */}
-    {!loading && movimenations.length > 0 && (
+    {/* TABELA */}
+    {!loading && movimentations.length > 0 && (
     <TableContainer
     sx={{
     maxHeight: "100%",
@@ -174,7 +281,7 @@ page * rowsPerPage + rowsPerPage
     {/* HEADER */}
     <TableHead>
     <TableRow>
-    {["Nº Documento","Cliente","Motivo", "Data Saída",  "Itens", "Valor Total", "Ações"].map(
+    {["Nº Documento","Cliente","Data Saída", "Motivo",  "Itens", "Valor Total", "Ações"].map(
     (col) => (
     <TableCell
     key={col}
@@ -196,9 +303,9 @@ page * rowsPerPage + rowsPerPage
 
     {/* BODY */}
     <TableBody>
-    {fornecedoresPaginados.map((row) => (
+    {movimentations.map((row) => (
     <TableRow
-    key={row.nNota}
+    key={row.nota}
     sx={{
       alignContent:"center",
       justifyContent:"center",
@@ -209,16 +316,16 @@ page * rowsPerPage + rowsPerPage
     ...hoverGlow,
     }}
     >
-    <TableCell sx={cellStyleBold}>{row.nNota}</TableCell>
-    <TableCell sx={cellStyleBold}>{row.origem}</TableCell>
-    <TableCell sx={cellStyle}>{formatDateTime(row.dataEmissao)}</TableCell>
-    <TableCell sx={cellStyle}>{formatDateTime(row.dataEntrada)}</TableCell>
-    <TableCell sx={cellStyleBold}>{row.itens}</TableCell>
-    <TableCell sx={cellStyleBold}>{maskCurrency(row.valor)}</TableCell>
+    <TableCell sx={cellStyleBold}>{row.nota}</TableCell>
+    <TableCell sx={cellStyleBold}>{row.fornecedor}</TableCell>
+    <TableCell sx={cellStyle}>{formatDateTime(row.data_ocorrencia, false)}</TableCell>
+    <TableCell sx={cellStyle}>{row.motivo_saida??"--"}</TableCell>
+    <TableCell sx={cellStyleBold}>{row.total_itens}</TableCell>
+    <TableCell sx={cellStyleBold}>{maskCurrency(row.valor_total)}</TableCell>
     <TableCell sx={cellStyle}> <Stack direction="row" spacing={1} justifyContent="start" alignItems="start" > 
      {/* Visualizar */} 
     <Box
-    onClick={() => openViewMoviment(row)}
+    onClick={() => fetchMoviment(row)}
     sx={{
     width: 32,
     height: 32,
@@ -239,7 +346,7 @@ page * rowsPerPage + rowsPerPage
     <Eye size={18} />
     </Box>   
     {/* Deletar */} 
-    <Box onClick={() => handleEdit(row)} sx={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 1, cursor: "pointer", color: colorOpacity, transition: "0.25s ease", 
+    <Box onClick={() =>handleSelectMovDelete(row)} sx={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 1, cursor: "pointer", color: colorOpacity, transition: "0.25s ease", 
       "&:hover": { color: colorNegative, backgroundColor: bgColorNegative, boxShadow: "0 0 12px rgba(255,50,50,0.45)", transform: "translateY(-1px)", }, }} >
     <Trash2 size={16} /> </Box> 
 
@@ -251,7 +358,7 @@ page * rowsPerPage + rowsPerPage
     </Table>
     </TableContainer>
     )}
-    {!loading && movimenations.length > rowsPerPage && (
+    {!loading && movimentations.length > rowsPerPage && (
     <Box
     mt={3}
     display="flex"
@@ -302,6 +409,6 @@ page * rowsPerPage + rowsPerPage
 
     </Box>
     </Box>
-
+ </>
     );
     }

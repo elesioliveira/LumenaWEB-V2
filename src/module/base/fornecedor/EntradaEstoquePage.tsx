@@ -12,6 +12,8 @@
   Table,
   TableBody,
   CircularProgress,
+  Snackbar,
+  Alert,
   } from "@mui/material";
   import { useEffect, useRef, useState } from "react";
 import { bgColorNegative,  bgComponents, colorNegative, colorOpacity, colorPositive, hoverGlow, primaryColor } from "../../../theme/theme";
@@ -20,23 +22,25 @@ import { formatDateTime, maskCurrency } from "../../../shared/MaskUtils";
 import { PaginationButton } from "../produto/fornecedor/components/PaginationButton";
 import { PrimaryActionButton } from "../../../shared/PrimaryActionButtonProps";
 import { CreateEntradaEstoqueModal } from "./componentes/ModalCreateEntryMovimentation";
-import { fetchFornecedor, fetchStockEntrada } from "./repository/StockRepository";
+import { fetchFornecedor, fetchStockDetails, fetchStock } from "./repository/StockRepository";
 import type { FornecedorProduct } from "../produto/produto/entity/ProductEntity";
-import type { StockEntradaEntity } from "./entity/StockEntity";
+import type { MovimetDetails, StockEntradaEntity } from "./entity/StockEntity";
+import { ModalDeleteMovById } from "./componentes/ModalDeleteMov";
+import { ModalViewMovimentation } from "./componentes/ModalViewMovimentation";
 
 
 
 
 export function EntradaEstoque() {
-  const [openModalCreate, setModalCreate] = useState(false);
-// const [selectedCategory, selectCategory] =useState<CategoryEntity | null>(null);
-// const [categories, setCategories] = useState<CategoryEntity[]>([]);
+const [openModalCreate, setModalCreate] = useState(false);
+const [openModalDelete, setOpenModalDelete] = useState(false);
+const [movimentDelete, setMovimentDelete] =useState<number |null>(null);
+const [openModalView, setOpenModalView] = useState(false);
+const [movimenDetails, setMovimentDetails] = useState<MovimetDetails| null>(null);
 const [toastOpen, setToastOpen] = useState(false);
 const [toastMsg, setToastMsg] = useState("");
 const [toastType, setToastType] = useState<"success" | "error">("error");
-const searchRef = useRef("");
 const [loading, setLoading] = useState(false);
-const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 const jaCarregouRef = useRef(false);
 const [fornecedores, setFornecedores] = useState<FornecedorProduct[]>([]);
 const [movimentations, setMovimentations] = useState<StockEntradaEntity[]>([]);
@@ -49,14 +53,34 @@ page * rowsPerPage,
 page * rowsPerPage + rowsPerPage
 );
 
-
-
-
-
-
-    const openViewMoviment = async (r: any)=> {
-    // open modal view
+const fetchMoviment = async (row: StockEntradaEntity) => {
+  setLoading(true);
+  try {
+    const result = await fetchStockDetails(row.movimentacao_id);
+     if (!result?.success) {
+    setToastType("error");
+    setToastMsg(result?.message ?? "Erro. Não foi possível encontrar a movimentação");
+    setToastOpen(true);
+    return;
     }
+    setMovimentDetails(result.data);
+    setOpenModalView(true);
+  } catch (error) {
+    setToastType("error");
+    setToastMsg("Erro ao mudar status do status do produto.");
+    setToastOpen(true);
+    return;
+  }finally {
+    setLoading(false);
+  }
+}
+
+const handleSelectMovDelete = (row: StockEntradaEntity) =>{
+  setMovimentDelete(row.movimentacao_id);
+  setOpenModalDelete(true);
+};
+
+
 
 
 const getFornecedor = async () => {
@@ -83,7 +107,7 @@ const getStockEntrada = async (search?: string) => {
   setLoading(true);
 
   try {
-    const result = await fetchStockEntrada(search, "ENTRADA");
+    const result = await fetchStock(search, "ENTRADA");
 
     if (!result?.success) {
       setMovimentations([]);
@@ -116,7 +140,37 @@ useEffect(() => {
          setModalCreate(false);
          }}
          />
-      
+  <ModalDeleteMovById
+      open={openModalDelete}
+      movId={movimentDelete}
+      onSuccess={async() => await getStockEntrada("")}
+      onClose={() => {
+      setOpenModalDelete(false);
+      setMovimentDelete(null);
+      }}
+      />
+  <ModalViewMovimentation
+      open={openModalView}
+      data={movimenDetails}
+      onClose={() => {
+      setOpenModalView(false);
+      setMovimentDetails(null);
+      }}
+      />
+    <Snackbar
+    open={toastOpen}
+    autoHideDuration={2500}
+    onClose={() => setToastOpen(false)}
+    anchorOrigin={{ vertical: "top", horizontal: "center" }}
+    >
+    <Alert
+    severity={toastType}
+    onClose={() => setToastOpen(false)}
+    sx={{ width: "100%" }}
+    >
+    {toastMsg}
+    </Alert>
+    </Snackbar>
     <Box flexDirection={"column"}>
     <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={2}>
     <Stack display={"flex"} flexDirection={"row"} flexGrow={2} justifyContent={"space-between"} mr={2} alignContent={"center"} justifyItems={"center"} alignItems={"center"} >
@@ -238,7 +292,7 @@ useEffect(() => {
     <TableCell sx={cellStyle}> <Stack direction="row" spacing={1} justifyContent="start" alignItems="start" > 
      {/* Visualizar */} 
     <Box
-    onClick={() => openViewMoviment(row)}
+    onClick={() => fetchMoviment(row)}
     sx={{
     width: 32,
     height: 32,
@@ -259,7 +313,7 @@ useEffect(() => {
     <Eye size={18} />
     </Box>   
     {/* Deletar */} 
-    <Box onClick={() => {console.log('deletar');}} sx={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 1, cursor: "pointer", color: colorOpacity, transition: "0.25s ease", 
+    <Box onClick={() =>handleSelectMovDelete(row)} sx={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 1, cursor: "pointer", color: colorOpacity, transition: "0.25s ease", 
       "&:hover": { color: colorNegative, backgroundColor: bgColorNegative, boxShadow: "0 0 12px rgba(255,50,50,0.45)", transform: "translateY(-1px)", }, }} >
     <Trash2 size={16} /> </Box> 
 

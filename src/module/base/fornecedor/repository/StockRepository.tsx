@@ -37,11 +37,11 @@ export const fetchProductByGtinOrName = async(search: string) => {
   }
 }
 
-export const fetchStockEntrada = async (search?: string, tipo?: string) => {
+export const fetchStock = async (search?: string, tipo?: string) => {
   try {
     const response = await api.get("Get/Stock", {
       withCredentials: true,
-      params: search ? { numNota: search.trim(), tipo: tipo?.trim() } : {},
+      params:  { numNota: search?.trim(), tipo: tipo?.trim() } ,
     });
 
     return response.data;
@@ -59,6 +59,21 @@ export const fetchStockDetails = async (id: number) => {
     const response = await api.get("Get/Stock/Detalhe", {
       withCredentials: true,
       params: {movimentacao_id: id},
+    });
+
+    return response.data;
+  } catch (error: any) {
+    return error?.response?.data ?? {
+      success: false,
+      message: "Erro. Contate o administrador",
+    };
+  }
+}
+
+export const deleteMov = async(movimentId: number) => {
+   try {
+    const response = await api.delete(`Delete/MovimentacaoEstoque/${movimentId}`, {
+      withCredentials: true,
     });
 
     return response.data;

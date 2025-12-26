@@ -85,7 +85,7 @@ export function ModalViewMovimentation({
           fontWeight={400}
           color="#fff"
           mb={2}>
-          Entrada de Nota - NF-{data?.nota ?? "--"}
+          {data?.tipo ==="ENTRADA"? "Entrada" : "Saída"} de Nota - NF-{data?.nota ?? "--"}
         </Typography>
 </Stack>
           <Typography
@@ -99,7 +99,7 @@ export function ModalViewMovimentation({
           <Stack display={"flex"} flexDirection={"row"} flexGrow={1} justifyContent={"space-between"}>
           <Box display={"flex"} flexDirection={"column"} flex={1}>
             <Typography color={colorOpacity} fontWeight={400} fontSize={"1rem"}>
-            Fornecedor
+            {data?.tipo ==="ENTRADA"? "Fornecedor" : "Cliente"}
             </Typography>
             <Typography color={"#ffff"} fontWeight={500} fontSize={"1.2rem"}>
             Distribuidora ABC
@@ -119,7 +119,7 @@ export function ModalViewMovimentation({
            Observação
             </Typography>
             <Typography color={"#ffff"} fontWeight={400} fontSize={"1.2rem"}>
-            Primeira compra do mês
+            {data?.observacao}
             </Typography>
           </Box>
       <Typography color={colorOpacity} fontWeight={400} fontSize={"1.2rem"} mt={4}>

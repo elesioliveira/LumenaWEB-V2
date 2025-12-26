@@ -23,13 +23,15 @@ import { PaginationButton } from "../produto/fornecedor/components/PaginationBut
 import { PrimaryActionButton } from "../../../shared/PrimaryActionButtonProps";
 import { ModalViewMovimentation } from "./componentes/ModalViewMovimentation";
 import type { MovimetDetails, StockEntradaEntity } from "./entity/StockEntity";
-import { fetchStockDetails, fetchStockEntrada } from "./repository/StockRepository";
+import { fetchStockDetails, fetchStock } from "./repository/StockRepository";
+import { ModalDeleteMovById } from "./componentes/ModalDeleteMov";
 
 
 
 
 export function MovimentPage() {
 const [openModalView, setOpenModalView] = useState(false);
+const [openModalDelete, setOpenModalDelete] = useState(false);
 const [toastOpen, setToastOpen] = useState(false);
 const [toastMsg, setToastMsg] = useState("");
 const [toastType, setToastType] = useState<"success" | "error">("error");
@@ -38,9 +40,10 @@ const [loading, setLoading] = useState(false);
 const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 const jaCarregouRef = useRef(false);
 const [page, setPage] = useState(0);
-const [filter, setFilter] = useState<"all" | "entry" | "output">("all");
 const [movimentations, setMovimentations] = useState<StockEntradaEntity[]>([]);
 const [movimenDetails, setMovimentDetails] = useState<MovimetDetails| null>(null);
+const [movimentDelete, setMovimentDelete] =useState<number |null>(null);
+const [tipoMovimentStock, setTipoStock] = useState<string> ('');
 const rowsPerPage = 10;
 
 const totalPages = Math.ceil(movimentations.length / rowsPerPage);
@@ -50,19 +53,19 @@ page * rowsPerPage + rowsPerPage
 );
 
 
-    const debounceSearch = () => {
-    if (debounceTimeout.current) {
-    clearTimeout(debounceTimeout.current);
-    }
+const debounceSearch = () => {
+if (debounceTimeout.current) {
+clearTimeout(debounceTimeout.current);
+}
 
-    debounceTimeout.current = setTimeout(() => {
-    const value = searchRef.current.trim();
+debounceTimeout.current = setTimeout(() => {
+const value = searchRef.current.trim();
 
-    if ( value !=='' && value.length < 0) return;
+if ( value !=='' && value.length < 0) return;
 
-     getStockEntrada(value);
-    }, 500);
-    };
+  getStockEntrada(value);
+}, 500);
+};
 
 
 
@@ -88,16 +91,18 @@ const fetchMoviment = async (row: StockEntradaEntity) => {
   }
 }
 
-
-const handleEdit = () => {
-  console.log('deletar');
+const handleSelectMovDelete = (row: StockEntradaEntity) =>{
+  setMovimentDelete(row.movimentacao_id);
+  setOpenModalDelete(true);
 };
 
-const getStockEntrada = async (search?: string) => {
+
+
+const getStockEntrada = async (search?: string, tipo?: string) => {
   setLoading(true);
   setPage(0);
   try {
-    const result = await fetchStockEntrada(search);
+    const result = await fetchStock(search,tipo);
 
     if (!result?.success) {
       setMovimentations([]);
@@ -115,11 +120,26 @@ const getStockEntrada = async (search?: string) => {
 useEffect(() => {
    if (jaCarregouRef.current) return;
     jaCarregouRef.current = true;
-  getStockEntrada("");
+  getStockEntrada("",);
 }, []);
  
+useEffect(()=> {
+  if (tipoMovimentStock ==='') return;
+  getStockEntrada("",tipoMovimentStock.replaceAll("TODOS",""));
+},[tipoMovimentStock]);
+
     return (
     <>
+    
+  <ModalDeleteMovById
+      open={openModalDelete}
+      movId={movimentDelete}
+      onSuccess={async() => await getStockEntrada("")}
+      onClose={() => {
+      setOpenModalDelete(false);
+      setMovimentDelete(null);
+      }}
+      />
   <ModalViewMovimentation
       open={openModalView}
       data={movimenDetails}
@@ -209,26 +229,26 @@ useEffect(() => {
     }} />
     <PrimaryActionButton
     label="Todos"
-    background={filter ==="all"? "linear-gradient(to right, #f59f0a 0%, #e68a00 100%)": undefined}
-    boxShadow={filter ==="all"? "0 0 20px rgba(245,159,10,0.35)" : undefined}
+    background={tipoMovimentStock ==="TODOS" || tipoMovimentStock === ""? "linear-gradient(to right, #f59f0a 0%, #e68a00 100%)": undefined}
+    boxShadow={tipoMovimentStock ==="TODOS"|| tipoMovimentStock === ""? "0 0 20px rgba(245,159,10,0.35)" : undefined}
     onClick={() => {
-      setFilter("all");
+      setTipoStock("TODOS");
     }}
   />
     <PrimaryActionButton
     label="Entradas"
-    background={filter ==="entry"? "linear-gradient(to right, #f59f0a 0%, #e68a00 100%)": undefined}
-    boxShadow={filter ==="entry"? "0 0 20px rgba(245,159,10,0.35)" : undefined}
+    background={tipoMovimentStock ==="ENTRADA"? "linear-gradient(to right, #f59f0a 0%, #e68a00 100%)": undefined}
+    boxShadow={tipoMovimentStock ==="ENTRADA"? "0 0 20px rgba(245,159,10,0.35)" : undefined}
     onClick={() => {
-      setFilter("entry");
+      setTipoStock("ENTRADA");
     }}
   />
     <PrimaryActionButton
     label="Saídas"
-    background={filter ==="output"? "linear-gradient(to right, #f59f0a 0%, #e68a00 100%)": undefined}
-    boxShadow={filter ==="output"? "0 0 20px rgba(245,159,10,0.35)" : undefined}
+    background={tipoMovimentStock ==="SAIDA"? "linear-gradient(to right, #f59f0a 0%, #e68a00 100%)": undefined}
+    boxShadow={tipoMovimentStock ==="SAIDA"? "0 0 20px rgba(245,159,10,0.35)" : undefined}
     onClick={() => {
-      setFilter("output");
+      setTipoStock("SAIDA");
     }}
   />
     </Stack>
@@ -282,7 +302,7 @@ useEffect(() => {
     {/* HEADER */}
     <TableHead>
     <TableRow>
-    {["Tipo", "Nº Documento", "Origem", "Data", "Valor Total", "Ações"].map(
+    {["Tipo", "Nº Documento", "Origem/Destino", "Data", "Valor Total", "Ações"].map(
     (col) => (
     <TableCell
     key={col}
@@ -368,7 +388,7 @@ useEffect(() => {
     <Eye size={18} />
     </Box>   
     {/* Deletar */} 
-    <Box onClick={() => handleEdit()} sx={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 1, cursor: "pointer", color: colorOpacity, transition: "0.25s ease", 
+    <Box onClick={() => handleSelectMovDelete(row)} sx={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 1, cursor: "pointer", color: colorOpacity, transition: "0.25s ease", 
       "&:hover": { color: colorNegative, backgroundColor: bgColorNegative, boxShadow: "0 0 12px rgba(255,50,50,0.45)", transform: "translateY(-1px)", }, }} >
     <Trash2 size={16} /> </Box> 
 

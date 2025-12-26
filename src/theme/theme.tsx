@@ -98,6 +98,7 @@ shadows: [
     MuiButton: {
       styleOverrides: {
         root: {
+          backgroundColor: bgColorTopSellers,
           borderRadius: "0.75rem",
           textTransform: "none",
           boxShadow: "none",
@@ -185,6 +186,9 @@ export const textFieldStyle = {
   "& .MuiOutlinedInput-root": {
     backgroundColor: bgColorTopSellers,
     color: "#fff",
+    "&.MuiInputBase-root": {
+    backgroundColor: bgColorTopSellers,
+    },
   },
 
   /* BORDA PADRÃO */
