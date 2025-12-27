@@ -20,6 +20,7 @@ import { ModuleProduct } from "../produto/ModuleProductPage";
 import { CurrentModulePage } from "./enums/HomeEnums";
 import { DashBoardPage } from "../dashboard/DashBoardPage";
 import { StockPage } from "../fornecedor/StockPage";
+import { ModuleClient } from "../client/ModuleClient";
   const menuItems = [
   { label: "Dashboard", 
     icon: LayoutDashboard, 
@@ -84,6 +85,8 @@ const handleOnChagentPage = (page: CurrentModulePage) => {
         return <DashBoardPage collapsed={collapsed} />;
         case CurrentModulePage.Stock:
         return <StockPage/>;
+        case CurrentModulePage.Client:
+        return <ModuleClient/>;
       // case CurrentModulePage.Seller:
       //   return <SellerPage />;
       // case CurrentModulePage.Client:

@@ -1,0 +1,17 @@
+export interface ClientDTO  {
+nome: string |null,
+tipo: string |null,
+telefone: string |null,
+email: string |null,
+documento: string |null,
+grupo: string |null,
+cidade: string |null,
+ativo: boolean,
+rua: string |null,
+numero: string |null,
+complemento: string |null,
+bairro: string |null,
+cep: string |null,
+uf: string |null,
+observacao: string |null,
+}

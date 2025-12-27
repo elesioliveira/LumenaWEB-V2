@@ -6,6 +6,12 @@ export const cellStyle = {
   fontWeight: 400,
   borderBottom: "1px solid rgba(40, 61, 107, 0.25)",
 };
+export const cellStyleWhite = {
+  color: "#ffff",
+  fontSize: "0.85rem",
+  fontWeight: 400,
+  borderBottom: "1px solid rgba(40, 61, 107, 0.25)",
+};
 
 export const cellStyleBold = {
   color: "#fff",
