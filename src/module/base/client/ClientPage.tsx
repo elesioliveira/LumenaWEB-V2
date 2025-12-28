@@ -17,101 +17,149 @@
   Alert,
   } from "@mui/material";
   import { useEffect, useRef, useState } from "react";
-import type { ClientDetailsEntity, ClientEntity } from "./entity/ClientEntity";
-import { clientsMock, grupoMocks } from "./mocks/ClientMocks";
+import type { ClientDetailsEntity, ClientEntity, GroupClientEntity } from "./entity/ClientEntity";
 import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, colorNegative, colorOpacity, colorPositive, primaryColor } from "../../../theme/theme";
 import { cellStyle, cellStyleBold, cellStyleWhite } from "../../../theme/cellTable";
 import { PaginationButton } from "../produto/fornecedor/components/PaginationButton";
 import { CreatOrUpdateClientModal } from "./componentes/CreateOrUpdateClientModal";
+import { getClient, getClientDetails, getGroupClient, putStatusClient } from "./repository/ClientRepository";
+import { ufMocks } from "./mocks/ClientMocks";
+import type { ClientStatusDTO } from "./dto/ClientDTO";
 
 
 
 export function ClientPage() {
 const [openClientModal, setOpenClientModal] = useState(false);
-const [selectClient, setSelectClient] =useState<ClientDetailsEntity | null>(null);
-// const [clients, setClients] = useState<ClientEntity[]>([]);
+const [clients, setClients] = useState<ClientEntity[]>([]);
+const [grupos, setGrupos] = useState<GroupClientEntity []>([]);
 const [toastOpen, setToastOpen] = useState(false);
 const [toastMsg, setToastMsg] = useState("");
 const [toastType, setToastType] = useState<"success" | "error">("error");
 const searchRef = useRef("");
 const [loading, setLoading] = useState(false);
 const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+const [clientDetails, setClientDetails] = useState<ClientDetailsEntity | null>(null);
 const jaCarregouRef = useRef(false);
 const [page, setPage] = useState(0);
 const rowsPerPage = 10;
 
-const totalPages = Math.ceil(clientsMock.length / rowsPerPage);
-const clientsPaginados = clientsMock.slice(
+const totalPages = Math.ceil(clients.length / rowsPerPage);
+const clientsPaginados = clients.slice(
 page * rowsPerPage,
 page * rowsPerPage + rowsPerPage
 );
 
-    // const fetchClient = async (search: string) => {
-    // setLoading(true);
 
-    // try {
-    // const response = await getFornecedor(search);
+const fetchClientDetails = async(row: ClientEntity) => {
+    setLoading(true);
+    try {
+        const result = await getClientDetails(row.id);
+    if (!result.success) {
+    setToastType("error");
+    setToastMsg(result?.message ?? "Erro ao buscar grupos de clientes.");
+    setToastOpen(true);
+    return;
+    }
+    await fetchGroup();
+    setClientDetails(result.data);
+    setOpenClientModal(true); 
+    } catch (error) {
+    setToastType("error");
+    setToastMsg("Erro ao buscar grupos de clientes.");
+    setToastOpen(true);
+    return; 
+    } 
+    finally{
+    setLoading(false);
+    }
+}
 
-    // if (response?.success) {
-    // setClients(response.data);
-    // if (page >= totalPages && totalPages > 0) {
-    // setPage(0);
-    // }
-    // }
-    // } finally {
-    // setLoading(false);
-    // }
-    // };
+const fetchGroup = async() => {
+       setLoading(true);
+    try {
+    const response = await getGroupClient("", true);
+    if (!response.success) {
+    setToastType("error");
+    setToastMsg(response?.message ?? "Erro ao buscar grupos de clientes.");
+    setToastOpen(true);
+    return;
+    }
+    setGrupos(response.data);
+    setOpenClientModal(true);
+    } catch (error) {
+    setToastType("error");
+    setToastMsg("Erro ao buscar grupos de clientes.");
+    setToastOpen(true);
+    return; 
+    } finally{
+        setLoading(false);
+    }
+};
 
-    // const debounceSearch = () => {
-    // if (debounceTimeout.current) {
-    // clearTimeout(debounceTimeout.current);
-    // }
+    const fetchClient = async (search: string) => {
+    setLoading(true);
 
-    // debounceTimeout.current = setTimeout(() => {
-    // const value = searchRef.current.trim();
+    try {
+    const response = await getClient(search);
 
-    // if ( value !=='' && value.length < 3) return;
-
-    // fetchClient(value);
-    // }, 1000);
-    // };
-
-
-    // const onChangedAtivo = async (f: ClientEntity)=> {
-    // try {
-    // f.ativo = !f.ativo;
-    // setLoading(true);
-    // const response = await updateFornecedor(f);
-    // if (!response?.success) {
-    // setToastType("error");
-    // setToastMsg(response?.message ?? "Erro ao mudar status do fornecedor.");
-    // setToastOpen(true);
-    // return;
-    // }
-    // await fetchClient(searchRef.current);
-    // } catch (error) {
-    // setToastType("error");
-    // setToastMsg("Erro ao mudar status do fornecedor.");
-    // setToastOpen(true);
-    // return;
-    // }finally {
-    // setLoading(false);
-    // }
-    // }
-
-    // useEffect(() => {
-    // if (jaCarregouRef.current) return;
-
-    // jaCarregouRef.current = true;
-    // fetchClient("");
-    // }, []);
-
-    const handleEdit = (row: ClientEntity) => {
-    //corrigir aqui
-        //setSelectClient(row);      //  passa o fornecedor
-    setOpenClientModal(true);    //  abre modal
+    if (response?.success) {
+    setClients(response.data);
+    if (page >= totalPages && totalPages > 0) {
+    setPage(0);
+    }
+    }
+    } finally {
+    setLoading(false);
+    }
     };
+
+    const debounceSearch =async () => {
+    if (debounceTimeout.current) {
+    clearTimeout(debounceTimeout.current);
+    }
+
+    debounceTimeout.current = setTimeout(async() => {
+    const value = searchRef.current.trim();
+
+    if ( value !=='' && value.length < 3) return;
+
+  await  fetchClient(value);
+    }, 1000);
+    };
+
+
+    const onChangedAtivo = async (f: ClientEntity)=> {
+    try {
+    const payload : ClientStatusDTO= {
+        id: f.id,
+        status: !f.ativo
+    };
+
+    setLoading(true);
+    const response = await putStatusClient(payload);
+    if (!response?.success) {
+    setToastType("error");
+    setToastMsg(response?.message ?? "Erro ao mudar status do cliente.");
+    setToastOpen(true);
+    return;
+    }
+    await fetchClient(searchRef.current);
+    } catch (error) {
+    setToastType("error");
+    setToastMsg("Erro ao mudar status do cliente.");
+    setToastOpen(true);
+    return;
+    }finally {
+    setLoading(false);
+    }
+    }
+
+    useEffect(() => {
+    if (jaCarregouRef.current) return;
+
+    jaCarregouRef.current = true;
+    fetchClient("");
+    }, []);
 
 
 
@@ -136,15 +184,17 @@ page * rowsPerPage + rowsPerPage
     open={openClientModal}
     onClose={() => {
     setOpenClientModal(false);
-    setSelectClient(null);   //  limpa ao fechar
+    setClientDetails(null);   //  limpa ao fechar
     }}
-    grupo={grupoMocks}
+    grupo={grupos}
     onSuccess={async() => {
-        //corigir aqui
+    await fetchClient("")
+    setOpenClientModal(false);
+    setClientDetails(null);   //  limpa ao fechar
     }}   //  recarrega lista
-    client={selectClient}  //  passa via props
+    client={clientDetails}  //  passa via props
     />
-    <Box flexDirection={"column"}>
+    <Box flexDirection={"column"} >
     <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={2}>
     <Stack display={"flex"} flexDirection={"row"} flexGrow={1} justifyContent={"space-between"} justifyItems={"center"} alignContent={"center"}alignItems={"center"} >
     <Box display={"flex"} flexDirection={"column"}>
@@ -160,8 +210,7 @@ page * rowsPerPage + rowsPerPage
     placeholder="Buscar cliente..."
     onChange={(e) => {
     searchRef.current = e.target.value;
-  // CORRIGIR PESQUISAR AQUI
-    //  debounceSearch();
+     debounceSearch();
     }}
     size="small"
     sx={{
@@ -204,7 +253,7 @@ page * rowsPerPage + rowsPerPage
     />
     <Button
     startIcon={<Plus />}
-    onClick={() => setOpenClientModal(true)}
+    onClick={async() => await fetchGroup()}
     sx={{
     height: 40,
     width:100,
@@ -244,7 +293,7 @@ page * rowsPerPage + rowsPerPage
     )}
 
     {/* LISTA VAZIA */}
-    {!loading && clientsMock.length === 0 && (
+    {!loading && clients.length === 0 && (
     <Stack
     height={200}
     alignItems="center"
@@ -257,7 +306,7 @@ page * rowsPerPage + rowsPerPage
     )}
 
     {/* TABELA */}
-    {!loading && clientsMock.length > 0 && (
+    {!loading && clients.length > 0 && (
     <TableContainer
     sx={{
     maxHeight: "100%",
@@ -315,7 +364,7 @@ page * rowsPerPage + rowsPerPage
         {row.nome}
     </Typography>
     <Typography fontSize={"0.8rem"} fontWeight={400} color={colorOpacity}>
-        {row.tipo}
+        {row.tipo ===1 ?"Pessoa Física" :"Pessoa Jurídica"}
     </Typography>
     </Box>
     </TableCell>
@@ -337,7 +386,7 @@ page * rowsPerPage + rowsPerPage
     </TableCell>
     <TableCell sx={cellStyleWhite}>{row.documento ?? "-"}</TableCell>
     <TableCell sx={cellStyleWhite}>{row.grupo ?? "-"}</TableCell>
-    <TableCell sx={cellStyleWhite}>{row.cidade ?? "-"}</TableCell>
+    <TableCell sx={cellStyleWhite}>{row.local ?? "-"}</TableCell>
     <TableCell sx={cellStyle}>
     <Box
     sx={{
@@ -358,13 +407,12 @@ page * rowsPerPage + rowsPerPage
     </TableCell>
     <TableCell sx={cellStyle}> <Stack direction="row" spacing={1} justifyContent="start" alignItems="start" > 
     {/* EDITAR */} 
-    <Box onClick={() => handleEdit(row)} sx={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 1, cursor: "pointer", color: colorOpacity, transition: "0.25s ease", "&:hover": { color: primaryColor, backgroundColor: "rgba(245,159,10,0.15)", boxShadow: "0 0 12px rgba(245,159,10,0.45)", transform: "translateY(-1px)", }, }} >
+    <Box onClick={async () => await fetchClientDetails(row)} sx={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 1, cursor: "pointer", color: colorOpacity, transition: "0.25s ease", "&:hover": { color: primaryColor, backgroundColor: "rgba(245,159,10,0.15)", boxShadow: "0 0 12px rgba(245,159,10,0.45)", transform: "translateY(-1px)", }, }} >
     <Pencil size={16} /> </Box> 
     {/* Ativar ou Desativar */} 
     <Box
     onClick={() =>{
-        // corrigir aqui
-        // onChangedAtivo(row)
+    onChangedAtivo(row)
     }}
     sx={{
     width: 32,
@@ -396,7 +444,7 @@ page * rowsPerPage + rowsPerPage
     </Table>
     </TableContainer>
     )}
-    {!loading && clientsMock.length > rowsPerPage && (
+    {!loading && clients.length > rowsPerPage && (
     <Box
     mt={3}
     display="flex"

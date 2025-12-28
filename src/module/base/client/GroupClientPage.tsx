@@ -17,19 +17,21 @@
   Alert,
   } from "@mui/material";
   import { useEffect, useRef, useState } from "react";
-import type { ClientDetailsEntity, ClientEntity } from "./entity/ClientEntity";
-import { clientsMock, groupClientMocks, grupoMocks } from "./mocks/ClientMocks";
+import type {  GroupClientEntity } from "./entity/ClientEntity";
 import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, colorNegative, colorOpacity, colorPositive, primaryColor, rgbPrimaryColor } from "../../../theme/theme";
 import { cellStyle, cellStyleBold, cellStyleWhite } from "../../../theme/cellTable";
 import { PaginationButton } from "../produto/fornecedor/components/PaginationButton";
-import { CreatOrUpdateClientModal } from "./componentes/CreateOrUpdateClientModal";
+import { CreateOrUpdateGroupModal } from "./componentes/CreateOrUpdateGroupModal";
+import { getGroupClient, updateGroupClient } from "./repository/ClientRepository";
+import type { GroupDTO } from "./dto/ClientDTO";
 
 
 
 export function GroupClient() {
 const [openGroupClientModal, setOpenGroupClientModal] = useState(false);
-const [selectClient, setSelectClient] =useState<ClientDetailsEntity | null>(null);
-// const [clients, setClients] = useState<ClientEntity[]>([]);
+const [selectGroup, setSelectGroup] =useState<GroupClientEntity | null>(null);
+const [group, setGroup] = useState<GroupClientEntity[]>([]);
+const [grupoSelecionado, setGrupoSelecionado] = useState<GroupClientEntity | null>(null);
 const [toastOpen, setToastOpen] = useState(false);
 const [toastMsg, setToastMsg] = useState("");
 const [toastType, setToastType] = useState<"success" | "error">("error");
@@ -40,78 +42,82 @@ const jaCarregouRef = useRef(false);
 const [page, setPage] = useState(0);
 const rowsPerPage = 10;
 
-const totalPages = Math.ceil(groupClientMocks.length / rowsPerPage);
-const clientsPaginados = groupClientMocks.slice(
+const totalPages = Math.ceil(group.length / rowsPerPage);
+const groupsPaginados = group.slice(
 page * rowsPerPage,
 page * rowsPerPage + rowsPerPage
 );
 
-    // const fetchClient = async (search: string) => {
-    // setLoading(true);
+    const fetchGroupClient = async (search: string) => {
+    setLoading(true);
 
-    // try {
-    // const response = await getFornecedor(search);
+    try {
+    const response = await getGroupClient(search);
 
-    // if (response?.success) {
-    // setClients(response.data);
-    // if (page >= totalPages && totalPages > 0) {
-    // setPage(0);
-    // }
-    // }
-    // } finally {
-    // setLoading(false);
-    // }
-    // };
-
-    // const debounceSearch = () => {
-    // if (debounceTimeout.current) {
-    // clearTimeout(debounceTimeout.current);
-    // }
-
-    // debounceTimeout.current = setTimeout(() => {
-    // const value = searchRef.current.trim();
-
-    // if ( value !=='' && value.length < 3) return;
-
-    // fetchClient(value);
-    // }, 1000);
-    // };
-
-
-    // const onChangedAtivo = async (f: ClientEntity)=> {
-    // try {
-    // f.ativo = !f.ativo;
-    // setLoading(true);
-    // const response = await updateFornecedor(f);
-    // if (!response?.success) {
-    // setToastType("error");
-    // setToastMsg(response?.message ?? "Erro ao mudar status do fornecedor.");
-    // setToastOpen(true);
-    // return;
-    // }
-    // await fetchClient(searchRef.current);
-    // } catch (error) {
-    // setToastType("error");
-    // setToastMsg("Erro ao mudar status do fornecedor.");
-    // setToastOpen(true);
-    // return;
-    // }finally {
-    // setLoading(false);
-    // }
-    // }
-
-    // useEffect(() => {
-    // if (jaCarregouRef.current) return;
-
-    // jaCarregouRef.current = true;
-    // fetchClient("");
-    // }, []);
-
-    const handleEdit = (row: any) => {
-    //corrigir aqui
-        //setSelectClient(row);      //  passa o fornecedor
-    setOpenGroupClientModal(true);    //  abre modal
+    if (response?.success) {
+    setGroup(response.data);
+    if (page >= totalPages && totalPages > 0) {
+    setPage(0);
+    }
+    }
+    } finally {
+    setLoading(false);
+    }
     };
+
+    const debounceSearch = () => {
+    if (debounceTimeout.current) {
+    clearTimeout(debounceTimeout.current);
+    }
+
+    debounceTimeout.current = setTimeout(() => {
+    const value = searchRef.current.trim();
+
+    if ( value !=='' && value.length < 1) return;
+
+    fetchGroupClient(value);
+    }, 1000);
+    };
+
+
+    const onChangedAtivo = async (g: GroupClientEntity)=> {
+    try {
+   const payload: GroupDTO = {
+      nome: g.nome,
+      descricao: g.descricao,
+      desconto: g.desconto,
+      ativo: !g.ativo,
+    };
+    setLoading(true);
+    const response = await updateGroupClient(payload, g.id!);
+    if (!response?.success) {
+    setToastType("error");
+    setToastMsg(response?.message ?? "Erro ao mudar status do grupo.");
+    setToastOpen(true);
+    return;
+    }
+    await fetchGroupClient(searchRef.current);
+    } catch (error) {
+    setToastType("error");
+    setToastMsg("Erro ao mudar status do grupo.");
+    setToastOpen(true);
+    return;
+    }finally {
+    setLoading(false);
+    }
+    }
+
+    useEffect(() => {
+    if (jaCarregouRef.current) return;
+
+    jaCarregouRef.current = true;
+    fetchGroupClient("");
+    }, []);
+
+const handleEdit = (row: GroupClientEntity) => {
+setGrupoSelecionado(row);// passa o grupo
+setOpenGroupClientModal(true);//  abre modal
+ };
 
 
 
@@ -132,18 +138,17 @@ page * rowsPerPage + rowsPerPage
     {toastMsg}
     </Alert>
     </Snackbar>
-    {/* <CreatOrUpdateClientModal
+    <CreateOrUpdateGroupModal
     open={openGroupClientModal}
     onClose={() => {
-    openGroupClientModal(false);
-    setSelectClient(null);   //  limpa ao fechar
+    setOpenGroupClientModal(false);
+    setSelectGroup(null);   //  limpa ao fechar
     }}
-    grupo={grupoMocks}
+    grupo={grupoSelecionado}
     onSuccess={async() => {
-        //corigir aqui
-    }}   //  recarrega lista
-    client={selectClient}  //  passa via props
-    /> */}
+       await fetchGroupClient("");
+    }} 
+    />
     <Box flexDirection={"column"}>
     <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={2}>
     <Stack display={"flex"} flexDirection={"row"} flexGrow={1} justifyContent={"space-between"} justifyItems={"center"} alignContent={"center"}alignItems={"center"} >
@@ -160,8 +165,7 @@ page * rowsPerPage + rowsPerPage
     placeholder="Buscar grupo..."
     onChange={(e) => {
     searchRef.current = e.target.value;
-  // CORRIGIR PESQUISAR AQUI
-    //  debounceSearch();
+     debounceSearch();
     }}
     size="small"
     sx={{
@@ -244,7 +248,7 @@ page * rowsPerPage + rowsPerPage
     )}
 
     {/* LISTA VAZIA */}
-    {!loading && clientsMock.length === 0 && (
+    {!loading && group.length === 0 && (
     <Stack
     height={200}
     alignItems="center"
@@ -257,7 +261,7 @@ page * rowsPerPage + rowsPerPage
     )}
 
     {/* TABELA */}
-    {!loading && clientsMock.length > 0 && (
+    {!loading && group.length > 0 && (
     <TableContainer
     sx={{
     maxHeight: "100%",
@@ -298,7 +302,7 @@ page * rowsPerPage + rowsPerPage
 
     {/* BODY */}
     <TableBody>
-    {clientsPaginados.map((row, index) => (
+    {groupsPaginados.map((row, index) => (
     <TableRow
     key={`${row.id}/${index}`}
     sx={{
@@ -354,9 +358,8 @@ page * rowsPerPage + rowsPerPage
     <Pencil size={16} /> </Box> 
     {/* Ativar ou Desativar */} 
     <Box
-    onClick={() =>{
-        // corrigir aqui
-        // onChangedAtivo(row)
+    onClick={async() =>{
+      await  onChangedAtivo(row)
     }}
     sx={{
     width: 32,
@@ -388,7 +391,7 @@ page * rowsPerPage + rowsPerPage
     </Table>
     </TableContainer>
     )}
-    {!loading && clientsMock.length > rowsPerPage && (
+    {!loading && group.length > rowsPerPage && (
     <Box
     mt={3}
     display="flex"

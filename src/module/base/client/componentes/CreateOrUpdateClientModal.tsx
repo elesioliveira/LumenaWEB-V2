@@ -14,12 +14,13 @@ import {
   Autocomplete,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
-import type { ClientDetailsEntity, GrupoClient } from "../entity/ClientEntity";
+import type { ClientDetailsEntity, GroupClientEntity} from "../entity/ClientEntity";
 import type { ClientDTO } from "../dto/ClientDTO";
-import { fetchEnderecoByCep } from "../repository/ClientRepository";
+import { createClientSubmit, fetchEnderecoByCep, updateClient } from "../repository/ClientRepository";
 import { bgColorCardsDashBoard, colorNegative, colorOpacity, textFieldStyle } from "../../../../theme/theme";
 import { X } from "lucide-react";
 import { tipoClientMocks, ufMocks } from "../mocks/ClientMocks";
+import { maskCEP, maskCpfCnpj, maskTelefone } from "../../../../shared/MaskUtils";
 
 
 
@@ -28,7 +29,7 @@ interface CreateOrUpdateClientProps {
   onClose: () => void;
   onSuccess: () => Promise<void>;
   client: ClientDetailsEntity | null;
-  grupo: GrupoClient [];
+  grupo: GroupClientEntity [];
 }
 
 export function CreatOrUpdateClientModal({
@@ -57,17 +58,21 @@ useEffect(() => {
     reset({
         ativo: client.ativo,
         bairro: client.bairro,
-        cep: client.bairro,
+        cep: client.cep,
         cidade: client.cidade,
+        cod_uf: client.cod_uf,
         complemento: client.complemento,
         documento: client.documento,
         email: client.email,
-        grupo: client.grupo,
+        grupo_id: client.grupo_id,
         nome: client.nome,
         numero: client.numero,
         observacao: client.observacao,
         rua: client.rua,
-        telefone: client.telefone
+        telefone: client.telefone,
+        tipo: client.tipo,
+        uf: client.cod_uf
+        // cod_uf: client.cod_uf
     });
   } else {
  reset({
@@ -78,12 +83,13 @@ useEffect(() => {
         complemento: null,
         documento: null,
         email:null,
-        grupo: null,
+        grupo_id: null,
         nome: null,
         numero: null,
         observacao: null,
         rua: null,
         telefone: null,
+        cod_uf:null
     });
   }
 }, [client, reset]);
@@ -122,56 +128,46 @@ const handleFetchCep = async () => {
      SUBMIT
      ========================= */
 const onSubmit = async (data: ClientDTO) => {
-//   let result;
-//   const unidadeDescricao = getUnidadeDescricao(data.un!);
-//   if (client === null) {
-//     //  CREATE
-//     const payload  = {
-//       nome: data.nome?.trim(),
-//       descricao: data.descricao?.trim(),
-//       ativo: data.ativo,
-//       un: unidadeDescricao?? "",
-//       eanCode: data.eanCode?.trim(),
-//       marca_id: Number(data.marca_id),
-//       fornecedor_id: Number(data.fornecedor_id),
-//       categoria_id: Number(data.categoria_id),
-//       preco_custo: parseCurrencyBR(data.preco_custo as unknown as string),
-//       preco_venda: parseCurrencyBR(data.preco_venda as unknown as string),
-//       estoque_minimo: Number(data.estoque_minimo),
-//     };
-//     result = await createProduct(payload);
-//   } else {
-//     // UPDATE
-//     const payload: ProductEntity = {
-//       id: client.id, // vem da entidade selecionada
-//       nome: data.nome?.trim(),
-//       data_cadastro: client.data_cadastro,
-//       descricao: data.descricao?.trim(),
-//       ativo: data.ativo,
-//       un:unidadeDescricao ?? client.un,
-//       eanCode: data.eanCode?.trim(),
-//       marca_id: Number(data.marca_id),
-//       fornecedor_id: Number(data.fornecedor_id),
-//       categoria_id: Number(data.categoria_id),
-//       preco_custo:typeof data.preco_custo === "string" ? parseCurrencyBR(data.preco_custo as unknown as string) : data.preco_custo,
-//       preco_venda:typeof data.preco_venda === "string" ? parseCurrencyBR(data.preco_venda as unknown as string) : data.preco_venda,
-//       estoque_minimo: Number(data.estoque_minimo),
-//     };
-
-//     result = await updateProduct(payload);
-//   }
-
-//   if (!result?.success) {
-//     setToastType("error");
-//     setToastMsg(result?.message ?? "Erro ao salvar produto.");
-//     setToastOpen(true);
-//     return;
-//   }
-
-//   reset();
-//   onSuccess();
-//   onClose();
+  let result;
+  const uf = ufMocks.find((u) => u.id === data.uf);
+  data.uf = uf?.descricao!;
+  data.cod_uf = uf?.id !;
+  if (client === null) {
+    result = await createClientSubmit(data);
+  } else {
+    const payload : ClientDetailsEntity ={
+      ativo: client.ativo,
+      bairro: data.bairro,
+      cep: data.cep,
+      cidade: data.cidade,
+      cod_uf: data.cod_uf,
+      complemento: data.complemento,
+      data_cadastro: client.data_cadastro,
+      documento: data.documento,
+      email: data.email,
+      grupo_id: data.grupo_id,
+      id: client.id,
+      nome: data.nome,
+      numero: data.numero,
+      observacao: data.observacao,
+      rua: data.rua,
+      telefone: data.telefone,
+      tipo: data.tipo,
+      uf: data.uf
+    };
+   result = await updateClient(payload);
 };
+  if (!result?.success) {
+    setToastType("error");
+    setToastMsg(result?.message ?? "Erro ao salvar produto.");
+    setToastOpen(true);
+    return;
+  }
+    reset();
+    await onSuccess();
+    onClose();
+}
+
 
 
 return (
@@ -274,7 +270,7 @@ flexDirection={"column"}
           {...params}
           placeholder="Selecione o tipo"
           sx={textFieldStyle}
-          error={!!errors.grupo}
+          error={!!errors.tipo}
         />
       )}
       PaperComponent={(props) => (
@@ -296,13 +292,13 @@ flexDirection={"column"}
   Grupo*
 </Typography>
 <Controller
-  name="grupo"
+  name="grupo_id"
   control={control}
   rules={{ required: true }}
   render={({ field }) => (
     <Autocomplete
       options={grupo}
-      getOptionLabel={(option) => option.descricao!}
+      getOptionLabel={(option) => option.nome!}
       value={
         grupo.find((m) => m.id === field.value) || null
       }
@@ -314,7 +310,7 @@ flexDirection={"column"}
           {...params}
           placeholder="Selecione o grupo"
           sx={textFieldStyle}
-          error={!!errors.grupo}
+          error={!!errors.grupo_id}
         />
       )}
       PaperComponent={(props) => (
@@ -353,7 +349,7 @@ flexDirection={"column"}
 </Box>
 <Box display="flex" flexDirection="column" flex={1}>
   <Typography fontSize="1rem" fontWeight={400} color="#fff" mb={1} mt={3}>
-    CPF 
+    Documento 
   </Typography>
   <Controller
     name="documento"
@@ -363,10 +359,14 @@ flexDirection={"column"}
       <TextField
         {...field}
         fullWidth
+        onChange={(e) => {
+        field.onChange(maskCpfCnpj(e.target.value))
+        }}
         placeholder="CPF/CPNJ"
         sx={textFieldStyle}
         error={!!fieldState.error}
         helperText={fieldState.error?.message}
+        inputProps={{ maxLength: 18 }}
       />
     )}
   />
@@ -409,8 +409,14 @@ flexDirection={"column"}
       <TextField
         {...field}
         fullWidth
-        type="number"
+        type="text"
         placeholder="(00) 00000-0000"
+        onChange={(e) => {
+          const raw = e.target.value.replace(/\D/g, "");
+          if (raw.length <= 11) {
+            field.onChange(maskTelefone(e.target.value));
+          }
+        }}
         sx={textFieldStyle}
         error={!!fieldState.error}
         helperText={fieldState.error?.message}
@@ -522,9 +528,13 @@ flexDirection={"column"}
         fullWidth
         type="text"
         placeholder="Bairro"
+        onChange={(e) => {
+          field.onChange(maskCEP(e.target.value))
+        }}
+        onBlur={handleFetchCep}
         sx={textFieldStyle}
-        error={!!fieldState.error}
-        helperText={fieldState.error?.message}
+        error={!!errors.cep}
+        helperText={errors.cep?.message}
       />
     )}
   />
