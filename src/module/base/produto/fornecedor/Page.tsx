@@ -19,7 +19,7 @@
   import { useEffect, useRef, useState } from "react";
 import type { FornecedorEntity } from "./entity/FornecedorEntity";
 import { getFornecedor, updateFornecedor } from "./repository/FornecedorRepository";
-import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, bgView, colorNegative, colorOpacity, colorPositive, primaryColor } from "../../../../theme/theme";
+import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, bgView, colorNegative, colorOpacity, colorPositive, hoverGlow, primaryColor } from "../../../../theme/theme";
 import { cellStyle, cellStyleBold } from "../../../../theme/cellTable";
 import { PaginationButton } from "./components/PaginationButton";
 import { CreateFornecedorModal } from "./components/modalCreateOrUpdate";
@@ -291,12 +291,14 @@ page * rowsPerPage + rowsPerPage
     {fornecedoresPaginados.map((row) => (
     <TableRow
     key={row.id}
-    sx={{
-    backgroundColor: "rgba(255,255,255,0.02)",
-    transition: "0.25s ease",
-    "&:hover": {
-    backgroundColor: "rgba(245,159,10,0.08)",
-    },
+  sx={{
+      alignContent:"center",
+      justifyContent:"center",
+      alignItems:"center",
+      justifyItems:"center",
+      backgroundColor: "rgba(255,255,255,0.02)",
+    transition: "all 0.25s ease",
+    ...hoverGlow,
     }}
     >
     <TableCell sx={cellStyleBold}>

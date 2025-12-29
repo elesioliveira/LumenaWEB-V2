@@ -18,7 +18,7 @@
   } from "@mui/material";
   import { useEffect, useRef, useState } from "react";
 import type {  GroupClientEntity } from "./entity/ClientEntity";
-import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, colorNegative, colorOpacity, colorPositive, primaryColor, rgbPrimaryColor } from "../../../theme/theme";
+import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, colorNegative, colorOpacity, colorPositive, hoverGlow, primaryColor, rgbPrimaryColor } from "../../../theme/theme";
 import { cellStyle, cellStyleBold, cellStyleWhite } from "../../../theme/cellTable";
 import { PaginationButton } from "../produto/fornecedor/components/PaginationButton";
 import { CreateOrUpdateGroupModal } from "./componentes/CreateOrUpdateGroupModal";
@@ -305,13 +305,15 @@ setOpenGroupClientModal(true);//  abre modal
     {groupsPaginados.map((row, index) => (
     <TableRow
     key={`${row.id}/${index}`}
-    sx={{
-    backgroundColor: "rgba(255,255,255,0.02)",
-    transition: "0.25s ease",
-    "&:hover": {
-    backgroundColor: "rgba(245,159,10,0.08)",
-    },
-    }}
+     sx={{
+         alignContent:"center",
+         justifyContent:"center",
+         alignItems:"center",
+         justifyItems:"center",
+         backgroundColor: "rgba(255,255,255,0.02)",
+       transition: "all 0.25s ease",
+       ...hoverGlow,
+       }}
     >
     <TableCell sx={cellStyleBold}>{row.nome}</TableCell>
     <TableCell sx={cellStyle}>{row.descricao}</TableCell>

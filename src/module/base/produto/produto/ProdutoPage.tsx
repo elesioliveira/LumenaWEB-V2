@@ -18,7 +18,7 @@
   Alert,
   } from "@mui/material";
   import { useEffect, useRef, useState } from "react";
-import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, colorNegative, colorOpacity, colorPositive, primaryColor } from "../../../../theme/theme";
+import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, colorNegative, colorOpacity, colorPositive, hoverGlow, primaryColor } from "../../../../theme/theme";
 import { cellStyle, cellStyleBold } from "../../../../theme/cellTable";
 import { formatDateTime, maskCurrency } from "../../../../shared/MaskUtils";
 import { PaginationButton } from "../fornecedor/components/PaginationButton";
@@ -308,16 +308,14 @@ const fetchFormProduct = async () => {
     {entregasPaginadas.map((row) => (
     <TableRow
     key={row.id}
-    sx={{
+  sx={{
       alignContent:"center",
       justifyContent:"center",
       alignItems:"center",
       justifyItems:"center",
       backgroundColor: "rgba(255,255,255,0.02)",
-      transition: "0.25s ease",
-      "&:hover": {
-      backgroundColor: "rgba(245,159,10,0.08)",
-    },
+    transition: "all 0.25s ease",
+    ...hoverGlow,
     }}
     >
     <TableCell sx={cellStyle}>{row.eanCode}</TableCell>

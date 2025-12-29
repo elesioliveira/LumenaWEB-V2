@@ -18,7 +18,7 @@
   } from "@mui/material";
   import { useEffect, useRef, useState } from "react";
 import type { ClientDetailsEntity, ClientEntity, GroupClientEntity } from "./entity/ClientEntity";
-import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, colorNegative, colorOpacity, colorPositive, primaryColor } from "../../../theme/theme";
+import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, colorNegative, colorOpacity, colorPositive, hoverGlow, primaryColor } from "../../../theme/theme";
 import { cellStyle, cellStyleBold, cellStyleWhite } from "../../../theme/cellTable";
 import { PaginationButton } from "../produto/fornecedor/components/PaginationButton";
 import { CreatOrUpdateClientModal } from "./componentes/CreateOrUpdateClientModal";
@@ -350,13 +350,15 @@ const fetchGroup = async() => {
     {clientsPaginados.map((row, index) => (
     <TableRow
     key={`${row.id}/${index}`}
-    sx={{
-    backgroundColor: "rgba(255,255,255,0.02)",
-    transition: "0.25s ease",
-    "&:hover": {
-    backgroundColor: "rgba(245,159,10,0.08)",
-    },
-    }}
+     sx={{
+         alignContent:"center",
+         justifyContent:"center",
+         alignItems:"center",
+         justifyItems:"center",
+         backgroundColor: "rgba(255,255,255,0.02)",
+       transition: "all 0.25s ease",
+       ...hoverGlow,
+       }}
     >
     <TableCell sx={cellStyle}>
     <Box display={"flex"} flexDirection={"column"} alignItems={"start"} justifyContent={"center"}>
