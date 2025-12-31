@@ -27,7 +27,7 @@ import { useForm } from "react-hook-form";
 import type { FornecedorProduct } from "../../produto/produto/entity/ProductEntity";
 import type { EstoqueItem, MovimentarEstoqueDTO, ProdutoExample } from "../dto/StockDTO";
 import { fetchProductByGtinOrName, submitMovimentarEstoque } from "../repository/StockRepository";
-import { bgColorCardsDashBoard, bordasComponents, colorNegative, colorOpacity, hoverGlow, primaryColor, textFieldStyle } from "../../../../theme/theme";
+import { bgColorCardsDashBoard, bgColorDatePicker, bordasComponents, colorNegative, colorOpacity, hoverGlow, primaryColor, textFieldStyle } from "../../../../theme/theme";
 import { mask } from "framer-motion/m";
 import { formatDateTime, maskCEP, maskCurrency } from "../../../../shared/MaskUtils";
 import { Package, Pencil, ToggleRight, Trash2 } from "lucide-react";
@@ -154,6 +154,9 @@ const onSubmit = async (data: MovimentarEstoqueDTO) => {
       ...data,
       tipo: "ENTRADA", // ou controlado por select
       valor_total: calcularValorTotal(),
+      data_emissao: data.data_emissao
+      ? data.data_emissao.toISOString()
+      : null,
       itens: itens.map(item => ({
         produto_id: item.produto_id!,
         quantidade: item.quantidade!,
@@ -348,21 +351,55 @@ gap={2} >
 <DatePicker
   format="DD/MM/YYYY"
   label="dd/mm/aaaa"
-sx={{bgcolor:"#FFFF"}}
   value={field.value ? dayjs(field.value) : null}
   onChange={(date) => {
-    field.onChange(date ? date.toISOString() : null);
+    field.onChange(date); // mantém Dayjs aqui
   }}
-  slotProps={{
-     textField: {
-    sx: {
-      ...textFieldStyle,
-      color: "#fff", // sobrescreve ou complementa
-     fontStyle: {color:"#FFFF"}
-    },
-    error: !!errors.data_emissao,
-    helperText: errors.data_emissao?.message,
+slotProps={{
+    textField: {
+      variant: "outlined", // equivalente ao filled: true do Flutter
+sx: {
+  backgroundColor: "#182543",
+  borderRadius: 1,
+  border: "1px solid rgba(40, 61, 107, 0.4)",
+
+  "& .MuiOutlinedInput-root": {
+    backgroundColor: "#182543",
   },
+  "& .MuiIconButton-root:hover": {
+    color: primaryColor,
+  },
+  "& .input": {
+color:"#FFFF"
+  },
+  /* TEXTO DA DATA (readOnly) */
+  "& .MuiOutlinedInput-input.Mui-readOnly": {
+    color: "#fff",
+    WebkitTextFillColor: "#fff",
+    fontSize: 16,
+    fontWeight: 500,
+  },
+
+  /* PLACEHOLDER */
+  "& .MuiOutlinedInput-input::placeholder": {
+    color: "#fff",
+    opacity: 1,
+  },
+
+  /* LABEL */
+  "& label": {
+    color: "#fff",
+  },
+},
+      InputProps: {
+        disableUnderline: false, // remove underline padrão do filled
+      },
+      error: !!errors.data_emissao,
+       helperText:
+        typeof errors.data_emissao?.message === "string"
+          ? errors.data_emissao.message
+          : undefined,
+    },
     popper: {
       sx: {
         "& .MuiPaper-root": {
@@ -372,24 +409,20 @@ sx={{bgcolor:"#FFFF"}}
         },
         "& .MuiPickersDay-root": {
           color: "#fff",
-          "&:hover": {
-            backgroundColor: `${primaryColor}33`,
-          },
         },
         "& .MuiPickersDay-root.Mui-selected": {
           backgroundColor: primaryColor,
-          color: "#0f1729",
-          fontWeight: 600,
+          color: "#FFFF",
+          fontWeight: 900,
+        },
+          "& label": {
+          color: "#fff",
         },
       },
     },
   }}
 />
-
-
-      </LocalizationProvider>
-    )}
-  />
+</LocalizationProvider>)}/>
 </Box>
 </Box>
 <Box display={"flex"} flexDirection={"column"}>
@@ -530,7 +563,7 @@ Itens da Nota
   />
 </Box>
 
- ({itens.length >0}     
+ {itens.length >0}     
   <TableContainer sx={{ maxHeight: "100%",  mt:0}}>
       <Table
         stickyHeader//se tirar some o header da table
@@ -614,12 +647,15 @@ Itens da Nota
           ))}
         </TableBody>
       </Table>
-    </TableContainer>)
+    </TableContainer>
      {/* AÇÕES */}
           <Stack direction="row" spacing={2} justifyContent="flex-end" mt={4}>
             <Button
               variant="outlined"
-              onClick={onClose}
+              onClick={()=> {
+                reset();
+                onClose();
+              }}
               sx={{
                 color: colorOpacity,
                 border: "1px solid rgba(40, 61, 107, 0.6)",

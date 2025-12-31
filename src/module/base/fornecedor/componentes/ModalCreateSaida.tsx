@@ -397,53 +397,77 @@ gap={2} >
   label="dd/mm/aaaa"
   value={field.value ? dayjs(field.value) : null}
   onChange={(date) => {
-    field.onChange(date ? date.toISOString() : null);
+    field.onChange(date); // mantém Dayjs aqui
   }}
 slotProps={{
-  textField: {
-    sx: {
-      ...textFieldStyle,
-          background:"#182543",
-    borderRadius:1,
-       "&:hover": {
-      boxShadow: "0 8px 20px rgba(0,0,0,0.22)",
-     borderColor: primaryColor,
-    },
-    },
-    error: !!errors.data_emissao,
-    helperText: errors.data_emissao?.message,
+    textField: {
+      variant: "outlined", // equivalente ao filled: true do Flutter
+sx: {
+  backgroundColor: "#182543",
+  borderRadius: 1,
+  border: "1px solid rgba(40, 61, 107, 0.4)",
+
+  "& .MuiOutlinedInput-root": {
+    backgroundColor: "#182543",
+  },
+  "& .MuiIconButton-root:hover": {
+    color: primaryColor,
+  },
+  "& .input": {
+color:"#FFFF"
+  },
+  /* TEXTO DA DATA (readOnly) */
+  "& .MuiOutlinedInput-input.Mui-readOnly": {
+    color: "#fff",
+    WebkitTextFillColor: "#fff",
+    fontSize: 16,
+    fontWeight: 500,
   },
 
-  popper: {
-    sx: {
-      "& .MuiPaper-root": {
-        backgroundColor: bgColorCardsDashBoard,
-        color: "#fff",
-        border: bordasComponents,
-      },
+  /* PLACEHOLDER */
+  "& .MuiOutlinedInput-input::placeholder": {
+    color: "#fff",
+    opacity: 1,
+  },
 
-      "& .MuiPickersDay-root": {
-        color: "#fff",
-        "&:hover": {
-          backgroundColor: `${primaryColor}33`,
+  /* LABEL */
+  "& label": {
+    color: "#fff",
+  },
+},
+      InputProps: {
+        disableUnderline: false, // remove underline padrão do filled
+      },
+      error: !!errors.data_emissao,
+       helperText:
+        typeof errors.data_emissao?.message === "string"
+          ? errors.data_emissao.message
+          : undefined,
+    },
+    popper: {
+      sx: {
+        "& .MuiPaper-root": {
+          backgroundColor: bgColorCardsDashBoard,
+          color: "#fff",
+          border: bordasComponents,
+        },
+        "& .MuiPickersDay-root": {
+          color: "#fff",
+        },
+        "& .MuiPickersDay-root.Mui-selected": {
+          backgroundColor: primaryColor,
+          color: "#FFFF",
+          fontWeight: 900,
+        },
+          "& label": {
+          color: "#fff",
         },
       },
-
-      "& .MuiPickersDay-root.Mui-selected": {
-        backgroundColor: primaryColor,
-        color: "#0f1729",
-        fontWeight: 600,
-      },
     },
-  },
-}}
-
+  }}
 />
-
-
-      </LocalizationProvider>
-    )}
-  />
+</LocalizationProvider>)}
+/>
 </Box>
 </Box>
 <Box display={"flex"} flexDirection={"column"}>
@@ -584,7 +608,7 @@ Itens da Nota
   />
 </Box>
 
- ({itens.length >0}     
+ {itens.length >0}     
   <TableContainer sx={{ maxHeight: "100%",  mt:0}}>
       <Table
         stickyHeader//se tirar some o header da table
@@ -668,7 +692,7 @@ Itens da Nota
           ))}
         </TableBody>
       </Table>
-    </TableContainer>)
+    </TableContainer>
      {/* AÇÕES */}
           <Stack direction="row" spacing={2} justifyContent="flex-end" mt={4}>
             <Button

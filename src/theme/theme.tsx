@@ -64,7 +64,7 @@ export const customTheme = createTheme({
     },
 
     text: {
-      primary: "#0f1729",
+      primary: colorOpacity,
       secondary: "#6b7280",
     },
 
@@ -118,6 +118,10 @@ shadows: [
         root: {
           borderRadius: "0.75rem",
           backgroundColor: "#ffffff",
+                input: {
+        color: colorOpacity,
+        WebkitTextFillColor: colorOpacity,
+      },
           "& fieldset": {
             borderColor: "#e5e7eb", // Border
           },
@@ -169,12 +173,13 @@ shadows: [
         },
       },
     },
+    
 
     MuiMenu: {
       styleOverrides: {
         paper: {
           backgroundColor: "#ffffff",
-          color: "#0f1729",
+          color: "#ffff",
           borderRadius: "0.75rem",
         },
       },
@@ -196,6 +201,17 @@ export const textFieldStyle = {
   "& .MuiOutlinedInput-notchedOutline": {
     border: bordasComponents,
   },
+/* TEXTO DISABLED */
+"& .MuiInputBase-root.Mui-disabled input": {
+  color: colorOpacity,
+  WebkitTextFillColor: colorOpacity,
+},
+
+/* PLACEHOLDER DISABLED */
+"& .MuiInputBase-root.Mui-disabled input::placeholder": {
+  color: colorOpacity,
+  opacity: 1,
+},
 
   /* HOVER */
   "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {

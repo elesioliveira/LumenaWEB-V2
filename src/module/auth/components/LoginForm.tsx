@@ -81,7 +81,7 @@ if (!result.success) {
             </Alert>
           </Snackbar>
     {/* Títulos */}
-    <Typography variant="h4" fontWeight="bold" color="text.primary" mb={1}>
+    <Typography variant="h4" fontWeight="bold" color="#0f1729" mb={1}>
       Bem-vindo de volta
     </Typography>
 
@@ -90,7 +90,7 @@ if (!result.success) {
     </Typography>
 
     {/* === Input Email === */}
-    <Typography variant="subtitle1" color="text.primary" fontWeight="400">
+    <Typography variant="subtitle1" color="#0f1729" fontWeight="400">
       Email
     </Typography>
 
@@ -110,7 +110,7 @@ if (!result.success) {
     />
 
     {/* === Input Senha === */}
-    <Typography variant="subtitle1" color="text.primary" fontWeight="400">
+    <Typography variant="subtitle1" color="#0f1729" fontWeight="400">
       Senha
     </Typography>
 

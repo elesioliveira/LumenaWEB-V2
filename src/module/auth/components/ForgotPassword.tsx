@@ -56,7 +56,7 @@ export function ForgotPassword() {
   return (
     <Box width="100%" sx={{ py: 4, mt: 30 }}>
       {/* Títulos */}
-      <Typography variant="h4" fontWeight="bold" color="text.primary" mb={1}>
+      <Typography variant="h4" fontWeight="bold" color="#0f1729" mb={1}>
         Esqueceu a senha?
       </Typography>
 
@@ -65,7 +65,7 @@ export function ForgotPassword() {
       </Typography>
 
       {/* Input Email */}
-      <Typography variant="subtitle1" color="text.primary" fontWeight="400" sx={{ mb: 0 }}>
+      <Typography variant="subtitle1" color="#0f1729" fontWeight="400" sx={{ mb: 0 }}>
         Email
       </Typography>
 

@@ -187,7 +187,7 @@ const handleOnChagentPage = (page: CurrentModulePage) => {
   boxSizing: "border-box",
   borderRight: bordasComponents,
   borderRadius: 0,
-  backgroundColor: (theme) => theme.palette.text.primary,
+  backgroundColor: "#0f1729",
   color: (theme) => theme.palette.background.paper,
   display: "flex",
   flexDirection: "column",

@@ -1,3 +1,4 @@
+import type { Dayjs } from "dayjs";
 
 export interface EstoqueItem {
     produto_id : number | null,
@@ -19,7 +20,7 @@ export interface MovimentarEstoqueDTO {
     tipo: string | null,
     nota: string | null,
     fornecedor_id: number | null,
-    data_emissao: string | null,
+    data_emissao: any,
     observacao: string | null,
     valor_total: number | null,
     motivo_saida: string | null,
