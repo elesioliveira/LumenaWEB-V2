@@ -1,10 +1,9 @@
 
-  import {  ChevronLeft, ChevronRight, Eye, FileInput, FileOutput, LogIn, LogOut, Plus, Trash2 } from "lucide-react";
+  import {  ChevronLeft, ChevronRight, Eye, FileOutput,  Plus, Trash2 } from "lucide-react";
   import {
   Box,
   Typography,
   Stack,
-  TextField,
   TableHead,
   TableRow,
   TableCell,
@@ -14,12 +13,11 @@
   CircularProgress,
   } from "@mui/material";
   import { useEffect, useRef, useState } from "react";
-import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, colorNegative, colorOpacity, colorPositive, hoverGlow, primaryColor } from "../../../theme/theme";
+import { bgColorNegative,  bgComponents, colorNegative, colorOpacity, colorPositive, hoverGlow,  } from "../../../theme/theme";
 import { cellStyle, cellStyleBold } from "../../../theme/cellTable";
 import { formatDateTime, maskCurrency } from "../../../shared/MaskUtils";
 import { PaginationButton } from "../produto/fornecedor/components/PaginationButton";
 import { PrimaryActionButton } from "../../../shared/PrimaryActionButtonProps";
-import { data } from "react-router-dom";
 import { ModalSaidaStock } from "./componentes/ModalCreateSaida";
 import type { FornecedorProduct } from "../produto/produto/entity/ProductEntity";
 import { fetchFornecedor, fetchStock, fetchStockDetails } from "./repository/StockRepository";
@@ -41,15 +39,13 @@ const [toastOpen, setToastOpen] = useState(false);
 const [toastMsg, setToastMsg] = useState("");
 const [toastType, setToastType] = useState<"success" | "error">("error");
 const [openModalDelete, setOpenModalDelete] = useState(false);
-const searchRef = useRef("");
 const [loading, setLoading] = useState(false);
-const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 const jaCarregouRef = useRef(false);
 const [page, setPage] = useState(0);
 const rowsPerPage = 10;
 
 const totalPages = Math.ceil(movimentations.length / rowsPerPage);
-const fornecedoresPaginados = movimentations.slice(
+const saidaPaginadas = movimentations.slice(
 page * rowsPerPage,
 page * rowsPerPage + rowsPerPage
 );
@@ -86,53 +82,13 @@ useEffect(() => {
   getStockSaida("");
 }, []);
 
-    // const fetchCategories = async (search: string) => {
-    // setLoading(true);
 
-    // try {
-    // const response = await getCategory(search);
-
-    // if (response?.success) {
-    // setCategories(response.data);
-    // if (page >= totalPages && totalPages > 0) {
-    // setPage(0);
-    // }
-    // }
-    // } finally {
-    // setLoading(false);
-    // }
-    // };
-
-    const debounceSearch = () => {
-    if (debounceTimeout.current) {
-    clearTimeout(debounceTimeout.current);
-    }
-
-    debounceTimeout.current = setTimeout(() => {
-    const value = searchRef.current.trim();
-
-    if ( value !=='' && value.length < 3) return;
-
-    // fetchCategories(value);
-    }, 1000);
-    };
+ 
 
 
-    const openViewMoviment = async (r: any)=> {
-    // open modal view
-    }
 
-    // useEffect(() => {
-    // if (jaCarregouRef.current) return;
 
-    // jaCarregouRef.current = true;
-    // fetchCategories("");
-    // }, []);
 
-    const handleEdit = (row: any) => {
-    // selectCategory(row);      //  passa a categoria
-    // setOpenCategoryModal(true);    //  abre modal
-    };
 
 const getStockSaida = async (search?: string) => {
   setLoading(true);
@@ -303,7 +259,7 @@ const getFornecedor = async () => {
 
     {/* BODY */}
     <TableBody>
-    {movimentations.map((row) => (
+    {saidaPaginadas.map((row) => (
     <TableRow
     key={row.nota}
     sx={{

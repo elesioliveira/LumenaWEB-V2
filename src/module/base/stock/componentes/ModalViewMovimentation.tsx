@@ -9,12 +9,10 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography,
 } from "@mui/material";
-import { useForm } from "react-hook-form";
-import type { ModalViewMovimentationEntity, MovimetDetails } from "../entity/StockEntity";
-import { bgColorCardsDashBoard, colorNegative, colorOpacity, colorPositive, hoverGlow, hoverPrimary, primaryColor } from "../../../../theme/theme";
+import type { MovimetDetails } from "../entity/StockEntity";
+import { bgColorCardsDashBoard, colorNegative, colorOpacity, colorPositive, hoverGlow,} from "../../../../theme/theme";
 import { FileInput, X } from "lucide-react";
 import { cellStyle, cellStyleBold } from "../../../../theme/cellTable";
 import { maskCurrency } from "../../../../shared/MaskUtils";

@@ -14,7 +14,6 @@ import {
   Stack,
   TextField,
   Typography,
-  MenuItem,
   Autocomplete,
   TableContainer,
   TableHead,
@@ -27,10 +26,9 @@ import { useForm } from "react-hook-form";
 import type { FornecedorProduct } from "../../produto/produto/entity/ProductEntity";
 import type { EstoqueItem, MovimentarEstoqueDTO, ProdutoExample } from "../dto/StockDTO";
 import { fetchProductByGtinOrName, submitMovimentarEstoque } from "../repository/StockRepository";
-import { bgColorCardsDashBoard, bgColorTopSellers, bordasComponents, colorNegative, colorOpacity, hoverGlow, primaryColor, textFieldStyle } from "../../../../theme/theme";
-import { mask } from "framer-motion/m";
-import { formatDateTime, maskCEP, maskCurrency } from "../../../../shared/MaskUtils";
-import { Package, Pencil, ToggleRight, Trash2 } from "lucide-react";
+import { bgColorCardsDashBoard, bordasComponents, colorNegative, colorOpacity, hoverGlow, primaryColor, textFieldStyle } from "../../../../theme/theme";
+import {  maskCurrency } from "../../../../shared/MaskUtils";
+import { Package, Trash2 } from "lucide-react";
 import { cellStyle, cellStyleBold } from "../../../../theme/cellTable";
 import { PrimaryActionButton } from "../../../../shared/PrimaryActionButtonProps";
 import type { StockProduct } from "../entity/StockEntity";
@@ -126,7 +124,6 @@ export function ModalSaidaStock({
     handleSubmit,
     reset,    
   control,
-  setValue,
     formState: { errors, isSubmitting },
   } = useForm<MovimentarEstoqueDTO>();
   const [toastOpen, setToastOpen] = useState(false);

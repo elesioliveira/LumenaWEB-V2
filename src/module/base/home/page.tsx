@@ -19,8 +19,9 @@
 import { ModuleProduct } from "../produto/ModuleProductPage";
 import { CurrentModulePage } from "./enums/HomeEnums";
 import { DashBoardPage } from "../dashboard/DashBoardPage";
-import { StockPage } from "../fornecedor/StockPage";
 import { ModuleClient } from "../client/ModuleClient";
+import { StockPage } from "../stock/StockPage";
+import { ModuleSales } from "../sales/SalesPage";
   const menuItems = [
   { label: "Dashboard", 
     icon: LayoutDashboard, 
@@ -28,7 +29,7 @@ import { ModuleClient } from "../client/ModuleClient";
   },
   { label: "Vendas", 
     icon: ShoppingCart, 
-    page: CurrentModulePage.seller 
+    page: CurrentModulePage.Sales 
   },
   { label: "Produto",
      icon: Package, 
@@ -87,6 +88,8 @@ const handleOnChagentPage = (page: CurrentModulePage) => {
         return <StockPage/>;
         case CurrentModulePage.Client:
         return <ModuleClient/>;
+        case CurrentModulePage.Sales:
+        return <ModuleSales/>;
       // case CurrentModulePage.Seller:
       //   return <SellerPage />;
       // case CurrentModulePage.Client:

@@ -11,7 +11,7 @@ export type CurrentSubModuleProduct = typeof CurrentSubModuleProduct[keyof typeo
 
 export const CurrentModulePage = {
     Dashboard :0,
-    seller:1,
+    Sales:1,
     Product:2,
     Client:3,
     Financial:4,
