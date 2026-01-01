@@ -44,68 +44,7 @@ interface CreateEntradaEstoqueModal {
 }
 
 
-export const produtos: ProdutoExample[] = [
-  {
-    id: 1,
-    nome: "Arroz Branco Tipo 1 (5kg)",
-    valor_unitario: 27.90,
-    permite_fracionado: false,
-  },
-  {
-    id: 2,
-    nome: "Feijão Carioca (1kg)",
-    valor_unitario: 8.49,
-    permite_fracionado: false,
-  },
-  {
-    id: 3,
-    nome: "Açúcar Refinado (1kg)",
-    valor_unitario: 4.99,
-    permite_fracionado: false,
-  },
-  {
-    id: 4,
-    nome: "Farinha de Trigo (kg)",
-    valor_unitario: 3.75,
-    permite_fracionado: true, // vendido por peso
-  },
-  {
-    id: 5,
-    nome: "Carne Bovina Acém (kg)",
-    valor_unitario: 32.90,
-    permite_fracionado: true,
-  },
-  {
-    id: 6,
-    nome: "Queijo Mussarela (kg)",
-    valor_unitario: 41.50,
-    permite_fracionado: true,
-  },
-  {
-    id: 7,
-    nome: "Leite Integral (1L)",
-    valor_unitario: 4.39,
-    permite_fracionado: false,
-  },
-  {
-    id: 8,
-    nome: "Óleo de Soja (900ml)",
-    valor_unitario: 6.89,
-    permite_fracionado: false,
-  },
-  {
-    id: 9,
-    nome: "Tomate Italiano (kg)",
-    valor_unitario: 7.25,
-    permite_fracionado: true,
-  },
-  {
-    id: 10,
-    nome: "Sabão em Pó (1kg)",
-    valor_unitario: 12.99,
-    permite_fracionado: false,
-  },
-];
+
 
 
 export function CreateEntradaEstoqueModal({
@@ -119,7 +58,6 @@ export function CreateEntradaEstoqueModal({
     handleSubmit,
     reset,    
   control,
-  setValue,
     formState: { errors, isSubmitting },
   } = useForm<MovimentarEstoqueDTO>();
   const [toastOpen, setToastOpen] = useState(false);

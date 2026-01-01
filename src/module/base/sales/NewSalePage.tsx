@@ -1,4 +1,5 @@
-  import {  Package, Save, ShoppingCart, Trash2} from "lucide-react";
+import Decimal from "decimal.js";
+import {  Package, Save, ShoppingCart, Trash2} from "lucide-react";
   import {
   Box,
   Typography,
@@ -15,11 +16,10 @@
   TableBody,
   Divider,
   } from "@mui/material";
-  import { useEffect, useRef, useState } from "react";
+  import { useEffect, useMemo, useRef, useState } from "react";
 import { bgColorCardsDashBoard, bordasComponents,colorNegative,colorOpacity, hoverGlow, primaryColor, textFieldStyle } from "../../../theme/theme";
-import type { SalesEntity } from "./entity/SalesEntity";
-import { salesMock, typeOfStatusList, typeOfStatusListNewSales } from "./mocks/SalesMocks";
-import type { StockProduct } from "../stock/entity/StockEntity";
+import type { Canais, ClientSalesEntity, Entrega, FormSalesEntity, ProductSalesEntity } from "./entity/SalesEntity";
+import {  typeOfStatusListNewSales } from "./mocks/SalesMocks";
 import React from "react";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import type { Dayjs } from "dayjs";
@@ -28,139 +28,177 @@ import { cellStyle, cellStyleBold } from "../../../theme/cellTable";
 import { maskCurrency } from "../../../shared/MaskUtils";
 import type { EstoqueItem } from "../stock/dto/StockDTO";
 import { PrimaryActionButton } from "../../../shared/PrimaryActionButtonProps";
+import { fetchClient, fetchFormSale, fetchProductByGtinOrNameSales } from "./repository/SalesRepository";
 
 
 
 
 export function NewSalePage() {
-const [openSaleModal, setOpenDetailsModal] = useState(false);
-const [openModalDelete, setOpenModalDelete] = useState(false);
 const [toastOpen, setToastOpen] = useState(false);
 const [toastMsg, setToastMsg] = useState("");
 const [toastType, setToastType] = useState<"success" | "error">("error");
-const searchRef = useRef("");
-const [loading, setLoading] = useState(false);
-const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 const jaCarregouRef = useRef(false);
-const [page, setPage] = useState(0);
-const rowsPerPage = 10;
-const [sales, setSales] = useState<SalesEntity[]>([]);
 const [typeOfSale, setTypeofSale] = useState<string | null>("Pendente");
-const [produtos, setProdutos] = useState<StockProduct[]>([]);
-const [loadingProducts, setLoadingProducts] = useState(false);
-const [produtoSelecionado, setProdutoSelecionado] = useState<StockProduct | null>(null);
+const [products, setProducts] = useState<ProductSalesEntity[]>([]);
+const [productSelected, setSelectProduct] = useState<ProductSalesEntity | null>(null);
+const [canal, setCanalDeVenda] = useState<Canais | null>(null);
+const [metodo, setMetodoEntrega] = useState<Entrega | null>(null);
 const [quantidade, setQuantidade] = useState<number | "">("");
-const [search, setSearch] = useState("");
 const [dataPedido, setDatePedido] = React.useState<Dayjs | null>(null);
 const [itens, setItens] = useState<EstoqueItem[]>([]);
-const totalPages = Math.ceil(sales.length / rowsPerPage);
-const salesPaginados = sales.slice(
-page * rowsPerPage,
-page * rowsPerPage + rowsPerPage
-);
+const [infoForm, setForm] = useState<FormSalesEntity | null>(null);
+const searchClientRef = useRef("");
+const searchProductRef = useRef("");
+const [clients, setClients] = useState<ClientSalesEntity[]>([]);
+const [clientSelected, setClient] = useState<ClientSalesEntity | null>(null);
+const [loading, setLoading] = useState(false);
+const debounceRef = useRef<number | null>(null);
+const debounceProductRef = useRef<number | null>(null);
+const valFrete = metodo?.custo ?? 0;
+const totalItens = itens.length??0;
+const desconto = clientSelected?.desconto??0;
+const precoTotalItens = useMemo(() => {
+  return itens.reduce((total, item) => {
+    const quantidade = item.quantidade ?? 0;
+    const valorUnitario = item.valor_unitario ?? 0;
+    return total + quantidade * valorUnitario;
+  }, 0);
+}, [itens]);
+const precoTotal = useMemo(() => {
+  const descontoPercentual = desconto ?? 0;
+
+  return new Decimal(precoTotalItens)
+    .plus(valFrete)
+    .mul(new Decimal(1).minus(new Decimal(descontoPercentual).div(100)))
+    .toDecimalPlaces(2, Decimal.ROUND_HALF_UP)
+    .toNumber();
+}, [precoTotalItens, valFrete, desconto]);
 
 const onDeleteItem = (index: number) => {
   setItens((prev) => prev.filter((_, i) => i !== index));
 };
 
-const debounceSearch = () => {
-if (debounceTimeout.current) {
-clearTimeout(debounceTimeout.current);
-}
-
-debounceTimeout.current = setTimeout(() => {
-const value = searchRef.current.trim();
-
-if ( value !=='' && value.length < 0) return;
-
-  getStockEntrada(value);
-}, 500);
-};
 
 
+const canais = useMemo(() => infoForm?.canais ?? [], [infoForm]);
+const metodos = useMemo(() => infoForm?.entrega ?? [], [infoForm]);
 
-const fetchMoviment = async (row: any) => {
-    //corrigir aqui
+const getFormSales = async () => {
   setLoading(true);
   try {
-    // const result = await fetchStockDetails(row.movimentacao_id);
-    //  if (!result?.success) {
-    // setToastType("error");
-    // setToastMsg(result?.message ?? "Erro ao mudar status do produto.");
-    // setToastOpen(true);
-    // return;
-    // }
-    // setMovimentDetails(result.data);
-    // setOpenDetailsModal(true);
+    const result = await fetchFormSale();
+     if (!result?.success) {
+    setToastType("error");
+    setToastMsg(result?.message ?? "Erro em buscar dados do formulário.");
+    setToastOpen(true);
+    return;
+    }
+    setForm(result.data);
   } catch (error) {
-    // setToastType("error");
-    // setToastMsg("Erro ao mudar status do status do produto.");
-    // setToastOpen(true);
-    // return;
+    setToastType("error");
+    setToastMsg("Erro em buscar dados do formulário.");
+    setToastOpen(true);
+    return;
   }finally {
     setLoading(false);
   }
 }
 
-const handleSelectMovDelete = (row: any) =>{
- //corrigir aqui
-    // setMovimentDelete(row.movimentacao_id);
-  setOpenModalDelete(true);
+const handleSearchChange = (value: string) => {
+  searchClientRef.current = value;
+
+  if (debounceRef.current) {
+    clearTimeout(debounceRef.current);
+  }
+
+  if (!value || value.trim().length < 2) {
+    setClients([]);
+    return;
+  }
+
+  debounceRef.current = window.setTimeout(() => {
+    fetchClients(searchClientRef.current);
+  }, 500);
+};
+
+const handleSearchChangeProduct = (value: string) => {
+  searchProductRef.current = value;
+
+  if (debounceProductRef.current) {
+    clearTimeout(debounceProductRef.current);
+  }
+
+  if (!value || value.trim().length < 2) {
+    setProducts([]);
+    return;
+  }
+
+  debounceProductRef.current = window.setTimeout(() => {
+    fetchProducts(searchProductRef.current);
+  }, 500);
 };
 
 
-
-const getStockEntrada = async (search?: string, tipo?: string) => {
+const fetchClients = async (search: string) => {
   setLoading(true);
-  setPage(0);
-  //corrigir aaqui
   try {
-    // const result = await fetchStock(search,tipo);
-
-    // if (!result?.success) {
-    //   setMovimentations([]);
-    //   return;
-    // }
-
-    setSales(salesMock);
-  } catch (error) {
-    setSales([]);
+    const result = await fetchClient(search);
+    if (!result?.success) {
+      setToastType("error");
+      setToastMsg(result?.message ?? "Erro ao buscar cliente.");
+      setToastOpen(true);
+      return;
+    }
+    setClients(result.data);
+  } catch {
+    setToastType("error");
+    setToastMsg("Erro ao buscar cliente.");
+    setToastOpen(true);
   } finally {
     setLoading(false);
   }
 };
 
+const fetchProducts = async (value: string) => {
+  if (!value || value.trim().length < 2) {
+    setProducts([]);
+    return;
+  }
+
+  setLoading(true);
+
+  const result = await fetchProductByGtinOrNameSales(value);
+
+  if (!result?.success) {
+    setProducts([]);
+    setLoading(false);
+    return;
+  }
+
+  const data: ProductSalesEntity[] = result.data;
+
+  // se veio apenas 1 produto (GTIN)
+  if (data.length === 1) {
+    setSelectProduct(data[0]);
+    setProducts(data); // opcional
+  } else {
+    setProducts(data);
+  }
+
+  setLoading(false);
+};
+
+
 useEffect(() => {
    if (jaCarregouRef.current) return;
     jaCarregouRef.current = true;
-  getStockEntrada("",);
+  getFormSales();
 }, []);
- 
-useEffect(()=> {
-  if (typeOfSale ==='') return;
-  getStockEntrada("",typeOfSale?.replaceAll("TODOS",""));
-},[typeOfSale]);
+
+
 
     return (
     <>
-{/* corrigir aqui */}
-  {/* <ModalDeleteMovById
-      open={openModalDelete}
-      movId={movimentDelete}
-      onSuccess={async() => await getStockEntrada("")}
-      onClose={() => {
-      setOpenModalDelete(false);
-      setMovimentDelete(null);
-      }}
-      />
-  <ModalViewMovimentation
-      open={openSaleModal}
-      data={movimenDetails}
-      onClose={() => {
-      setOpenDetailsModal(false);
-      setMovimentDetails(null);
-      }}
-      /> */}
     <Snackbar
     open={toastOpen}
     autoHideDuration={2500}
@@ -199,28 +237,25 @@ useEffect(()=> {
             <Box display={"grid"}  gridTemplateColumns="repeat(2, 1fr)" gap={4} flexGrow={1} width={"100%"} mt={4}>
             <Box display={"flex"} flexDirection={"column"} gap={1}>
             <Typography color={"#FFFF"} fontWeight={400}>Cliente *</Typography>
-            <Autocomplete
-              options={produtos}
-              loading={loadingProducts}
-              value={produtoSelecionado}
-              inputValue={search}
-              onInputChange={(_, value) => {
-                setSearch(value);
-              }}
+             <Autocomplete<ClientSalesEntity, false, false, false>
+              options={clients}
+              loading={loading}
+              value={clientSelected}
+              onInputChange={(_, value) => handleSearchChange(value)}
               onChange={(_, value) => {
-                setProdutoSelecionado(value);
+                setClient(value);
                 setQuantidade("");
               }}
-              getOptionLabel={(option) => option?.nome ?? ""}
+              getOptionLabel={(option) => option.nome}
               isOptionEqualToValue={(option, value) => option.id === value.id}
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  placeholder="Produto"
+                  placeholder="Buscar por cliente..."
                   sx={textFieldStyle}
                 />
-              )}
-              PaperComponent={(props) => (
+                )} 
+                PaperComponent={(props) => (
                 <Box
                   {...props}
                   sx={{
@@ -296,24 +331,19 @@ useEffect(()=> {
             </Box>
             <Box display={"flex"} flexDirection={"column"} gap={1}>
             <Typography color={"#FFFF"} fontWeight={400}>Canal de Venda *</Typography>
-            <Autocomplete
-              options={produtos}
-              loading={loadingProducts}
-              value={produtoSelecionado}
-              inputValue={search}
-              onInputChange={(_, value) => {
-                setSearch(value);
-              }}
-              onChange={(_, value) => {
-                setProdutoSelecionado(value);
-                setQuantidade("");
-              }}
-              getOptionLabel={(option) => option?.nome ?? ""}
+            <Autocomplete<Canais, false, false, false>
+              options={canais}
+              value={canal}
+              loading={loading}
+              loadingText="Carregando canais..."
+              noOptionsText="Nenhum canal disponível"
+              onChange={(_, value) => setCanalDeVenda(value)}
+              getOptionLabel={(option) => option.nome}
               isOptionEqualToValue={(option, value) => option.id === value.id}
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  placeholder="Produto"
+                  placeholder="Selecione o canal de venda..."
                   sx={textFieldStyle}
                 />
               )}
@@ -328,39 +358,37 @@ useEffect(()=> {
                 />
               )}/>
             </Box>
-            <Box display={"flex"} flexDirection={"column"} gap={1}>
-            <Typography color={"#FFFF"} fontWeight={400}>Método de Entrega *</Typography>
-            <Autocomplete
-              options={produtos}
-              loading={loadingProducts}
-              value={produtoSelecionado}
-              inputValue={search}
-              onInputChange={(_, value) => {
-                setSearch(value);
-              }}
-              onChange={(_, value) => {
-                setProdutoSelecionado(value);
-                setQuantidade("");
-              }}
-              getOptionLabel={(option) => option?.nome ?? ""}
-              isOptionEqualToValue={(option, value) => option.id === value.id}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder="Produto"
-                  sx={textFieldStyle}
-                />
-              )}
-              PaperComponent={(props) => (
-                <Box
-                  {...props}
-                  sx={{
-                    bgcolor: bgColorCardsDashBoard,
-                    border: bordasComponents,
-                    color: "#fff",
-                  }}
-                />
-              )}/>
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography color="#FFF" fontWeight={400}>
+                Método de Entrega *
+              </Typography>
+              <Autocomplete<Entrega, false, false, false>
+                options={metodos}
+                value={metodo}
+                loading={loading}
+                loadingText="Carregando métodos de entrega..."
+                noOptionsText="Nenhum método disponível"
+                onChange={(_, value) => setMetodoEntrega(value)}
+                getOptionLabel={(option) => option.nome}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder="Selecione um método de entrega..."
+                    sx={textFieldStyle}
+                  />
+                )}
+                PaperComponent={(props) => (
+                  <Box
+                    {...props}
+                    sx={{
+                      bgcolor: bgColorCardsDashBoard,
+                      border: bordasComponents,
+                      color: "#fff",
+                    }}
+                  />
+                )}
+              />
             </Box>
             </Box>
             <Box display={"flex"} flexDirection={"column"} gap={1} mt={4}>
@@ -388,24 +416,21 @@ useEffect(()=> {
   mt={2}
 >
   {/* PRODUTO */}
-<Autocomplete
-  options={produtos}
-  loading={loadingProducts}
-  value={produtoSelecionado}
-  inputValue={search}
-  onInputChange={(_, value) => {
-    setSearch(value);
-  }}
+<Autocomplete<ProductSalesEntity, false, false, false>
+  options={products}
+  loading={loading}
+  value={productSelected}
+  onInputChange={(_, value) => handleSearchChangeProduct(value)}
   onChange={(_, value) => {
-    setProdutoSelecionado(value);
+    setSelectProduct(value);
     setQuantidade("");
   }}
-  getOptionLabel={(option) => option?.nome ?? ""}
+  getOptionLabel={(option) => option.nome}
   isOptionEqualToValue={(option, value) => option.id === value.id}
   renderInput={(params) => (
     <TextField
       {...params}
-      placeholder="Produto"
+      placeholder="Buscar por produto..."
       sx={textFieldStyle}
     />
   )}
@@ -429,26 +454,26 @@ useEffect(()=> {
     value={quantidade}
     onChange={(e) => {
       const value = e.target.value;
-      if (!produtoSelecionado) return;
+      if (!productSelected) return;
 
       // se não permite fracionado, força inteiro
-      if (!produtoSelecionado.fracionado && value.includes(".")) return;
+      if (!productSelected.fracionado && value.includes(".")) return;
 
       setQuantidade(value === "" ? "" : Number(value));
     }}
     inputProps={{
-      step: produtoSelecionado?.fracionado ? "0.01" : "1",
+      step: productSelected?.fracionado ? "0.01" : "1",
       min: 0,
     }}
     sx={textFieldStyle}
-    disabled={!produtoSelecionado}
+    disabled={!productSelected}
   />
 
   {/* VALOR UNITÁRIO (READ ONLY) */}
   <TextField
     value={
-      produtoSelecionado
-        ? maskCurrency(produtoSelecionado.valor_custo)
+      productSelected
+        ? maskCurrency(productSelected.preco_venda)
         : ""
     }
     placeholder="Valor unit."
@@ -463,11 +488,11 @@ useEffect(()=> {
     boxShadow="0 0 20px rgba(245,159,10,0.35)"
     background="linear-gradient(to right, #f59f0a 0%, #e68a00 100%)"
     sx={{mt:0.4}}
-    disabled={!produtoSelecionado || !quantidade || quantidade <= 0}
+    disabled={!productSelected || !quantidade || quantidade <= 0}
     onClick={() => {
-      if (!produtoSelecionado || !quantidade) return;
+      if (!productSelected || !quantidade) return;
        const jaExiste = itens.some(
-        (item) => item.produto_id === produtoSelecionado.id
+        (item) => item.produto_id === productSelected.id
     );
 
   if (jaExiste) {
@@ -478,21 +503,21 @@ useEffect(()=> {
 }
 
       const subTotal =
-        quantidade * produtoSelecionado.valor_custo;
+        quantidade * productSelected.preco_venda;
 
       setItens((prev) => [
         ...prev,
         {
-          produto_id: produtoSelecionado.id,
-          nome: produtoSelecionado.nome,
+          produto_id: productSelected.id,
+          nome: productSelected.nome,
           quantidade,
-          valor_unitario: produtoSelecionado.valor_custo,
+          valor_unitario: productSelected.preco_venda,
           sub_total: subTotal,
         },
       ]);
 
       // reset
-      setProdutoSelecionado(null);
+      setSelectProduct(null);
       setQuantidade("");
     }}
   />
@@ -610,10 +635,10 @@ useEffect(()=> {
             </Typography>
             <Stack display={"flex"} flexDirection={"row"} justifyContent={"space-between"} mt={2}>
             <Typography color ={colorOpacity} fontSize="1rem" fontWeight={400}>
-                Itens ({"0"})
+                Itens ({totalItens})
             </Typography>
             <Typography color={"#FFFF"} fontSize="1rem" fontWeight={400}>
-                {maskCurrency(25.350)}
+                {maskCurrency(precoTotalItens)}
             </Typography>
             </Stack>
             <Stack display={"flex"} flexDirection={"row"} justifyContent={"space-between"} mt={1}>
@@ -621,7 +646,7 @@ useEffect(()=> {
                 Frete
             </Typography>
             <Typography color={"#FFFF"} fontSize="1rem" fontWeight={400}>
-                {maskCurrency(25.350)}
+                {maskCurrency(valFrete)}
             </Typography>
             </Stack>
             <Stack display={"flex"} flexDirection={"row"} justifyContent={"space-between"} mt={1}>
@@ -629,7 +654,7 @@ useEffect(()=> {
                 Desconto Geral
             </Typography>
             <Typography color={"#FFFF"} fontSize="1rem" fontWeight={400}>
-                {maskCurrency(25.350)}
+                {desconto}%
             </Typography>
             </Stack>
             <Divider
@@ -644,7 +669,7 @@ useEffect(()=> {
                 Total
             </Typography>
             <Typography color={primaryColor} fontSize="1.4rem" fontWeight="bold">
-                {maskCurrency(0)}
+                {maskCurrency(precoTotal)}
             </Typography>
             </Stack>
             <Box display={"flex"} flexDirection={"column"} gap={1} mb={4}>
@@ -683,9 +708,9 @@ useEffect(()=> {
     background="linear-gradient(to right, #f59f0a 0%, #e68a00 100%)"
     sx={{mt:0.4}}
     onClick={() => {
-      if (!produtoSelecionado || !quantidade) return;
+      if (!productSelected || !quantidade) return;
        const jaExiste = itens.some(
-        (item) => item.produto_id === produtoSelecionado.id
+        (item) => item.produto_id === productSelected.id
     );
 
   if (jaExiste) {
@@ -696,21 +721,21 @@ useEffect(()=> {
 }
 
       const subTotal =
-        quantidade * produtoSelecionado.valor_custo;
+        quantidade * productSelected.preco_venda;
 
       setItens((prev) => [
         ...prev,
         {
-          produto_id: produtoSelecionado.id,
-          nome: produtoSelecionado.nome,
+          produto_id: productSelected.id,
+          nome: productSelected.nome,
           quantidade,
-          valor_unitario: produtoSelecionado.valor_custo,
+          valor_unitario: productSelected.preco_venda,
           sub_total: subTotal,
         },
       ]);
 
       // reset
-      setProdutoSelecionado(null);
+      setSelectProduct(null);
       setQuantidade("");
     }}
   />
