@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Box, Stack, Toolbar, Typography } from "@mui/material";
 import { bgView, bordasComponents } from "../../../theme/theme";
 import { ClipboardList, Plus } from "lucide-react";
 import { CurrentSaleViewEnum } from "./enums/SalesEnums";
 import { OrderSalePage } from "./OrderSalesPage";
 import { NewSalePage } from "./NewSalePage";
+import { useSales } from "./provider/SalesProvider";
 
 const currentPageStock = [
   {
@@ -21,14 +22,10 @@ const currentPageStock = [
 ];
 
 export function ModuleSales() {
-const [currentPage, setPage] = useState<CurrentSaleViewEnum>(
-CurrentSaleViewEnum.Order
-);
-
+const { currentPage, onChangedCurrentPage } = useSales();
+const jaCarregouRef = useRef(false);
   const currentPageView = () => {
     switch (currentPage) {
-      // case CurrentPageHome.Product:
-      //   return <ProductPage />;
       case CurrentSaleViewEnum.Order:
         return <OrderSalePage />;
       case CurrentSaleViewEnum.NewSale:
@@ -39,8 +36,14 @@ CurrentSaleViewEnum.Order
   };
 
 const handleOnChagentPage = (page: CurrentSaleViewEnum) => {
-  setPage(page);
+  onChangedCurrentPage(page);
 };
+
+useEffect(() => {
+   if (jaCarregouRef.current) return;
+    jaCarregouRef.current = true;
+    handleOnChagentPage(CurrentSaleViewEnum.Order);
+}, []);
 
     return (
   <Box

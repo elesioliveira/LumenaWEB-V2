@@ -28,60 +28,60 @@ import { cellStyle, cellStyleBold } from "../../../theme/cellTable";
 import { maskCurrency } from "../../../shared/MaskUtils";
 import type { EstoqueItem } from "../stock/dto/StockDTO";
 import { PrimaryActionButton } from "../../../shared/PrimaryActionButtonProps";
-import { fetchClient, fetchFormSale, fetchProductByGtinOrNameSales } from "./repository/SalesRepository";
+import { fetchClient, fetchFormSale, fetchProductByGtinOrNameSales, submitNewSale, updateSubmitSale } from "./repository/SalesRepository";
+import type { NewSaleDTO, SaleItensFormDTO } from "./dto/SaleDTO";
+import { useSales } from "./provider/SalesProvider";
+import { CurrentSaleViewEnum } from "./enums/SalesEnums";
+
 
 
 
 
 export function NewSalePage() {
+const { 
+    saleId,
+    statusOfSale,
+    canal,
+    metodo,
+    dataPedido,
+    itens,
+    clientSelected,
+    observacaoRef,
+    valFrete,
+    totalItens,
+    desconto,
+    precoTotalItens,
+    precoTotal,
+    setStatusOfSale,
+    setCanalDeVenda,
+    setMetodoEntrega,
+    setDatePedido,
+    setItens,
+    setClient,
+    onDeleteItem,
+    restForm,
+    onChangedCurrentPage } = useSales();
 const [toastOpen, setToastOpen] = useState(false);
 const [toastMsg, setToastMsg] = useState("");
 const [toastType, setToastType] = useState<"success" | "error">("error");
 const jaCarregouRef = useRef(false);
-const [typeOfSale, setTypeofSale] = useState<string | null>("Pendente");
 const [products, setProducts] = useState<ProductSalesEntity[]>([]);
 const [productSelected, setSelectProduct] = useState<ProductSalesEntity | null>(null);
-const [canal, setCanalDeVenda] = useState<Canais | null>(null);
-const [metodo, setMetodoEntrega] = useState<Entrega | null>(null);
 const [quantidade, setQuantidade] = useState<number | "">("");
-const [dataPedido, setDatePedido] = React.useState<Dayjs | null>(null);
-const [itens, setItens] = useState<EstoqueItem[]>([]);
 const [infoForm, setForm] = useState<FormSalesEntity | null>(null);
 const searchClientRef = useRef("");
 const searchProductRef = useRef("");
 const [clients, setClients] = useState<ClientSalesEntity[]>([]);
-const [clientSelected, setClient] = useState<ClientSalesEntity | null>(null);
 const [loading, setLoading] = useState(false);
 const debounceRef = useRef<number | null>(null);
 const debounceProductRef = useRef<number | null>(null);
-const valFrete = metodo?.custo ?? 0;
-const totalItens = itens.length??0;
-const desconto = clientSelected?.desconto??0;
-const precoTotalItens = useMemo(() => {
-  return itens.reduce((total, item) => {
-    const quantidade = item.quantidade ?? 0;
-    const valorUnitario = item.valor_unitario ?? 0;
-    return total + quantidade * valorUnitario;
-  }, 0);
-}, [itens]);
-const precoTotal = useMemo(() => {
-  const descontoPercentual = desconto ?? 0;
-
-  return new Decimal(precoTotalItens)
-    .plus(valFrete)
-    .mul(new Decimal(1).minus(new Decimal(descontoPercentual).div(100)))
-    .toDecimalPlaces(2, Decimal.ROUND_HALF_UP)
-    .toNumber();
-}, [precoTotalItens, valFrete, desconto]);
-
-const onDeleteItem = (index: number) => {
-  setItens((prev) => prev.filter((_, i) => i !== index));
-};
 
 
 
 const canais = useMemo(() => infoForm?.canais ?? [], [infoForm]);
 const metodos = useMemo(() => infoForm?.entrega ?? [], [infoForm]);
+
+
 
 const getFormSales = async () => {
   setLoading(true);
@@ -137,6 +137,55 @@ const handleSearchChangeProduct = (value: string) => {
     fetchProducts(searchProductRef.current);
   }, 500);
 };
+
+const onSubmitNewSale = async () => {
+  try {
+    setLoading(true);
+ const observacao = observacaoRef.current?.value?.trim() || null;
+    const dto: NewSaleDTO = {
+      canal_id: canal?.id ?? 0,
+      client_id: clientSelected?.id ?? 0,
+      data_pedido: dataPedido ? dataPedido.toISOString() : "",
+      desconto: desconto ?? 0,
+      entrega_id: metodo?.id ?? 0,
+      observacao: observacao,
+      status: statusOfSale ?? "",
+      total: precoTotal,
+      sub_total:precoTotalItens,
+      val_frete: valFrete,
+      itens: itens.map((item) => ({
+        produto_id: item.produto_id!,
+        qtd: item.quantidade!,
+        val_unitario: item.valor_unitario!,
+        sub_total: item.sub_total!
+      }))
+    };
+
+    const result =saleId?await updateSubmitSale(dto, saleId): await submitNewSale(dto);
+
+    if (!result?.success) {
+      setToastType("error");
+      setToastMsg(result?.message ?? "Erro. Não foi possível cadastrar uma nova venda.");
+      setToastOpen(true);
+      return;
+    }
+
+    // sucesso
+    setToastType("success");
+    setToastMsg("Venda cadastrada com sucesso.");
+    setToastOpen(true);
+    restForm();
+    onChangedCurrentPage(CurrentSaleViewEnum.Order);
+  } catch (error) {
+    setToastType("error");
+    setToastMsg("Erro. Não foi possível cadastrar uma nova venda.");
+    setToastOpen(true);
+    console.error(error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
 
 const fetchClients = async (search: string) => {
@@ -213,7 +262,7 @@ useEffect(() => {
     {toastMsg}
     </Alert>
     </Snackbar>
-    <Box flexDirection={"column"}>
+    <Box flexDirection={"column"} mb={2}>
    
     <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={2}>
     <Box display={"flex"} flexDirection={"column"}>
@@ -241,10 +290,13 @@ useEffect(() => {
               options={clients}
               loading={loading}
               value={clientSelected}
-              onInputChange={(_, value) => handleSearchChange(value)}
+              onInputChange={(_, value, reason) => {
+                if (reason === "input") {
+                  handleSearchChange(value);
+                }
+              }}
               onChange={(_, value) => {
                 setClient(value);
-                setQuantidade("");
               }}
               getOptionLabel={(option) => option.nome}
               isOptionEqualToValue={(option, value) => option.id === value.id}
@@ -394,8 +446,9 @@ useEffect(() => {
             <Box display={"flex"} flexDirection={"column"} gap={1} mt={4}>
             <Typography color={"#FFFF"} fontWeight={400}>Observação *</Typography>
             <TextField
+            inputRef={observacaoRef}
             multiline
-            rows={4}               // altura inicial
+            rows={4}
             placeholder="Observações do pedido..."
             sx={textFieldStyle}
             />
@@ -420,11 +473,15 @@ useEffect(() => {
   options={products}
   loading={loading}
   value={productSelected}
-  onInputChange={(_, value) => handleSearchChangeProduct(value)}
-  onChange={(_, value) => {
-    setSelectProduct(value);
-    setQuantidade("");
-  }}
+              onInputChange={(_, value, reason) => {
+                if (reason === "input") {
+                  handleSearchChangeProduct(value);
+                }
+              }}
+              onChange={(_, value) => {
+                setSelectProduct(value);
+                 setQuantidade("");
+              }}
   getOptionLabel={(option) => option.nome}
   isOptionEqualToValue={(option, value) => option.id === value.id}
   renderInput={(params) => (
@@ -676,9 +733,9 @@ useEffect(() => {
             <Typography color={"#FFFF"} fontWeight={400} mt={2}>Status</Typography>
             <Autocomplete
             options={typeOfStatusListNewSales}
-            value={typeOfSale}
+            value={statusOfSale}
             onChange={(_, value) => {
-                setTypeofSale(value!);
+                setStatusOfSale(value!);
             }}
             getOptionLabel={(option) => option}
             renderInput={(params) => (
@@ -701,44 +758,15 @@ useEffect(() => {
             />
             </Box>
     <PrimaryActionButton
-    label="Salvar"
-    height={53}
-    boxShadow="0 0 20px rgba(245,159,10,0.35)"
-    startIcon={<Save />}
-    background="linear-gradient(to right, #f59f0a 0%, #e68a00 100%)"
-    sx={{mt:0.4}}
-    onClick={() => {
-      if (!productSelected || !quantidade) return;
-       const jaExiste = itens.some(
-        (item) => item.produto_id === productSelected.id
-    );
-
-  if (jaExiste) {
-    setToastType("error");
-    setToastMsg("Produto já adicionado a lista");
-    setToastOpen(true);  
-    return;
-}
-
-      const subTotal =
-        quantidade * productSelected.preco_venda;
-
-      setItens((prev) => [
-        ...prev,
-        {
-          produto_id: productSelected.id,
-          nome: productSelected.nome,
-          quantidade,
-          valor_unitario: productSelected.preco_venda,
-          sub_total: subTotal,
-        },
-      ]);
-
-      // reset
-      setSelectProduct(null);
-      setQuantidade("");
-    }}
-  />
+      label="Salvar"
+      height={53}
+      boxShadow="0 0 20px rgba(245,159,10,0.35)"
+      startIcon={<Save />}
+      background="linear-gradient(to right, #f59f0a 0%, #e68a00 100%)"
+      sx={{ mt: 0.4 }}
+      loading={loading}
+      onClick={onSubmitNewSale}
+    />
     <PrimaryActionButton
     label="Cancelar"
      height={53}
@@ -746,10 +774,10 @@ useEffect(() => {
     sx={{mt:2}}
     boxShadow={"transparent"}
     onClick={() => {
-    //   setTipoStock("SAIDA");
+    onChangedCurrentPage(CurrentSaleViewEnum.Order);
     }}
   />
-        </Box>
+      </Box>
       </Box>
     </Box>
     </Box>

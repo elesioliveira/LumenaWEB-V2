@@ -1,4 +1,4 @@
-import type { Dayjs } from "dayjs";
+
 
 export interface EstoqueItem {
     produto_id : number | null,

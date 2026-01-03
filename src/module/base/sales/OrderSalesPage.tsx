@@ -1,5 +1,5 @@
 
-  import {  ChevronLeft, ChevronRight, Eye, FileInput, LogIn, LogOut, Plus, ShoppingCart, Trash2 } from "lucide-react";
+  import {  ChevronLeft, ChevronRight, Eye, FileInput, LogIn, LogOut, Pencil, Plus, ShoppingCart, Trash2 } from "lucide-react";
   import {
   Box,
   Typography,
@@ -17,21 +17,27 @@
   MenuItem,
   } from "@mui/material";
   import { useEffect, useRef, useState } from "react";
-import { bgColorCardsDashBoard, bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, colorNegative, colorOpacity, colorPositive, hoverGlow, primaryColor, textFieldStyle } from "../../../theme/theme";
+import { bgColorCardsDashBoard, bgColorNegative, bgColorTopSellers, bgComponents, colorNegative, colorOpacity, colorPositive, hoverGlow, primaryColor, textFieldStyle } from "../../../theme/theme";
 import { cellStyle, cellStyleBold } from "../../../theme/cellTable";
 import { formatDateTime, maskCurrency } from "../../../shared/MaskUtils";
 import { PaginationButton } from "../produto/fornecedor/components/PaginationButton";
 import { PrimaryActionButton } from "../../../shared/PrimaryActionButtonProps";
-import type { SalesEntity } from "./entity/SalesEntity";
-import { salesMock, typeOfStatusList } from "./mocks/SalesMocks";
+import type { SaleDetailsModalEntity, SalesEntity } from "./entity/SalesEntity";
+import { typeOfStatusList } from "./mocks/SalesMocks";
 import { typeofStatus, typeofStatusBg } from "./helpers/SalesHelpers";
+import { cancelSubmitSale, fetchSale, fetchSaleDetails } from "./repository/SalesRepository";
+import { ModalViewSale } from "./components/SalesComponents";
+import { useSales } from "./provider/SalesProvider";
+import { CurrentSaleViewEnum } from "./enums/SalesEnums";
+import { ModalCancelSale } from "./components/SalesModalCancel";
 
 
 
 
 export function OrderSalePage() {
+const { hydrateFromApi } = useSales();
 const [openSaleModal, setOpenDetailsModal] = useState(false);
-const [openModalDelete, setOpenModalDelete] = useState(false);
+const [openModalCancel, setOpenCancelModal] = useState(false);
 const [toastOpen, setToastOpen] = useState(false);
 const [toastMsg, setToastMsg] = useState("");
 const [toastType, setToastType] = useState<"success" | "error">("error");
@@ -39,10 +45,13 @@ const searchRef = useRef("");
 const [loading, setLoading] = useState(false);
 const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 const jaCarregouRef = useRef(false);
+const jaCarregouRefTypeOfStatus = useRef(false);
 const [page, setPage] = useState(0);
 const rowsPerPage = 10;
 const [sales, setSales] = useState<SalesEntity[]>([]);
+const [saleDetailsModal, setSaleDateilsModal] = useState<SaleDetailsModalEntity | null>(null);
 const [typeOfSale, setTypeofSale] = useState<string>("Todos");
+const [saleIdCancel, setSaleIdCancel] =useState<number |null>(null);
 
 const totalPages = Math.ceil(sales.length / rowsPerPage);
 const salesPaginados = sales.slice(
@@ -59,60 +68,110 @@ clearTimeout(debounceTimeout.current);
 debounceTimeout.current = setTimeout(() => {
 const value = searchRef.current.trim();
 
-if ( value !=='' && value.length < 0) return;
+if ( value !=='' && value.length < 1) return;
 
-  getStockEntrada(value);
+  fetchSales(value);
 }, 500);
 };
 
 
 
-const fetchMoviment = async (row: any) => {
-    //corrigir aqui
-  setLoading(true);
+
+
+
+const handleCancelSaleSubmit = async(saleId: number) =>{
+ setLoading(true);
   try {
-    // const result = await fetchStockDetails(row.movimentacao_id);
-    //  if (!result?.success) {
-    // setToastType("error");
-    // setToastMsg(result?.message ?? "Erro ao mudar status do produto.");
-    // setToastOpen(true);
-    // return;
-    // }
-    // setMovimentDetails(result.data);
-    // setOpenDetailsModal(true);
+    const result = await cancelSubmitSale(saleId); 
+    if (!result?.success) {
+    setToastType("error");
+    setToastMsg(result?.message ?? "Erro ao cancelar pedido.");
+    setToastOpen(true);
+    return;
+    }
   } catch (error) {
-    // setToastType("error");
-    // setToastMsg("Erro ao mudar status do status do produto.");
-    // setToastOpen(true);
-    // return;
-  }finally {
+    setToastType("error");
+    setToastMsg("Erro ao cancelar pedido.");
+    setToastOpen(true);
+  } finally{
     setLoading(false);
   }
-}
-
-const handleSelectMovDelete = (row: any) =>{
- //corrigir aqui
-    // setMovimentDelete(row.movimentacao_id);
-  setOpenModalDelete(true);
 };
 
+const fetchSaleDateilsModal = async(saleId: number) => {
+  setLoading(true);
+  try {
+    const result = await fetchSaleDetails(saleId); 
+    if (!result?.success) {
+    setToastType("error");
+    setToastMsg(result?.message ?? "Erro ao buscar seu pedido.");
+    setToastOpen(true);
+    return;
+    }
+    setSaleDateilsModal(result.data);
+    setOpenDetailsModal(true);
+  } catch (error) {
+    setSaleDateilsModal(null);
+    setToastType("error");
+    setToastMsg("Erro ao buscar seu pedido.");
+    setToastOpen(true);
+    setOpenDetailsModal(false);
+  } finally{
+    setLoading(false);
+  }
+};
 
+const fetchDetailsSaleEdit = async (row: SalesEntity) => {
+  if (row.status==='Cancelada') {
+    setToastType("error");
+    setToastMsg("Não é possível editar um pedido cancelado.");
+    setToastOpen(true);
+    return;
+  }
+  setLoading(true);
+  try {
+    const result = await fetchSaleDetails(row.id);
 
-const getStockEntrada = async (search?: string, tipo?: string) => {
+    if (!result?.success) {
+      setToastType("error");
+      setToastMsg(result?.message ?? "Erro ao buscar seu pedido.");
+      setToastOpen(true);
+      return;
+    }
+
+    hydrateFromApi(result.data); //  AQUI
+
+  } catch {
+    setToastType("error");
+    setToastMsg("Erro ao buscar seu pedido.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const handleCancelSaleSubmitRow = (saleId: number) =>{
+  setSaleIdCancel(saleId);
+  setOpenCancelModal(true);
+};
+
+const fetchSales = async (search?: string) => {
   setLoading(true);
   setPage(0);
-  //corrigir aaqui
   try {
-    // const result = await fetchStock(search,tipo);
+    const result = await fetchSale(search);
 
-    // if (!result?.success) {
-    //   setMovimentations([]);
-    //   return;
-    // }
-
-    setSales(salesMock);
+     if (!result?.success) {
+    setToastType("error");
+    setToastMsg(result?.message ?? "Erro ao buscar suas vendas.");
+    setToastOpen(true);
+    return;
+    }
+    setSales(result.data);
   } catch (error) {
     setSales([]);
+    setToastType("error");
+    setToastMsg("Erro ao buscar suas vendas.");
+    setToastOpen(true);
   } finally {
     setLoading(false);
   }
@@ -121,12 +180,12 @@ const getStockEntrada = async (search?: string, tipo?: string) => {
 useEffect(() => {
    if (jaCarregouRef.current) return;
     jaCarregouRef.current = true;
-  getStockEntrada("",);
+  fetchSales("",);
 }, []);
  
 useEffect(()=> {
-  if (typeOfSale ==='') return;
-  getStockEntrada("",typeOfSale.replaceAll("TODOS",""));
+  if(!jaCarregouRefTypeOfStatus.current) return;
+  fetchSales(typeOfSale ==='Todos'? "" :typeOfSale);
 },[typeOfSale]);
 
     return (
@@ -140,15 +199,23 @@ useEffect(()=> {
       setOpenModalDelete(false);
       setMovimentDelete(null);
       }}
+      /> */}
+  <ModalCancelSale
+      open={openModalCancel}
+      saleId={saleIdCancel}
+      onSuccess={async() => await fetchSales("")}
+      onClose={() => {
+      setOpenCancelModal(false);
+      setSaleIdCancel(null);
+      }}
       />
-  <ModalViewMovimentation
+  <ModalViewSale
       open={openSaleModal}
-      data={movimenDetails}
+      data={saleDetailsModal}
       onClose={() => {
       setOpenDetailsModal(false);
-      setMovimentDetails(null);
       }}
-      /> */}
+      />
     <Snackbar
     open={toastOpen}
     autoHideDuration={2500}
@@ -196,7 +263,9 @@ sx={{
   },
 }}
   value={typeOfSale}
-  onChange={(e) => setTypeofSale(e.target.value)}
+  onChange={(e) => {
+    jaCarregouRefTypeOfStatus.current=true;
+    setTypeofSale(e.target.value);}}
   SelectProps={{
     MenuProps: {
       PaperProps: {
@@ -266,7 +335,7 @@ sx={{
     background="linear-gradient(to right, #f59f0a 0%, #e68a00 100%)"
     startIcon={<Plus />}
     onClick={async() => {
-    //corrigir aqui
+    await debounceSearch();
     }}
   />
     </Stack>
@@ -282,7 +351,7 @@ sx={{
     >
     <CircularProgress color="inherit" />
     <Typography mt={2} color={colorOpacity}>
-    Carregando movimentações...
+    Carregando pedidos...
     </Typography>
     </Stack>
     )}
@@ -295,7 +364,7 @@ sx={{
     justifyContent="center"
     >
     <Typography color={colorOpacity}>
-    Nenhuma movimentação encontrada.
+    Nenhum pedido encontrado.
     </Typography>
     </Stack>
     )}
@@ -320,7 +389,7 @@ sx={{
     {/* HEADER */}
     <TableHead>
     <TableRow>
-    {["Nº Pedido", "Cliente", "Canal", "Data", "Itens","Total","Status","Ações"].map(
+    {["Nº Pedido", "Cliente", "Canal", "Data Cadastro","Data Pedido", "Itens","Total","Status","Ações"].map(
     (col) => (
     <TableCell
     key={col}
@@ -344,7 +413,7 @@ sx={{
     <TableBody>
     {salesPaginados.map((row, index) => (
     <TableRow
-    key={`${row.nPedido}/${index}`}
+    key={`${row.id}/${index}`}
     sx={{
       alignContent:"center",
       justifyContent:"center",
@@ -355,10 +424,11 @@ sx={{
     ...hoverGlow,
     }}
     >
-    <TableCell sx={cellStyle}>{row.nPedido}</TableCell>
-    <TableCell sx={cellStyleBold}>{row.client}</TableCell>
+    <TableCell sx={cellStyle}>{row.ultimo_pedido}</TableCell>
+    <TableCell sx={cellStyleBold}>{row.cliente}</TableCell>
     <TableCell sx={cellStyle}>{row.canal}</TableCell>
-    <TableCell sx={cellStyle}>{formatDateTime(row.date)}</TableCell>
+    <TableCell sx={cellStyle}>{formatDateTime(row.data_cadastro)}</TableCell>
+    <TableCell sx={cellStyle}>{formatDateTime(row.data_pedido, false)}</TableCell>
     <TableCell sx={cellStyleBold}>{row.itens}</TableCell>
     <TableCell sx={cellStyleBold}>{maskCurrency(row.total)}</TableCell>
     <Box
@@ -386,7 +456,7 @@ sx={{
     <TableCell sx={cellStyle}> <Stack direction="row" spacing={1} justifyContent="start" alignItems="start" > 
      {/* Visualizar */} 
     <Box
-    onClick={() => fetchMoviment(row)}
+    onClick={async() =>await fetchSaleDateilsModal(row.id)}
     sx={{
     width: 32,
     height: 32,
@@ -406,8 +476,11 @@ sx={{
     }}>
     <Eye size={18} />
     </Box>   
+    {/* EDITAR */} 
+    <Box onClick={() => fetchDetailsSaleEdit(row)} sx={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 1, cursor: "pointer", color: colorOpacity, transition: "0.25s ease", "&:hover": { color: primaryColor, backgroundColor: "rgba(245,159,10,0.15)", boxShadow: "0 0 12px rgba(245,159,10,0.45)", transform: "translateY(-1px)", }, }} >
+    <Pencil size={16} /> </Box> 
     {/* Deletar */} 
-    <Box onClick={() => handleSelectMovDelete(row)} sx={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 1, cursor: "pointer", color: colorOpacity, transition: "0.25s ease", 
+    <Box onClick={() => handleCancelSaleSubmitRow(row.id)} sx={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 1, cursor: "pointer", color: colorOpacity, transition: "0.25s ease", 
       "&:hover": { color: colorNegative, backgroundColor: bgColorNegative, boxShadow: "0 0 12px rgba(255,50,50,0.45)", transform: "translateY(-1px)", }, }} >
     <Trash2 size={16} /> </Box> 
 
