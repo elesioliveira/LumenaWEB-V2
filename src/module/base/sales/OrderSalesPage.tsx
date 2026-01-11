@@ -1,5 +1,5 @@
 
-  import {  ChevronLeft, ChevronRight, Eye, FileInput, LogIn, LogOut, Pencil, Plus, ShoppingCart, Trash2 } from "lucide-react";
+  import {  Ban, ChevronLeft, ChevronRight, Eye, FileInput, LogIn, LogOut, Pencil, Plus, ShoppingCart, Trash2 } from "lucide-react";
   import {
   Box,
   Typography,
@@ -76,27 +76,6 @@ if ( value !=='' && value.length < 1) return;
 
 
 
-
-
-
-const handleCancelSaleSubmit = async(saleId: number) =>{
- setLoading(true);
-  try {
-    const result = await cancelSubmitSale(saleId); 
-    if (!result?.success) {
-    setToastType("error");
-    setToastMsg(result?.message ?? "Erro ao cancelar pedido.");
-    setToastOpen(true);
-    return;
-    }
-  } catch (error) {
-    setToastType("error");
-    setToastMsg("Erro ao cancelar pedido.");
-    setToastOpen(true);
-  } finally{
-    setLoading(false);
-  }
-};
 
 const fetchSaleDateilsModal = async(saleId: number) => {
   setLoading(true);
@@ -482,7 +461,7 @@ sx={{
     {/* Deletar */} 
     <Box onClick={() => handleCancelSaleSubmitRow(row.id)} sx={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 1, cursor: "pointer", color: colorOpacity, transition: "0.25s ease", 
       "&:hover": { color: colorNegative, backgroundColor: bgColorNegative, boxShadow: "0 0 12px rgba(255,50,50,0.45)", transform: "translateY(-1px)", }, }} >
-    <Trash2 size={16} /> </Box> 
+    <Ban size={16} /> </Box> 
 
     </Stack> 
     </TableCell>
