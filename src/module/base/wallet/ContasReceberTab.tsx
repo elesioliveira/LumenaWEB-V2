@@ -47,8 +47,7 @@ const rowsPerPage = 10;
 const [contas, setContas] = useState<ContaReceberDTO[]>(contasReceberMock);
 const [summaryCard, setSummary] = useState<SummaryCardDTO[]>(contaReceberSummaryCardMock);
 const [typeOfPayment, setTypeOfPayment] = useState<string>("Todos");
-const [selectStatus, setSelectStatus] = useState<string>("Todos Status");
-const [selectPeriodo, setSelectPeriodo] = useState<string>("Este mês");
+
 const jaCarregouRefTypeOfStatus = useRef(false);
 const totalPages = Math.ceil(contas.length / rowsPerPage);
 const contasPaginadas = contas.slice(

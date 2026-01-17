@@ -4,9 +4,9 @@ import { Ellipsis } from "lucide-react";
 
 interface TableActionsMenuProps {
   rowId: number;
+  onView: (id: number) => void;
 }
-
-export function TableActionsMenuContaPagar({ rowId }: TableActionsMenuProps) {
+export function TableActionsMenuContaPagar({ rowId,  onView,}: TableActionsMenuProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -20,6 +20,11 @@ export function TableActionsMenuContaPagar({ rowId }: TableActionsMenuProps) {
 
   const handleAction = (action: string) => {
     console.log(`Ação: ${action} | ID: ${rowId}`);
+    handleClose();
+  };
+  
+  const handleView = () => {
+    onView(rowId);
     handleClose();
   };
 
@@ -44,9 +49,7 @@ export function TableActionsMenuContaPagar({ rowId }: TableActionsMenuProps) {
           },
         }}
       >
-        <MenuItem onClick={() => handleAction("visualizar")}>
-          Visualizar
-        </MenuItem>
+        <MenuItem onClick={handleView}>Visualizar</MenuItem>
 
         <MenuItem onClick={() => handleAction("marcar_como_pago")}>
           Marcar como pago

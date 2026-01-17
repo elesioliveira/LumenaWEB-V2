@@ -29,11 +29,12 @@ import { BaseSelect } from "./components/SizedSelect";
 import { PrimaryActionButton } from "../../../shared/PrimaryActionButtonProps";
 import { getStatusNeonBgColor, getStatusNeonFontStyle } from "./helpers/WallletHelpers";
 import { TableActionsMenuContaPagar } from "./components/TableActionsMenuContaPagar";
+import { ModalContaPagarView } from "./components/ModalContaPagarView";
 
 
 
 export function ContasPagarTab() {
-const [openClientModal, setOpenClientModal] = useState(false);
+const [openModalView, setOpenModalView] = useState(false);
 const [toastOpen, setToastOpen] = useState(false);
 const [toastMsg, setToastMsg] = useState("");
 const [toastType, setToastType] = useState<"success" | "error">("error");
@@ -48,6 +49,7 @@ const [summaryCard, setSummary] = useState<SummaryCardDTO[]>(contaPagarSummaryCa
 const [typeOfPayment, setTypeOfPayment] = useState<string>("Todos");
 const [selectStatus, setSelectStatus] = useState<string>("Todos Status");
 const [selectPeriodo, setSelectPeriodo] = useState<string>("Este mês");
+const [modalViewIdSelect, setModalViewIdSelect] =useState<number | null>(null);
 const jaCarregouRefTypeOfStatus = useRef(false);
 const totalPages = Math.ceil(contas.length / rowsPerPage);
 const contasPaginadas = contas.slice(
@@ -55,56 +57,15 @@ page * rowsPerPage,
 page * rowsPerPage + rowsPerPage
 );
 
-
-const fetchClientDetails = async(row: any) => {
-    //corrigir aqui
-    // setLoading(true);
-    // try {
-    //     const result = await getClientDetails(row.id);
-    // if (!result.success) {
-    // setToastType("error");
-    // setToastMsg(result?.message ?? "Erro ao buscar grupos de clientes.");
-    // setToastOpen(true);
-    // return;
-    // }
-    // await fetchGroup();
-    // setClientDetails(result.data);
-    // setOpenClientModal(true); 
-    // } catch (error) {
-    // setToastType("error");
-    // setToastMsg("Erro ao buscar grupos de clientes.");
-    // setToastOpen(true);
-    // return; 
-    // } 
-    // finally{
-    // setLoading(false);
-    // }
-}
-
-const fetchGroup = async() => {
-    //corrigir aqui
-    //    setLoading(true);
-    // try {
-    // const response = await getGroupClient("", true);
-    // if (!response.success) {
-    // setToastType("error");
-    // setToastMsg(response?.message ?? "Erro ao buscar grupos de clientes.");
-    // setToastOpen(true);
-    // return;
-    // }
-    // setGrupos(response.data);
-    // setOpenClientModal(true);
-    // } catch (error) {
-    // setToastType("error");
-    // setToastMsg("Erro ao buscar grupos de clientes.");
-    // setToastOpen(true);
-    // return; 
-    // } finally{
-    //     setLoading(false);
-    // }
+const handleOpenModalView = (id: number) => {
+  setModalViewIdSelect(id);
 };
 
-    const fetchClient = async (search: string) => {
+const handleCloseModalView = () => {
+  setModalViewIdSelect(null);
+};
+
+const fetchClient = async (search: string) => {
     //corrigir aqui
         // setLoading(true);
 
@@ -120,9 +81,9 @@ const fetchGroup = async() => {
     // } finally {
     // setLoading(false);
     // }
-    };
+};
 
-    const debounceSearch =async () => {
+const debounceSearch =async () => {
     if (debounceTimeout.current) {
     clearTimeout(debounceTimeout.current);
     }
@@ -134,35 +95,10 @@ const fetchGroup = async() => {
 
   await  fetchClient(value);
     }, 1000);
-    };
+};
 
 
-    const onChangedAtivo = async (f: any)=> {
-    //corrigir aqui
-    // try {
-    // const payload : ClientStatusDTO= {
-    //     id: f.id,
-    //     status: !f.ativo
-    // };
 
-    // setLoading(true);
-    // const response = await putStatusClient(payload);
-    // if (!response?.success) {
-    // setToastType("error");
-    // setToastMsg(response?.message ?? "Erro ao mudar status do cliente.");
-    // setToastOpen(true);
-    // return;
-    // }
-    // await fetchClient(searchRef.current);
-    // } catch (error) {
-    // setToastType("error");
-    // setToastMsg("Erro ao mudar status do cliente.");
-    // setToastOpen(true);
-    // return;
-    // }finally {
-    // setLoading(false);
-    // }
-    }
 
     useEffect(() => {
     if (jaCarregouRef.current) return;
@@ -175,7 +111,7 @@ const fetchGroup = async() => {
 
 
     return (
-        <>
+<>
 <Snackbar
     open={toastOpen}
     autoHideDuration={2500}
@@ -191,20 +127,13 @@ const fetchGroup = async() => {
     </Alert>
     </Snackbar>
     
-    {/* <CreatOrUpdateClientModal
-    open={openClientModal}
+    <ModalContaPagarView
+     open={modalViewIdSelect !== null}
+    id={modalViewIdSelect}
     onClose={() => {
-    setOpenClientModal(false);
-    setClientDetails(null);   //  limpa ao fechar
-    }}
-    grupo={grupos}
-    onSuccess={async() => {
-    await fetchClient("")
-    setOpenClientModal(false);
-    setClientDetails(null);   //  limpa ao fechar
-    }}   //  recarrega lista
-    client={clientDetails}  //  passa via props
-    /> */}
+    handleCloseModalView();
+    }}  //  recarrega lista
+    />
     <Stack display={"flex"} flexDirection={"row"} flexGrow={1} gap={2} mr={2} mb={4}>
     {summaryCard.length >0 && (
     summaryCard.map((i, index) => 
@@ -446,12 +375,16 @@ const fetchGroup = async() => {
     {row.status}
     </Box>
     </TableCell>
-    <TableCell sx={cellStyleWhite}  align="left">
-      <Stack display={"flex"} flexDirection={"row"} gap={1}  alignItems={"center"} alignContent={"start"}  justifyContent={"start"} justifyItems={"start"} >
-      <Box flex={1}>{maskCurrency(row.valor??0)}</Box>
-      <Box flex={1}>
-        <TableActionsMenuContaPagar rowId={row.id}/>
-      </Box>
+    <TableCell sx={cellStyleWhite} align="left">
+      <Stack direction="row" gap={1} alignItems="center">
+        <Box flex={1}>{maskCurrency(row.valor ?? 0)}</Box>
+
+        <Box>
+          <TableActionsMenuContaPagar
+            rowId={row.id}
+            onView={handleOpenModalView}
+          />
+        </Box>
       </Stack>
     </TableCell>
     </TableRow>

@@ -222,6 +222,7 @@ export const textFieldStyle = {
   "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
     border: `1px solid ${primaryColor}`,
     boxShadow: "0 0 0 3px rgba(245,159,10,0.25)",
+    color: "#FFFF",
   },
 
   /* LABEL */
@@ -254,6 +255,6 @@ export const textFieldStyle = {
   },
 
   "& .MuiFormHelperText-root": {
-    color: colorOpacity,
+    color: "#FFFF",
   },
 };

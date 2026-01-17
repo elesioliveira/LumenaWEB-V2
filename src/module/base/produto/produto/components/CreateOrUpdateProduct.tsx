@@ -455,7 +455,6 @@ flexDirection={"column"}
         const unidadeSelecionada = unidadeMock.find(
           (u) => u.id === id
         );
-
         setUnidade(unidadeSelecionada ?? null);
       }}
     >

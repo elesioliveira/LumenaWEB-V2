@@ -1,4 +1,5 @@
-import type { ContaPagarDTO, ContaReceberDTO, MovimentacaoWalletDTO, SummaryCardDTO } from "../dto/WalletDTO";
+import type { CategoriaCor } from "../../produto/produto/dto/ProdutoDTO";
+import type { CategoryDTO, ContaPagarDTO, ContaReceberDTO, MovimentacaoWalletDTO, SummaryCardDTO } from "../dto/WalletDTO";
 
 export const FluxoSummaryCardMock: SummaryCardDTO[] = [
   {
@@ -18,6 +19,18 @@ export const FluxoSummaryCardMock: SummaryCardDTO[] = [
     valor: 2550.5,
     descricao: "Atualizado hoje",
     positive: true,
+  },
+];
+export const categoriaSummaryCardMock: SummaryCardDTO[] = [
+  {
+    title: "Categorias de Receita",
+    valor: 3,
+    descricao: "categorias ativas",
+  },
+  {
+    title: "Categorias de Despesa",
+    valor: 5,
+    descricao: "categorias ativas",
   },
 ];
 export const contaReceberSummaryCardMock: SummaryCardDTO[] = [
@@ -45,6 +58,9 @@ export const contaPagarSummaryCardMock: SummaryCardDTO[] = [
   },
 ];
 
+export const typeOfCategoryList: string[] =[
+  'Todos','Receita', 'Despesa',
+];
 export const typeOfReceberList: string[] =[
   'Todos','Pendentes', 'Recebido', 'Vencido'
 ];
@@ -68,7 +84,7 @@ export const movimentacoesWalletMock: MovimentacaoWalletDTO[] = [
     descricao: "Pagamento de cliente - Pedido #4587",
     categoria: "Entrada",
     origem: "PIX",
-    status: "Concluído",
+    status: "Pendente",
     valor: 1250.75,
   },
   {
@@ -590,3 +606,48 @@ export const contasPagarMock: ContaPagarDTO[] = [
     valor: 760.0,
   },
 ];
+
+export const categoriasCores: CategoriaCor[] = [
+  { id: 1, tipo: "Receita", cor: "#00FF9C" },
+  { id: 2, tipo: "Receita", cor: "#00B3FF" },
+  { id: 3, tipo: "Receita", cor: "#B400FF" },
+  { id: 4, tipo: "Receita", cor: "#00FFD1" },
+
+  { id: 5, tipo: "Despesa", cor: "#FF2E2E" },
+  { id: 6, tipo: "Despesa", cor: "#FFD300" },
+  { id: 7, tipo: "Despesa", cor: "#FF4D4D" },
+  { id: 8, tipo: "Despesa", cor: "#00B3FF" },
+
+  { id: 9, tipo: "Receita", cor: "#9CA3AF" },
+  { id: 10, tipo: "Despesa", cor: "#FF9F1C" },
+];
+
+export const corNomeMap: Record<string, string> = {
+  "#00FF9C": "Verde",
+  "#00B3FF": "Azul",
+  "#B400FF": "Roxo",
+  "#00FFD1": "Turquesa",
+  "#FF2E2E": "Vermelho",
+  "#FFD300": "Amarelo",
+  "#FF4D4D": "Vermelho Claro",
+  "#FF9F1C": "Laranja",
+  "#9CA3AF": "Cinza",
+};
+
+
+export const tipoReceita = [
+  {id:1, label :'Despesa'},
+  {id:2, label :'Receita'},
+];
+
+export interface CategoriaCorView extends CategoriaCor {
+  labelFinal: string;
+}
+
+export const categoriasCoresView: CategoriaCorView[] =
+  categoriasCores
+    .filter((c) => c.ativo !== false)
+    .map((c) => ({
+      ...c,
+      labelFinal: `${c.tipo} - ${corNomeMap[c.cor] ?? "Cor"}`,
+    }));

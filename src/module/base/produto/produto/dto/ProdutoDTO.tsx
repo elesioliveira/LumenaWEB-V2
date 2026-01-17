@@ -13,3 +13,12 @@ export interface ProductDTO {
   preco_venda?: number | null;
   estoque_minimo?: number | null;
 }
+
+export type TipoCategoria = "Receita" | "Despesa";
+
+export interface CategoriaCor {
+  id: number;
+  tipo: TipoCategoria;
+  cor: string;
+  ativo?: boolean;
+}

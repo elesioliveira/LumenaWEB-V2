@@ -7,6 +7,7 @@ import { div } from "framer-motion/m";
 import { MovimentacaoWalletTab } from "./FluxoCaixaTab";
 import { ContasPagarTab } from "./ContasPagarTab";
 import { ContasReceberTab } from "./ContasReceberTab";
+import { CategoriaTab } from "./CategoriasTab";
 
 const currentPageStock = [
   {
@@ -39,7 +40,7 @@ const [currentPage, setPage] = useState<CurrentWalletTabEnum>(CurrentWalletTabEn
       case CurrentWalletTabEnum.ContasReceber:
         return <ContasReceberTab/>;
       case CurrentWalletTabEnum.Categorias:
-        return <div>Categorias</div>;
+        return <CategoriaTab/>;
       default:
         return null;
     }

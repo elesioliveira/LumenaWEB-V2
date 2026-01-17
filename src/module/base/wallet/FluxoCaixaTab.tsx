@@ -26,6 +26,7 @@ import { formatDateTime, maskCurrency } from "../../../shared/MaskUtils";
 import { SummaryCard } from "./components/SummaryCardComponent";
 import { movimentacoesWalletMock, optionsPeriodoMovWallet, optionsStatusMovWallte, FluxoSummaryCardMock, typeOfMovimenttion } from "./mocks/WalletMocks";
 import { BaseSelect } from "./components/SizedSelect";
+import { getStatusNeonBgColor, getStatusNeonFontStyle } from "./helpers/WallletHelpers";
 
 
 
@@ -470,14 +471,14 @@ const fetchGroup = async() => {
     justifyContent: "center",
     fontSize: "0.7rem",
     fontWeight: 600,
-    color: row.status ==='Concluído'? colorPositive : colorNegative,
-    bgcolor:row.status ==='Concluído'? bgColorPositive : bgColorNegative ,
+    color:getStatusNeonFontStyle(row.status),
+    bgcolor: getStatusNeonBgColor(row.status),
     }}
     >
     {row.status}
     </Box>
     </TableCell>
-    <TableCell sx={cellStyleWhite}>{maskCurrency(row.valor)}</TableCell>
+    <TableCell sx={{fontSize:"0.85rem",fontWeight:600, color: getStatusNeonFontStyle(row.status) ,borderBottom: "1px solid rgba(40, 61, 107, 0.25)",}}>{maskCurrency(row.valor)}</TableCell>
     </TableRow>
     ))}
     </TableBody>
