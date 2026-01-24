@@ -4,9 +4,12 @@ import { Ellipsis } from "lucide-react";
 
 interface TableActionsMenuContaReceberProps {
   rowId: number;
+  handleActionVisualizar:() => void;
+  handleActionMarcarComoRecebido: () => Promise<void>;
+  handleEditarConta: () => void;
 }
 
-export function TableActionsMenuContaReceber({ rowId }: TableActionsMenuContaReceberProps) {
+export function TableActionsMenuContaReceber({ rowId,handleActionVisualizar,handleActionMarcarComoRecebido,handleEditarConta }: TableActionsMenuContaReceberProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -17,11 +20,11 @@ export function TableActionsMenuContaReceber({ rowId }: TableActionsMenuContaRec
   const handleClose = () => {
     setAnchorEl(null);
   };
-
-  const handleAction = (action: string) => {
-    console.log(`Ação: ${action} | ID: ${rowId}`);
-    handleClose();
+  const handleAction = (value: string) => {
+   console.log(value);
   };
+
+
 
   return (
     <>
@@ -44,15 +47,15 @@ export function TableActionsMenuContaReceber({ rowId }: TableActionsMenuContaRec
           },
         }}
       >
-        <MenuItem onClick={() => handleAction("visualizar")}>
+        <MenuItem onClick={() => handleActionVisualizar()}>
           Visualizar
         </MenuItem>
 
-        <MenuItem onClick={() => handleAction("marcar_como_pago")}>
+        <MenuItem onClick={async() => handleActionMarcarComoRecebido()}>
           Marcar como recebido
         </MenuItem>
 
-        <MenuItem onClick={() => handleAction("editar")}>
+        <MenuItem onClick={() => handleEditarConta()}>
           Editar
         </MenuItem>
 

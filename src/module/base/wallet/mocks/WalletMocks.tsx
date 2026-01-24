@@ -62,7 +62,7 @@ export const typeOfCategoryList: string[] =[
   'Todos','Receita', 'Despesa',
 ];
 export const typeOfReceberList: string[] =[
-  'Todos','Pendentes', 'Recebido', 'Vencido'
+  'Todos','Pendente', 'Recebido', 'Vencido'
 ];
 export const typeOfPaymentList: string[] =[
   'Todos','Pendentes', 'Pago', 'Vencido'
@@ -76,6 +76,30 @@ export const optionsStatusMovWallte: string[] =[
 export const optionsPeriodoMovWallet: string[] =[
   'Este mês','Esta semana', 'Hoje'
 ];
+
+export const paymentTypesMock: string[] = [
+  "Dinheiro",
+  "Pix",
+  "Cartão de Crédito",
+  "Cartão de Débito",
+  "Transferência Bancária",
+  "Boleto Bancário",
+  "Financiamento Bancário",
+  "Consórcio",
+  "Crédito Direto ao Consumidor (CDC)",
+  "Leasing",
+  "Cheque",
+  "Pagamento Parcelado",
+  "Pagamento à Vista",
+  "Permuta",
+  "Entrada + Parcelamento",
+  "Entrada + Financiamento",
+  "Pagamento Online",
+  "Carteira Digital",
+  "Link de Pagamento",
+  "Crédito Próprio da Loja",
+];
+
 
 export const movimentacoesWalletMock: MovimentacaoWalletDTO[] = [
   {

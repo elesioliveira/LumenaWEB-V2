@@ -1,5 +1,5 @@
 import { api } from "../../../../shared/HttpManager";
-import type {  CategoryModalDTOAPI } from "../dto/WalletDTO";
+import type {  CategoryModalDTOAPI, NovaContaDTO } from "../dto/WalletDTO";
 
 export const submitNewCategory = async (dto: CategoryModalDTOAPI) => {
     try {
@@ -34,3 +34,66 @@ export const fetchCategoryActives = async  () => {
         return error.response.data ?? {success:false, message:"Erro. Contate o Administrador."};
     }
 }
+export const fetchWalletCategoria = async  (search:string, tipo:string) => {
+    try {
+        const response = await api.get(`Get/Wallet/Categoria`, {withCredentials:true , params:{
+            search: search,
+            tipo: tipo
+        }});
+        return response.data;
+    } catch (error: any) {
+        return error.response.data ?? {success:false, message:"Erro. Contate o Administrador."};
+    }
+}
+export const fetchContasWallet = async  (search:string, status:string|null, origem: string) => {
+    try {
+        const response = await api.get(`Get/Wallet/Conta`, {withCredentials:true , params:{
+            search: search,
+            status: status,
+            origem: origem
+        }});
+        return response.data;
+    } catch (error: any) {
+        return error.response.data ?? {success:false, message:"Erro. Contate o Administrador."};
+    }
+}
+
+export const postSubmitNewConta = async (dto: NovaContaDTO) => {
+    try {
+        const response = await api.post(`Post/Wallet/Nova/Conta`,dto , {withCredentials:true});
+        return response.data;
+    } catch (error: any) {
+        return error.response.data ?? {success:false, message:"Erro. Contate o Administrador."};
+    }
+};
+export const putSubmitUpdateConta = async (dto: NovaContaDTO, id: number) => {
+    try {
+        const response = await api.put(`Put/Wallet/Conta/${id}`,dto , {withCredentials:true});
+        return response.data;
+    } catch (error: any) {
+        return error.response.data ?? {success:false, message:"Erro. Contate o Administrador."};
+    }
+};
+
+
+export const fetchClienteCategoria = async (id_cliente: number, id_categoria: number) => {
+    try {
+        const response = await api.get(`Get/Wallet/Cliente-Categoria`, {withCredentials:true, params: {
+            id_cliente: id_cliente,
+            id_categoria: id_categoria
+        }});
+        return response.data;
+    } catch (error: any) {
+        return error.response.data ?? {success:false, message:"Erro. Contate o Administrador."};
+    }
+};
+export const fetchDashBoardWallet = async (origem_tipo: string) => {
+    try {
+        const response = await api.get(`Get/Dashboard/Wallet`, {withCredentials:true, params: {
+            origem_tipo: origem_tipo,
+        }});
+        return response.data;
+    } catch (error: any) {
+        return error.response.data ?? {success:false, message:"Erro. Contate o Administrador."};
+    }
+};

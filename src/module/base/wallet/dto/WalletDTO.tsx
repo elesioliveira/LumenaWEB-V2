@@ -62,3 +62,25 @@ export interface totalCategoriasAtivas {
     totalReceita: number;
     totalDespesa: number;
 }
+
+export interface ContaReceberFormDTO {
+    descricao: string | null;
+    cliente_id: number | null;
+    categoria_id: number | null;
+    vencimento: string | null;
+    valor: string   | null;
+    tipo_pagamento: string  | null;
+    observacao: string | null;
+}
+export interface NovaContaDTO {
+    descricao: string |null;
+    categoria_id: number | null;
+    cliente_id: number | null;
+    fornecedor_id: number | null;
+    valor_total: number | null;
+    data_vencimento: string | null;
+    status: string | null;
+    origem_tipo: string | null;
+    observacao: string | null;
+    tipo_pagamento: string | null;   
+};

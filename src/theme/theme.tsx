@@ -192,6 +192,7 @@ export const textFieldStyle = {
   "& .MuiOutlinedInput-root": {
     backgroundColor: bgColorTopSellers,
     color: "#fff",
+    primaryColor: "#fff",
     "&.MuiInputBase-root": {
     backgroundColor: bgColorTopSellers,
     },
@@ -247,11 +248,11 @@ export const textFieldStyle = {
 
   /* ÍCONE */
   "& .MuiIconButton-root": {
-    color: colorOpacity,
+    color: "#FFFF",
   },
 
   "& .MuiIconButton-root:hover": {
-    color: primaryColor,
+    color: "#FFFF",
   },
 
   "& .MuiFormHelperText-root": {

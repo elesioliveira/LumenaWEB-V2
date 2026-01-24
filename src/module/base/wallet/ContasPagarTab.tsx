@@ -29,7 +29,7 @@ import { BaseSelect } from "./components/SizedSelect";
 import { PrimaryActionButton } from "../../../shared/PrimaryActionButtonProps";
 import { getStatusNeonBgColor, getStatusNeonFontStyle } from "./helpers/WallletHelpers";
 import { TableActionsMenuContaPagar } from "./components/TableActionsMenuContaPagar";
-import { ModalContaPagarView } from "./components/ModalContaPagarView";
+import { CreateOrUpdateContaReceberModal } from "./components/ModalContaReceber";
 
 
 
@@ -127,13 +127,13 @@ const debounceSearch =async () => {
     </Alert>
     </Snackbar>
     
-    <ModalContaPagarView
+    {/* <CreateOrUpdateContaReceberModal
      open={modalViewIdSelect !== null}
     id={modalViewIdSelect}
     onClose={() => {
     handleCloseModalView();
     }}  //  recarrega lista
-    />
+    /> */}
     <Stack display={"flex"} flexDirection={"row"} flexGrow={1} gap={2} mr={2} mb={4}>
     {summaryCard.length >0 && (
     summaryCard.map((i, index) => 

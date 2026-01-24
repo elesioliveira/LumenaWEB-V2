@@ -1,11 +1,10 @@
 
-  import {  ChevronLeft, ChevronRight, DollarSign, Funnel, Info, Mail, Pencil, Phone, Plus, ToggleLeft,  ToggleRight, TrendingDown, TrendingUp } from "lucide-react";
+  import {  ChevronLeft, ChevronRight, Funnel, Plus, TrendingUp, } from "lucide-react";
   import {
   Box,
   Typography,
   Stack,
   TextField,
-  Button,
   TableHead,
   TableRow,
   TableCell,
@@ -15,37 +14,41 @@
   CircularProgress,
   Snackbar,
   Alert,
-  MenuItem,
   } from "@mui/material";
   import { useEffect, useRef, useState } from "react";
-import { bgColorCardsDashBoard, bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, bordasComponents, colorNegative, colorOpacity, colorPositive, hoverGlow, primaryColor, textFieldStyle } from "../../../theme/theme";
-import { cellStyle, cellStyleBold, cellStyleWhite } from "../../../theme/cellTable";
+import { bgColorCardsDashBoard, bgColorTopSellers, bgComponents, bordasComponents, colorNegative, colorOpacity, colorPositive, hoverGlow, primaryColor } from "../../../theme/theme";
+import { cellStyle,  cellStyleWhite } from "../../../theme/cellTable";
 import { PaginationButton } from "../produto/fornecedor/components/PaginationButton";
-import type { ContaPagarDTO, ContaReceberDTO, MovimentacaoWalletDTO, SummaryCardDTO } from "./dto/WalletDTO";
-import { formatDateTime, maskCurrency } from "../../../shared/MaskUtils";
+import type { NovaContaDTO,  SummaryCardDTO } from "./dto/WalletDTO";
+import {  maskCurrency } from "../../../shared/MaskUtils";
 import { SummaryCard } from "./components/SummaryCardComponent";
-import { movimentacoesWalletMock, optionsPeriodoMovWallet, optionsStatusMovWallte, FluxoSummaryCardMock, typeOfMovimenttion, contaPagarSummaryCardMock, typeOfPaymentList, contasPagarMock, contaReceberSummaryCardMock, typeOfReceberList, contasReceberMock } from "./mocks/WalletMocks";
+import {  contaReceberSummaryCardMock, typeOfReceberList } from "./mocks/WalletMocks";
 import { BaseSelect } from "./components/SizedSelect";
 import { PrimaryActionButton } from "../../../shared/PrimaryActionButtonProps";
 import { getStatusNeonBgColor, getStatusNeonFontStyle } from "./helpers/WallletHelpers";
-import { TableActionsMenuContaPagar } from "./components/TableActionsMenuContaPagar";
 import { TableActionsMenuContaReceber } from "./components/TableActionsMenuContaReceber";
+import { CreateOrUpdateContaReceberModal } from "./components/ModalContaReceber";
+import type { ContaReceberEntity, DashbBoarWallet } from "./entity/WalletEntity";
+import { fetchContasWallet, fetchDashBoardWallet, putSubmitUpdateConta } from "./repository/WalletRepository";
+import { VisualizarContaDialog } from "./components/VisualizarContaDialog";
 
 
 
 export function ContasReceberTab() {
 const [openClientModal, setOpenClientModal] = useState(false);
+const [visualizarConta, setVisualizarConta] = useState(false);
+const [contaSelecionada, setContaSelecionada] = useState<ContaReceberEntity | null>(null);
 const [toastOpen, setToastOpen] = useState(false);
 const [toastMsg, setToastMsg] = useState("");
 const [toastType, setToastType] = useState<"success" | "error">("error");
-const searchRef = useRef("");
+const searchByDescricao = useRef("");
 const [loading, setLoading] = useState(false);
 const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 const jaCarregouRef = useRef(false);
 const [page, setPage] = useState(0);
 const rowsPerPage = 10;
-const [contas, setContas] = useState<ContaReceberDTO[]>(contasReceberMock);
-const [summaryCard, setSummary] = useState<SummaryCardDTO[]>(contaReceberSummaryCardMock);
+const [contas, setContas] = useState<ContaReceberEntity[]>([]);
+const [dashBoard, setDashBoard] =useState<DashbBoarWallet | null>(null);
 const [typeOfPayment, setTypeOfPayment] = useState<string>("Todos");
 
 const jaCarregouRefTypeOfStatus = useRef(false);
@@ -56,70 +59,31 @@ page * rowsPerPage + rowsPerPage
 );
 
 
-const fetchClientDetails = async(row: any) => {
-    //corrigir aqui
-    // setLoading(true);
-    // try {
-    //     const result = await getClientDetails(row.id);
-    // if (!result.success) {
-    // setToastType("error");
-    // setToastMsg(result?.message ?? "Erro ao buscar grupos de clientes.");
-    // setToastOpen(true);
-    // return;
-    // }
-    // await fetchGroup();
-    // setClientDetails(result.data);
-    // setOpenClientModal(true); 
-    // } catch (error) {
-    // setToastType("error");
-    // setToastMsg("Erro ao buscar grupos de clientes.");
-    // setToastOpen(true);
-    // return; 
-    // } 
-    // finally{
-    // setLoading(false);
-    // }
-}
-
-const fetchGroup = async() => {
-    //corrigir aqui
-    //    setLoading(true);
-    // try {
-    // const response = await getGroupClient("", true);
-    // if (!response.success) {
-    // setToastType("error");
-    // setToastMsg(response?.message ?? "Erro ao buscar grupos de clientes.");
-    // setToastOpen(true);
-    // return;
-    // }
-    // setGrupos(response.data);
-    // setOpenClientModal(true);
-    // } catch (error) {
-    // setToastType("error");
-    // setToastMsg("Erro ao buscar grupos de clientes.");
-    // setToastOpen(true);
-    // return; 
-    // } finally{
-    //     setLoading(false);
-    // }
+const handleContaSelecionada = (conta: ContaReceberEntity |null, openModal: boolean) => {
+  setContaSelecionada(conta);
+  setOpenClientModal(openModal);
 };
 
-    const fetchClient = async (search: string) => {
-    //corrigir aqui
-        // setLoading(true);
 
-    // try {
-    // const response = await getClient(search);
-
-    // if (response?.success) {
-    // setClients(response.data);
-    // if (page >= totalPages && totalPages > 0) {
-    // setPage(0);
-    // }
-    // }
-    // } finally {
-    // setLoading(false);
-    // }
+    const fetchContas = async () => {
+    setLoading(true);
+      try {
+          const response = await fetchContasWallet(searchByDescricao.current?.trim(), typeOfPayment ==="Todos"? null : typeOfPayment, 'Receita');
+        if (!response?.success) {
+          setToastType("error");
+          setToastMsg(response?.message ?? "Erro ao encontrar suas contas.");
+          setToastOpen(true);
+          return;
+        }
+        if (response?.success) {
+          setContas(response.data);
+          if (page >= totalPages && totalPages > 0) {
+            setPage(0);
+            }
+        }
+      } finally {
+        setLoading(false);
+      }
     };
 
     const debounceSearch =async () => {
@@ -128,50 +92,90 @@ const fetchGroup = async() => {
     }
 
     debounceTimeout.current = setTimeout(async() => {
-    const value = searchRef.current.trim();
+    const value = searchByDescricao.current.trim();
 
     if ( value !=='' && value.length < 3) return;
 
-  await  fetchClient(value);
+     await  fetchContas();
     }, 1000);
     };
 
-
-    const onChangedAtivo = async (f: any)=> {
-    //corrigir aqui
-    // try {
-    // const payload : ClientStatusDTO= {
-    //     id: f.id,
-    //     status: !f.ativo
-    // };
-
-    // setLoading(true);
-    // const response = await putStatusClient(payload);
-    // if (!response?.success) {
-    // setToastType("error");
-    // setToastMsg(response?.message ?? "Erro ao mudar status do cliente.");
-    // setToastOpen(true);
-    // return;
-    // }
-    // await fetchClient(searchRef.current);
-    // } catch (error) {
-    // setToastType("error");
-    // setToastMsg("Erro ao mudar status do cliente.");
-    // setToastOpen(true);
-    // return;
-    // }finally {
-    // setLoading(false);
-    // }
+const handleMarcarComoRecebido = async (row: ContaReceberEntity) => {
+  if (row.status ==="Recebido")return;
+  try {
+    setLoading(true);
+    const payload: NovaContaDTO = {
+      descricao: row.descricao,
+      categoria_id: row.categoria_id,
+      cliente_id: row.cliente_id,
+      data_vencimento: row.vencimento,
+      fornecedor_id: row.fornecedor_id,
+      observacao: row.observacao,
+      origem_tipo: row.origem_tipo,
+      status: "Recebido",
+      tipo_pagamento: row.tipo_pagamento,
+      valor_total: row.valor
+    };
+    const result = await putSubmitUpdateConta(payload, row.id);
+    if (!result.success) {
+      setToastMsg(result.message ?? "Error. Contate o administrador.");
+      setToastType("error");
+      setToastOpen(true);
+      return;
     }
+    await fetchContas();
+  } catch (error) {
+        setToastMsg( "Error. Contate o administrador.");
+      setToastType("error");
+      setToastOpen(true);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+const fetchDashBoard = async () => {
+  try {
+    const result = await fetchDashBoardWallet("Conta a Receber");
+      if (!result.success) {
+      setToastMsg(result.message ?? "Error. Contate o administrador.");
+      setToastType("error");
+      setToastOpen(true);
+      return;
+    }
+    setDashBoard(result.data);
+  } catch (error) {
+        setToastMsg( "Error. Contate o administrador.");
+      setToastType("error");
+      setToastOpen(true);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
     useEffect(() => {
     if (jaCarregouRef.current) return;
-
     jaCarregouRef.current = true;
-    fetchClient("");
+    const preLoad = async () => {
+      setLoading(true);
+    await fetchDashBoard();
+    await fetchContas();
+    setLoading(false);
+    };
+    preLoad();
     }, []);
 
+    useEffect(() => {
+    if (!jaCarregouRefTypeOfStatus.current) return;
+      fetchContas();
+    }, [typeOfPayment]);
 
+
+const handleVisualizarConta = (row: ContaReceberEntity) => {
+  setContaSelecionada(row);
+  setVisualizarConta(true);
+};
 
 
     return (
@@ -190,33 +194,129 @@ const fetchGroup = async() => {
     {toastMsg}
     </Alert>
     </Snackbar>
-    
-    {/* <CreatOrUpdateClientModal
+    <VisualizarContaDialog conta={contaSelecionada} open={visualizarConta} onClose={()=> {
+      setVisualizarConta(false);
+      setContaSelecionada(null);
+    }}/>
+    <CreateOrUpdateContaReceberModal
     open={openClientModal}
-    onClose={() => {
-    setOpenClientModal(false);
-    setClientDetails(null);   //  limpa ao fechar
-    }}
-    grupo={grupos}
+    onClose={() => handleContaSelecionada(null, false)}
     onSuccess={async() => {
-    await fetchClient("")
-    setOpenClientModal(false);
-    setClientDetails(null);   //  limpa ao fechar
-    }}   //  recarrega lista
-    client={clientDetails}  //  passa via props
-    /> */}
+      handleContaSelecionada(null, false);
+      await fetchContas();
+    }}
+    conta={contaSelecionada}
+    />
     <Stack display={"flex"} flexDirection={"row"} flexGrow={1} gap={2} mr={2} mb={4}>
-    {summaryCard.length >0 && (
-    summaryCard.map((i, index) => 
-    <SummaryCard
-     key={index}
-    title={i.title}
-    value={maskCurrency(i.valor)}
-    subtitle= { i.descricao} 
-    valueColor={i.descricao.toLowerCase().includes("vencidas") ? colorNegative: primaryColor}
-    borderStyle={bordasComponents}
-    />)
-    )}
+    <Box
+      display="flex"
+      flex={1}
+      flexDirection="column"
+      sx={{
+        border: "1px solid rgba(40, 61, 107, 0.4)",
+        p: 4,
+        borderRadius: 2,
+        position: "relative",
+        overflow: "hidden",
+        transition: "0.3s ease",
+
+        "&:hover": {
+          boxShadow: "0 0 25px rgba(40, 61, 107, 0.6)",
+          borderColor: "rgba(40, 61, 107, 0.9)",
+          transform: "translateY(0px)",
+        },
+
+        "&:before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          borderRadius: "inherit",
+          background: "radial-gradient(circle at 30% 20%, rgba(40,61,107,0.35), transparent)",
+          opacity: 0,
+          transition: "0.3s ease",
+        },
+
+        "&:hover:before": {
+          opacity: 1,
+        },
+      }}
+    >
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <Typography fontWeight={500} color="white" fontSize="1rem">
+          A Receber
+        </Typography>
+        <TrendingUp color={colorPositive}/>
+      </Stack>
+
+      <Typography fontWeight={600} color={colorPositive} fontSize="1.6rem">
+        {dashBoard!== null? maskCurrency(dashBoard?.total_aberto) : 0}
+      </Typography>
+
+      <Typography fontWeight={200} color={colorOpacity} fontSize="1.2rem">
+       {dashBoard?.qtd_aberto} contas pendentes
+      </Typography>
+    </Box>
+    <Box
+      display="flex"
+      flex={1}
+      flexDirection="column"
+      sx={{
+        border: "1px solid rgba(40, 61, 107, 0.4)",
+        p: 4,
+        borderRadius: 2,
+        position: "relative",
+        overflow: "hidden",
+        transition: "0.3s ease",
+
+        "&:hover": {
+          boxShadow: "0 0 25px rgba(40, 61, 107, 0.6)",
+          borderColor: "rgba(40, 61, 107, 0.9)",
+          transform: "translateY(0px)",
+        },
+
+        "&:before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          borderRadius: "inherit",
+          background: "radial-gradient(circle at 30% 20%, rgba(40,61,107,0.35), transparent)",
+          opacity: 0,
+          transition: "0.3s ease",
+        },
+
+        "&:hover:before": {
+          opacity: 1,
+        },
+      }}
+    >
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <Typography fontWeight={500} color="white" fontSize="1rem">
+          Contas Vencidas
+        </Typography>
+        <TrendingUp color={colorNegative}/>
+      </Stack>
+
+      <Typography fontWeight={600} color={colorNegative} fontSize="1.6rem">
+        {dashBoard!== null? maskCurrency(dashBoard?.total_vencido) : 0}
+      </Typography>
+      <Typography fontWeight={200} color={colorOpacity} fontSize="1.2rem">
+        {dashBoard?.qtd_vencido} contas vencidas
+      </Typography>
+    </Box>
     </Stack>
     <Box display={"flex"} flexDirection={"column"} flexGrow={1} ml={2}>
         <Stack display={"flex"} flexDirection={"row"} gap={1} alignContent={"center"} alignItems={"center"}>
@@ -233,7 +333,7 @@ const fetchGroup = async() => {
     type="text"
     size="medium"
     onChange={(e) => {
-    searchRef.current = e.target.value;
+    searchByDescricao.current = e.target.value;
      debounceSearch();
     }}
     sx={{
@@ -300,7 +400,7 @@ const fetchGroup = async() => {
       sx={{
         width:200
       }}
-      onChange={(e) => {
+      onChange={  (e) => {
         jaCarregouRefTypeOfStatus.current = true;
         setTypeOfPayment(e.target.value);
       }}
@@ -332,8 +432,7 @@ const fetchGroup = async() => {
       width:200,
       height:50,
     }}
-    onClick={async() => {
-    }}
+    onClick={async() => handleContaSelecionada(null, true)}
     />
     </Stack>
     </Box>
@@ -350,7 +449,7 @@ const fetchGroup = async() => {
     >
     <CircularProgress color="inherit" />
     <Typography mt={2} color={colorOpacity}>
-    Carregando movimentaçoes...
+    Carregando contas...
     </Typography>
     </Stack>
     )}
@@ -424,10 +523,10 @@ const fetchGroup = async() => {
        ...hoverGlow,
        }}
     >
-    <TableCell sx={cellStyleWhite}>{row.descricao }</TableCell>
+    <TableCell sx={cellStyleWhite}>{row.descricao}</TableCell>
     <TableCell sx={cellStyleWhite}>{row.cliente}</TableCell>
     <TableCell sx={cellStyleWhite}>{row.categoria}</TableCell>
-    <TableCell sx={cellStyleWhite}>{formatDateTime(row.vencimento)}</TableCell>
+    <TableCell sx={cellStyleWhite}>{row.vencimento}</TableCell>
     <TableCell sx={cellStyle}>
     <Box
     sx={{
@@ -439,18 +538,25 @@ const fetchGroup = async() => {
     justifyContent: "center",
     fontSize: "0.7rem",
     fontWeight: 600,
-    color: getStatusNeonFontStyle(row.status!),
-    bgcolor:getStatusNeonBgColor(row.status!),
+    color:  getStatusNeonFontStyle(new Date(row.vencimento) < new Date()?'Vencido': row.status!),
+    bgcolor:getStatusNeonBgColor(new Date(row.vencimento) < new Date() ?'Vencido':row.status!),
     }}
     >
-    {row.status}
+    { new Date(row.vencimento) < new Date() ?'Vencido':row.status}
     </Box>
     </TableCell>
     <TableCell sx={cellStyleWhite}  align="left">
       <Stack display={"flex"} flexDirection={"row"} gap={1}  alignItems={"center"} alignContent={"start"}  justifyContent={"start"} justifyItems={"start"} >
-      <Box flex={1}>{maskCurrency(row.valor??0)}</Box>
+      <Box flex={1} color={colorPositive}>{maskCurrency(row.valor??0)}</Box>
       <Box flex={1}>
-        <TableActionsMenuContaReceber rowId={row.id}/>
+        <TableActionsMenuContaReceber
+        handleEditarConta={() => {handleContaSelecionada(row, true)}}
+        handleActionMarcarComoRecebido={async () => {
+         await  handleMarcarComoRecebido(row);
+        }}
+        rowId={row.id} handleActionVisualizar={() => {
+          handleVisualizarConta(row);
+        }}/>
       </Box>
       </Stack>
     </TableCell>
