@@ -5,8 +5,11 @@ import { Ellipsis } from "lucide-react";
 interface TableActionsMenuProps {
   rowId: number;
   onView: (id: number) => void;
+  handleActionVisualizar:() => void;
+  handleActionMarcarComoPago: () => Promise<void>;
+  handleEditarConta: () => void;
 }
-export function TableActionsMenuContaPagar({ rowId,  onView,}: TableActionsMenuProps) {
+export function TableActionsMenuContaPagar({ rowId,  onView,handleActionVisualizar, handleActionMarcarComoPago, handleEditarConta}: TableActionsMenuProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -23,10 +26,7 @@ export function TableActionsMenuContaPagar({ rowId,  onView,}: TableActionsMenuP
     handleClose();
   };
   
-  const handleView = () => {
-    onView(rowId);
-    handleClose();
-  };
+ 
 
   return (
     <>
@@ -49,13 +49,13 @@ export function TableActionsMenuContaPagar({ rowId,  onView,}: TableActionsMenuP
           },
         }}
       >
-        <MenuItem onClick={handleView}>Visualizar</MenuItem>
+        <MenuItem onClick={()=> handleActionVisualizar()}>Visualizar</MenuItem>
 
-        <MenuItem onClick={() => handleAction("marcar_como_pago")}>
+        <MenuItem onClick={async () => await handleActionMarcarComoPago()}>
           Marcar como pago
         </MenuItem>
 
-        <MenuItem onClick={() => handleAction("editar")}>
+        <MenuItem onClick={async () => await handleEditarConta()}>
           Editar
         </MenuItem>
 

@@ -20,7 +20,7 @@ import { bgColorCardsDashBoard, bgColorTopSellers, bgComponents, bordasComponent
 import { cellStyle,  cellStyleWhite } from "../../../theme/cellTable";
 import { PaginationButton } from "../produto/fornecedor/components/PaginationButton";
 import type { NovaContaDTO,  SummaryCardDTO } from "./dto/WalletDTO";
-import {  maskCurrency } from "../../../shared/MaskUtils";
+import {  formatDateTime, maskCurrency } from "../../../shared/MaskUtils";
 import { SummaryCard } from "./components/SummaryCardComponent";
 import {  contaReceberSummaryCardMock, typeOfReceberList } from "./mocks/WalletMocks";
 import { BaseSelect } from "./components/SizedSelect";
@@ -526,7 +526,7 @@ const handleVisualizarConta = (row: ContaReceberEntity) => {
     <TableCell sx={cellStyleWhite}>{row.descricao}</TableCell>
     <TableCell sx={cellStyleWhite}>{row.cliente}</TableCell>
     <TableCell sx={cellStyleWhite}>{row.categoria}</TableCell>
-    <TableCell sx={cellStyleWhite}>{row.vencimento}</TableCell>
+    <TableCell sx={cellStyleWhite}>{formatDateTime(row.vencimento, false)}</TableCell>
     <TableCell sx={cellStyle}>
     <Box
     sx={{
@@ -554,9 +554,11 @@ const handleVisualizarConta = (row: ContaReceberEntity) => {
         handleActionMarcarComoRecebido={async () => {
          await  handleMarcarComoRecebido(row);
         }}
-        rowId={row.id} handleActionVisualizar={() => {
+        rowId={row.id} 
+        handleActionVisualizar={() => {
           handleVisualizarConta(row);
-        }}/>
+        }}
+        />
       </Box>
       </Stack>
     </TableCell>

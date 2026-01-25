@@ -19,6 +19,14 @@ export const fetchClient = async(search: string) => {
         return e.response.data ?? null;
     }
 };
+export const fetchFornecedor = async(search: string) => {
+    try {
+        const response = await api.get("Get/Sales/Fornecedores", {withCredentials: true, params:{search: search}});
+        return response.data;
+    } catch (e:any) {
+        return e.response.data ?? null;
+    }
+};
 
 export const fetchProductByGtinOrNameSales = async(search: string) => {
   try {

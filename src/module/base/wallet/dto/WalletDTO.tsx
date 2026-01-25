@@ -66,6 +66,7 @@ export interface totalCategoriasAtivas {
 export interface ContaReceberFormDTO {
     descricao: string | null;
     cliente_id: number | null;
+    fornecedor_id: number | null;
     categoria_id: number | null;
     vencimento: string | null;
     valor: string   | null;

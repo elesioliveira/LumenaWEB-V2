@@ -9,6 +9,7 @@ cliente_id: number| null;
 categoria: string;
 categoria_id: number| null;
 fornecedor_id: number| null;
+fornecedor: string | null;
 status: string;
 valor: number;
 tipo_pagamento: string;
@@ -21,6 +22,11 @@ export interface ClientesWalletFormEntity {
   nome: string;
 }
 export interface CategoriaWalletFormEntity {
+  id: number;
+  nome: string;
+}
+
+export interface FornecedorWalletFormEntity {
   id: number;
   nome: string;
 }

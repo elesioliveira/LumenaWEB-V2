@@ -21,7 +21,7 @@
 import { bgColorCardsDashBoard, bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, bordasComponents, colorNegative, colorOpacity, colorPositive, hoverGlow, primaryColor, textFieldStyle } from "../../../theme/theme";
 import { cellStyle, cellStyleBold, cellStyleWhite } from "../../../theme/cellTable";
 import { PaginationButton } from "../produto/fornecedor/components/PaginationButton";
-import type { ContaPagarDTO, MovimentacaoWalletDTO, SummaryCardDTO } from "./dto/WalletDTO";
+import type { ContaPagarDTO, MovimentacaoWalletDTO, NovaContaDTO, SummaryCardDTO } from "./dto/WalletDTO";
 import { formatDateTime, maskCurrency } from "../../../shared/MaskUtils";
 import { SummaryCard } from "./components/SummaryCardComponent";
 import { movimentacoesWalletMock, optionsPeriodoMovWallet, optionsStatusMovWallte, FluxoSummaryCardMock, typeOfMovimenttion, contaPagarSummaryCardMock, typeOfPaymentList, contasPagarMock } from "./mocks/WalletMocks";
@@ -30,11 +30,19 @@ import { PrimaryActionButton } from "../../../shared/PrimaryActionButtonProps";
 import { getStatusNeonBgColor, getStatusNeonFontStyle } from "./helpers/WallletHelpers";
 import { TableActionsMenuContaPagar } from "./components/TableActionsMenuContaPagar";
 import { CreateOrUpdateContaReceberModal } from "./components/ModalContaReceber";
+import { CreateOrUpdateContaPagar } from "./components/DialogContaPagar";
+import type { ContaReceberEntity, DashbBoarWallet } from "./entity/WalletEntity";
+import { fetchContasPagarWallet, fetchContasWallet, fetchDashBoardWallet, putSubmitUpdateConta } from "./repository/WalletRepository";
+import { VisualizarContaDialog } from "./components/VisualizarContaDialog";
 
 
 
 export function ContasPagarTab() {
-const [openModalView, setOpenModalView] = useState(false);
+const [openClientModal, setOpenClientModal] = useState(false);
+const [visualizarConta, setVisualizarConta] = useState(false);
+const [contaSelecionada, setContaSelecionada] = useState<ContaReceberEntity | null>(null);
+const [dashBoard, setDashBoard] =useState<DashbBoarWallet | null>(null);
+const searchByDescricao = useRef("");
 const [toastOpen, setToastOpen] = useState(false);
 const [toastMsg, setToastMsg] = useState("");
 const [toastType, setToastType] = useState<"success" | "error">("error");
@@ -44,7 +52,7 @@ const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 const jaCarregouRef = useRef(false);
 const [page, setPage] = useState(0);
 const rowsPerPage = 10;
-const [contas, setContas] = useState<ContaPagarDTO[]>(contasPagarMock);
+const [contas, setContas] = useState<ContaReceberEntity[]>([]);
 const [summaryCard, setSummary] = useState<SummaryCardDTO[]>(contaPagarSummaryCardMock);
 const [typeOfPayment, setTypeOfPayment] = useState<string>("Todos");
 const [selectStatus, setSelectStatus] = useState<string>("Todos Status");
@@ -60,53 +68,121 @@ page * rowsPerPage + rowsPerPage
 const handleOpenModalView = (id: number) => {
   setModalViewIdSelect(id);
 };
-
-const handleCloseModalView = () => {
-  setModalViewIdSelect(null);
+const handleVisualizarConta = (row: ContaReceberEntity) => {
+  setContaSelecionada(row);
+  setVisualizarConta(true);
 };
 
-const fetchClient = async (search: string) => {
-    //corrigir aqui
-        // setLoading(true);
 
-    // try {
-    // const response = await getClient(search);
+    const fetchContas = async () => {
+    setLoading(true);
+      try {
+          const response = await fetchContasPagarWallet(searchByDescricao.current?.trim(), typeOfPayment ==="Todos"? null : typeOfPayment, 'Despesa');
+        if (!response?.success) {
+          setToastType("error");
+          setToastMsg(response?.message ?? "Erro ao encontrar suas contas.");
+          setToastOpen(true);
+          return;
+        }
+        if (response?.success) {
+          setContas(response.data);
+          if (page >= totalPages && totalPages > 0) {
+            setPage(0);
+            }
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    // if (response?.success) {
-    // setClients(response.data);
-    // if (page >= totalPages && totalPages > 0) {
-    // setPage(0);
-    // }
-    // }
-    // } finally {
-    // setLoading(false);
-    // }
-};
-
-const debounceSearch =async () => {
+    const debounceSearch =async () => {
     if (debounceTimeout.current) {
     clearTimeout(debounceTimeout.current);
     }
 
     debounceTimeout.current = setTimeout(async() => {
-    const value = searchRef.current.trim();
+    const value = searchByDescricao.current.trim();
 
     if ( value !=='' && value.length < 3) return;
 
-  await  fetchClient(value);
+     await  fetchContas();
     }, 1000);
+    };
+
+    const handleContaSelecionada = (conta: ContaReceberEntity |null, openModal: boolean) => {
+      setContaSelecionada(conta);
+      setOpenClientModal(openModal);
+    };
+
+const handleMarcarComoPago = async (row: ContaReceberEntity) => {
+  if (row.status ==="Pago")return;
+  try {
+    setLoading(true);
+    const payload: NovaContaDTO = {
+      descricao: row.descricao,
+      categoria_id: row.categoria_id,
+      cliente_id: row.cliente_id,
+      data_vencimento: row.vencimento,
+      fornecedor_id: row.fornecedor_id,
+      observacao: row.observacao,
+      origem_tipo: row.origem_tipo,
+      status: "Pago",
+      tipo_pagamento: row.tipo_pagamento,
+      valor_total: row.valor
+    };
+    const result = await putSubmitUpdateConta(payload, row.id);
+    if (!result.success) {
+      setToastMsg(result.message ?? "Error. Contate o administrador.");
+      setToastType("error");
+      setToastOpen(true);
+      return;
+    }
+    await fetchContas();
+  } catch (error) {
+        setToastMsg( "Error. Contate o administrador.");
+      setToastType("error");
+      setToastOpen(true);
+  } finally {
+    setLoading(false);
+  }
 };
 
 
-
+const fetchDashBoard = async () => {
+  try {
+    const result = await fetchDashBoardWallet("Conta a Pagar");
+      if (!result.success) {
+      setToastMsg(result.message ?? "Error. Contate o administrador.");
+      setToastType("error");
+      setToastOpen(true);
+      return;
+    }
+    setDashBoard(result.data);
+  } catch (error) {
+        setToastMsg( "Error. Contate o administrador.");
+      setToastType("error");
+      setToastOpen(true);
+  } finally {
+    setLoading(false);
+  }
+};
 
     useEffect(() => {
     if (jaCarregouRef.current) return;
-
     jaCarregouRef.current = true;
-    fetchClient("");
+    const preLoad = async () => {
+      setLoading(true);
+    await fetchDashBoard();
+    await fetchContas();
+    setLoading(false);
+    };
+    preLoad();
     }, []);
 
+    useEffect(() => {
+    if (!jaCarregouRefTypeOfStatus.current) return;
+      fetchContas();
+    }, [typeOfPayment]);
 
 
 
@@ -126,26 +202,34 @@ const debounceSearch =async () => {
     {toastMsg}
     </Alert>
     </Snackbar>
-    
-    {/* <CreateOrUpdateContaReceberModal
-     open={modalViewIdSelect !== null}
-    id={modalViewIdSelect}
-    onClose={() => {
-    handleCloseModalView();
-    }}  //  recarrega lista
-    /> */}
+    <VisualizarContaDialog conta={contaSelecionada} open={visualizarConta} onClose={()=> {
+      setVisualizarConta(false);
+      setContaSelecionada(null);
+    }}/>
+    <CreateOrUpdateContaPagar
+    open={openClientModal}
+    onClose={() => handleContaSelecionada(null, false)}
+    onSuccess={async() => {
+      handleContaSelecionada(null, false);
+      await fetchContas();
+    }}
+    conta={contaSelecionada}
+    />
     <Stack display={"flex"} flexDirection={"row"} flexGrow={1} gap={2} mr={2} mb={4}>
-    {summaryCard.length >0 && (
-    summaryCard.map((i, index) => 
-    <SummaryCard
-     key={index}
-    title={i.title}
-    value={maskCurrency(i.valor)}
-    subtitle= { i.descricao} 
-    valueColor={i.descricao.toLowerCase().includes("vencidas") ? colorNegative: primaryColor}
-    borderStyle={bordasComponents}
-    />)
-    )}
+      <SummaryCard
+      title='Total Pendente'
+      value={maskCurrency(dashBoard?.total_aberto ?? 0)}
+      subtitle= {`${dashBoard?.qtd_aberto} Pendentes`} 
+      valueColor={primaryColor}
+      borderStyle={bordasComponents}
+      />
+      <SummaryCard
+      title='Total Vencido'
+      value={maskCurrency(dashBoard?.total_vencido ?? 0)}
+      subtitle= {`${dashBoard?.qtd_vencido} Vencidas`} 
+      valueColor={colorNegative}
+      borderStyle={bordasComponents}
+      />
     </Stack>
     <Box display={"flex"} flexDirection={"column"} flexGrow={1} ml={2}>
         <Stack display={"flex"} flexDirection={"row"} gap={1} alignContent={"center"} alignItems={"center"}>
@@ -229,7 +313,7 @@ const debounceSearch =async () => {
       sx={{
         width:200
       }}
-      onChange={(e) => {
+      onChange={  (e) => {
         jaCarregouRefTypeOfStatus.current = true;
         setTypeOfPayment(e.target.value);
       }}
@@ -261,8 +345,7 @@ const debounceSearch =async () => {
       width:200,
       height:50,
     }}
-    onClick={async() => {
-    }}
+    onClick={async() => handleContaSelecionada(null, true)}
     />
     </Stack>
     </Box>
@@ -356,7 +439,7 @@ const debounceSearch =async () => {
     <TableCell sx={cellStyleWhite}>{row.descricao }</TableCell>
     <TableCell sx={cellStyleWhite}>{row.fornecedor}</TableCell>
     <TableCell sx={cellStyleWhite}>{row.categoria}</TableCell>
-    <TableCell sx={cellStyleWhite}>{formatDateTime(row.vencimento)}</TableCell>
+    <TableCell sx={cellStyleWhite}>{formatDateTime(row.vencimento, false)}</TableCell>
     <TableCell sx={cellStyle}>
     <Box
     sx={{
@@ -377,12 +460,17 @@ const debounceSearch =async () => {
     </TableCell>
     <TableCell sx={cellStyleWhite} align="left">
       <Stack direction="row" gap={1} alignItems="center">
-        <Box flex={1}>{maskCurrency(row.valor ?? 0)}</Box>
+        <Box flex={1} color={colorNegative}>{maskCurrency(row.valor ?? 0)}</Box>
 
         <Box>
           <TableActionsMenuContaPagar
             rowId={row.id}
             onView={handleOpenModalView}
+            handleActionVisualizar={ () => {handleVisualizarConta(row)}}
+            handleActionMarcarComoPago={async () => {
+            await  handleMarcarComoPago(row);
+            }}
+            handleEditarConta={() => {handleContaSelecionada(row, true)}}
           />
         </Box>
       </Stack>

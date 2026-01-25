@@ -98,8 +98,8 @@ return (
             <Typography fontSize={"1.1rem"} fontWeight={500} color={"white"}>{conta?.descricao}</Typography>
         </Box>
         <Box display={"flex"} flexDirection={"column"}>
-            <Typography variant="body1" color={colorOpacity}>Cliente</Typography>
-            <Typography fontSize={"1.1rem"} fontWeight={500} color={"white"}>{conta?.cliente}</Typography>
+            <Typography variant="body1" color={colorOpacity}>{conta?.fornecedor!==null? "Fornecedor"  :"Cliente"}</Typography>
+            <Typography fontSize={"1.1rem"} fontWeight={500} color={"white"}>{conta?.fornecedor!==null? conta?.fornecedor : conta.cliente}</Typography>
         </Box>
         <Box display={"flex"} flexDirection={"column"}>
             <Typography variant="body1" color={colorOpacity}>Categoria</Typography>

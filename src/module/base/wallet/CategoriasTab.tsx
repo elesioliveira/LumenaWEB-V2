@@ -141,6 +141,7 @@ const fetchCategoriesAtives = async () => {
     }, []);
 
 useEffect(()=> {
+  if(!jaCarregouRefTypeOfStatus.current) return;
   fetchCategories(searchRef.current, typeOfCategory === "Todos"? null: typeOfCategory);
 },[typeOfCategory]);
 

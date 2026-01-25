@@ -45,6 +45,18 @@ export const fetchWalletCategoria = async  (search:string, tipo:string) => {
         return error.response.data ?? {success:false, message:"Erro. Contate o Administrador."};
     }
 }
+export const fetchContasPagarWallet = async  (search:string, status:string|null, origem: string) => {
+    try {
+        const response = await api.get(`Get/Wallet/Conta-Pagar`, {withCredentials:true , params:{
+            search: search,
+            status: status,
+            origem: origem
+        }});
+        return response.data;
+    } catch (error: any) {
+        return error.response.data ?? {success:false, message:"Erro. Contate o Administrador."};
+    }
+}
 export const fetchContasWallet = async  (search:string, status:string|null, origem: string) => {
     try {
         const response = await api.get(`Get/Wallet/Conta`, {withCredentials:true , params:{
@@ -87,11 +99,30 @@ export const fetchClienteCategoria = async (id_cliente: number, id_categoria: nu
         return error.response.data ?? {success:false, message:"Erro. Contate o Administrador."};
     }
 };
+export const fetchFornecedorCategoria = async (id_fornecedor: number, id_categoria: number) => {
+    try {
+        const response = await api.get(`Get/Wallet/Fornecedor-Categoria`, {withCredentials:true, params: {
+            id_fornecedor: id_fornecedor,
+            id_categoria: id_categoria
+        }});
+        return response.data;
+    } catch (error: any) {
+        return error.response.data ?? {success:false, message:"Erro. Contate o Administrador."};
+    }
+};
 export const fetchDashBoardWallet = async (origem_tipo: string) => {
     try {
         const response = await api.get(`Get/Dashboard/Wallet`, {withCredentials:true, params: {
             origem_tipo: origem_tipo,
         }});
+        return response.data;
+    } catch (error: any) {
+        return error.response.data ?? {success:false, message:"Erro. Contate o Administrador."};
+    }
+};
+export const fetchCategoriaAtiva = async () => {
+    try {
+        const response = await api.get(`Get/Categorias/Wallet/Ativa`, {withCredentials:true});
         return response.data;
     } catch (error: any) {
         return error.response.data ?? {success:false, message:"Erro. Contate o Administrador."};

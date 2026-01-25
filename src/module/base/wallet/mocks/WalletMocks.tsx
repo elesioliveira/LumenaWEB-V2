@@ -65,7 +65,7 @@ export const typeOfReceberList: string[] =[
   'Todos','Pendente', 'Recebido', 'Vencido'
 ];
 export const typeOfPaymentList: string[] =[
-  'Todos','Pendentes', 'Pago', 'Vencido'
+  'Todos','Pendente', 'Pago', 'Vencido'
 ];
 export const typeOfMovimenttion: string[] =[
   'Todos os tipos','Entradas', 'Saídas'

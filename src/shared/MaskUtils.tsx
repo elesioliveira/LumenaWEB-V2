@@ -88,27 +88,38 @@ export function maskQuilometragem(value: string): string {
   return formatted;
 }   
 
-export const formatDateTime = (value?: string | Date, withHour: boolean=true) => {
+export const formatDateTime = (
+  value?: string | Date,
+  withHour: boolean = true
+) => {
   if (!value) return "-";
 
-  const date = new Date(value);
-  if (withHour!==null && withHour) {
-     return date.toLocaleString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  let date: Date;
+
+  if (typeof value === "string" && value.length === 10) {
+    // YYYY-MM-DD → cria data local
+    const [year, month, day] = value.split("-").map(Number);
+    date = new Date(year, month - 1, day);
+  } else {
+    date = new Date(value);
   }
 
+  if (withHour) {
     return date.toLocaleString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  return date.toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
   });
 };
-
 
 
 export const parseCurrencyBR = (value: string) => {
