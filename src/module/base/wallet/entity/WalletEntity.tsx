@@ -38,3 +38,22 @@ export interface DashbBoarWallet {
   qtd_vencido: number;
   total_vencido: number;
 };
+
+export interface DashBoardResumo {
+  total_entrada: number;
+  total_saida: number;
+  saldo: number;
+}
+
+export interface DashBoardResumoRegistro {
+  id: number;
+  data_cadastro: string;
+  data_vencimento: string;
+  descricao: string;
+  cor: string;
+  nome: string;
+  origem_tipo: string;
+  status: string;
+  valor_total: number;
+
+}

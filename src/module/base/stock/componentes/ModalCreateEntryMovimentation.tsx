@@ -285,7 +285,7 @@ gap={2} >
     control={control}
     rules={{ required: "Campo obrigatório" }}
     render={({ field }) => (
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
+<LocalizationProvider dateAdapter={AdapterDayjs}>
 <DatePicker
   format="DD/MM/YYYY"
   label="dd/mm/aaaa"

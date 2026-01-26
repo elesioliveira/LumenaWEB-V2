@@ -24,7 +24,7 @@ import { PaginationButton } from "../produto/fornecedor/components/PaginationBut
 import type { ContaPagarDTO, MovimentacaoWalletDTO, NovaContaDTO, SummaryCardDTO } from "./dto/WalletDTO";
 import { formatDateTime, maskCurrency } from "../../../shared/MaskUtils";
 import { SummaryCard } from "./components/SummaryCardComponent";
-import { movimentacoesWalletMock, optionsPeriodoMovWallet, optionsStatusMovWallte, FluxoSummaryCardMock, typeOfMovimenttion, contaPagarSummaryCardMock, typeOfPaymentList, contasPagarMock } from "./mocks/WalletMocks";
+import { movimentacoesWalletMock, optionsPeriodoMovWallet, FluxoSummaryCardMock,  contaPagarSummaryCardMock, typeOfPaymentList, contasPagarMock } from "./mocks/WalletMocks";
 import { BaseSelect } from "./components/SizedSelect";
 import { PrimaryActionButton } from "../../../shared/PrimaryActionButtonProps";
 import { getStatusNeonBgColor, getStatusNeonFontStyle } from "./helpers/WallletHelpers";

@@ -32,6 +32,7 @@ import { fetchClient, fetchFormSale, fetchProductByGtinOrNameSales, submitNewSal
 import type { NewSaleDTO, SaleItensFormDTO } from "./dto/SaleDTO";
 import { useSales } from "./provider/SalesProvider";
 import { CurrentSaleViewEnum } from "./enums/SalesEnums";
+import dayjs from "dayjs";
 
 
 
@@ -324,6 +325,7 @@ useEffect(() => {
                 <DatePicker
                 format="DD/MM/YYYY"
                 label="dd/mm/aaaa"
+                maxDate={dayjs(new Date)}
                 value={dataPedido}
                 onChange={(date) => setDatePedido(date)}
                 slotProps={{

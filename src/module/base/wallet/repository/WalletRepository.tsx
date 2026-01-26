@@ -128,3 +128,32 @@ export const fetchCategoriaAtiva = async () => {
         return error.response.data ?? {success:false, message:"Erro. Contate o Administrador."};
     }
 };
+
+export const fetchDashBoardResumo = async(data_inicio: string, data_fim: string) => {
+        try {
+        const response = await api.get(`Get/Wallet/Resumo-Financeiro`, {withCredentials:true, params: {
+            data_inicio: data_inicio,
+            data_fim: data_fim,
+                }
+            }
+        );
+        return response.data;
+    } catch (error: any) {
+        return error.response.data ?? {success:false, message:"Erro. Contate o Administrador."};
+    }
+};
+export const fetchDashBoardRegistroResumo = async(data_inicio: string, data_fim: string, receita: string |null, status: string |null, search:string |null) => {
+        try {
+        const response = await api.get(`Get/Wallet/Resumo-Financeiro-Registros`, {withCredentials:true, params: {
+            data_inicio: data_inicio,
+            data_fim: data_fim,
+            status: status,
+            search: search,
+            receita: receita,}
+            }
+        );
+        return response.data;
+    } catch (error: any) {
+        return error.response.data ?? {success:false, message:"Erro. Contate o Administrador."};
+    }
+};

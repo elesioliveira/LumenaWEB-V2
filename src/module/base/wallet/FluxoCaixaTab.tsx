@@ -15,18 +15,21 @@
   CircularProgress,
   Snackbar,
   Alert,
-  MenuItem,
   } from "@mui/material";
   import { useEffect, useRef, useState } from "react";
-import { bgColorCardsDashBoard, bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, bordasComponents, colorNegative, colorOpacity, colorPositive, hoverGlow, primaryColor, textFieldStyle } from "../../../theme/theme";
-import { cellStyle, cellStyleBold, cellStyleWhite } from "../../../theme/cellTable";
+import { bgColorCardsDashBoard, bgColorTopSellers, bgComponents, bordasComponents, colorNegative, colorOpacity, colorPositive, hoverGlow, primaryColor, textFieldStyle } from "../../../theme/theme";
+import { cellStyle,  cellStyleWhite } from "../../../theme/cellTable";
 import { PaginationButton } from "../produto/fornecedor/components/PaginationButton";
-import type { MovimentacaoWalletDTO, SummaryCardDTO } from "./dto/WalletDTO";
-import { formatDateTime, maskCurrency } from "../../../shared/MaskUtils";
+import { formatDateTime, formatDateToISODate, maskCurrency } from "../../../shared/MaskUtils";
 import { SummaryCard } from "./components/SummaryCardComponent";
-import { movimentacoesWalletMock, optionsPeriodoMovWallet, optionsStatusMovWallte, FluxoSummaryCardMock, typeOfMovimenttion } from "./mocks/WalletMocks";
+import { movimentacoesWalletMock, optionsPeriodoMovWallet, FluxoSummaryCardMock, typeOfCategoryList, typeOfReceberList } from "./mocks/WalletMocks";
 import { BaseSelect } from "./components/SizedSelect";
 import { getStatusNeonBgColor, getStatusNeonFontStyle } from "./helpers/WallletHelpers";
+import { fetchDashBoardRegistroResumo, fetchDashBoardResumo } from "./repository/WalletRepository";
+import type { DashBoardResumo, DashBoardResumoRegistro } from "./entity/WalletEntity";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import dayjs from "dayjs";
 
 
 
@@ -38,87 +41,28 @@ const [toastType, setToastType] = useState<"success" | "error">("error");
 const searchRef = useRef("");
 const [loading, setLoading] = useState(false);
 const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-const jaCarregouRef = useRef(false);
 const [page, setPage] = useState(0);
 const rowsPerPage = 10;
-const [movimentacoes, setMovimentacao] = useState<MovimentacaoWalletDTO[]>(movimentacoesWalletMock);
-const [summaryCard, setSummary] = useState<SummaryCardDTO[]>(FluxoSummaryCardMock);
-const [typeOfMov, setTypeOfMov] = useState<string>("Todos os tipos");
-const [selectStatus, setSelectStatus] = useState<string>("Todos Status");
-const [selectPeriodo, setSelectPeriodo] = useState<string>("Este mês");
+const [contas, setContas] = useState<DashBoardResumoRegistro[]>([]);
+const [dashboard, setDashBoard] = useState<DashBoardResumo | null>(null); 
+const [typeOfMov, setTypeOfMov] = useState<string>("Todos");  
+const [selectStatus, setSelectStatus] = useState<string>("Todos");
+const [data_inicio, setDataInicio] = useState<string | null>(null);
+const [data_fim, setDataFim] = useState<string | null>(null);
+const hoje = new Date();
+
 const jaCarregouRefTypeOfStatus = useRef(false);
-const totalPages = Math.ceil(movimentacoes.length / rowsPerPage);
-const movimentacoesPaginados = movimentacoes.slice(
+const totalPages = Math.ceil(contas.length / rowsPerPage);
+const movimentacoesPaginados = contas.slice(
 page * rowsPerPage,
 page * rowsPerPage + rowsPerPage
 );
 
 
-const fetchClientDetails = async(row: any) => {
-    //corrigir aqui
-    // setLoading(true);
-    // try {
-    //     const result = await getClientDetails(row.id);
-    // if (!result.success) {
-    // setToastType("error");
-    // setToastMsg(result?.message ?? "Erro ao buscar grupos de clientes.");
-    // setToastOpen(true);
-    // return;
-    // }
-    // await fetchGroup();
-    // setClientDetails(result.data);
-    // setOpenClientModal(true); 
-    // } catch (error) {
-    // setToastType("error");
-    // setToastMsg("Erro ao buscar grupos de clientes.");
-    // setToastOpen(true);
-    // return; 
-    // } 
-    // finally{
-    // setLoading(false);
-    // }
-}
 
-const fetchGroup = async() => {
-    //corrigir aqui
-    //    setLoading(true);
-    // try {
-    // const response = await getGroupClient("", true);
-    // if (!response.success) {
-    // setToastType("error");
-    // setToastMsg(response?.message ?? "Erro ao buscar grupos de clientes.");
-    // setToastOpen(true);
-    // return;
-    // }
-    // setGrupos(response.data);
-    // setOpenClientModal(true);
-    // } catch (error) {
-    // setToastType("error");
-    // setToastMsg("Erro ao buscar grupos de clientes.");
-    // setToastOpen(true);
-    // return; 
-    // } finally{
-    //     setLoading(false);
-    // }
-};
 
-    const fetchClient = async (search: string) => {
-    //corrigir aqui
-        // setLoading(true);
 
-    // try {
-    // const response = await getClient(search);
 
-    // if (response?.success) {
-    // setClients(response.data);
-    // if (page >= totalPages && totalPages > 0) {
-    // setPage(0);
-    // }
-    // }
-    // } finally {
-    // setLoading(false);
-    // }
-    };
 
     const debounceSearch =async () => {
     if (debounceTimeout.current) {
@@ -130,51 +74,93 @@ const fetchGroup = async() => {
 
     if ( value !=='' && value.length < 3) return;
 
-  await  fetchClient(value);
+   await  fetchDashBoardRegistro();
     }, 1000);
     };
 
+    
+    const fetchDashBoard = async(data_inicio: string, data_fim: string) => {
+      try {
+        setLoading(true);
+        const result = await fetchDashBoardResumo(data_inicio, data_fim);
+        if (!result?.success) {
+          setToastMsg(result.message??"Erro. Contate o administrador");
+          setToastType("error");
+          setToastOpen(true);
+          return;
+        }
+        setDashBoard(result.data);
+      } catch (error) {
+           setToastMsg("Erro. Contate o administrador");
+          setToastType("error");
+          setToastOpen(true);
+      } finally {
+            setLoading(false);
+      }
+    };
 
-    const onChangedAtivo = async (f: any)=> {
-    //corrigir aqui
-    // try {
-    // const payload : ClientStatusDTO= {
-    //     id: f.id,
-    //     status: !f.ativo
-    // };
+const fetchDashBoardRegistro = async () => {
+  try {
+    setLoading(true);
 
-    // setLoading(true);
-    // const response = await putStatusClient(payload);
-    // if (!response?.success) {
-    // setToastType("error");
-    // setToastMsg(response?.message ?? "Erro ao mudar status do cliente.");
-    // setToastOpen(true);
-    // return;
-    // }
-    // await fetchClient(searchRef.current);
-    // } catch (error) {
-    // setToastType("error");
-    // setToastMsg("Erro ao mudar status do cliente.");
-    // setToastOpen(true);
-    // return;
-    // }finally {
-    // setLoading(false);
-    // }
+    const receita = typeOfMov === "Todos" ? null : typeOfMov;
+    const status = selectStatus === "Todos" ? null : selectStatus;
+    if (data_inicio ===null) return;
+    if (data_fim ===null) return;
+    const result = await fetchDashBoardRegistroResumo(
+      data_inicio,
+      data_fim,
+      receita,
+      status,
+      searchRef.current
+    );
+
+    if (!result?.success) {
+      setToastMsg(result.message ?? "Erro. Contate o administrador");
+      setToastType("error");
+      setToastOpen(true);
+      return;
     }
 
-    useEffect(() => {
-    if (jaCarregouRef.current) return;
+    setContas(result.data);
+  } catch {
+    setToastMsg("Erro. Contate o administrador");
+    setToastType("error");
+    setToastOpen(true);
+  } finally {
+    setLoading(false);
+  }
+};
 
-    jaCarregouRef.current = true;
-    fetchClient("");
-    }, []);
+useEffect(() => {
+const hoje = dayjs();
+
+
+setDataInicio(hoje.startOf("month").format("YYYY-MM-DD"));
+setDataFim(hoje.endOf("month").format("YYYY-MM-DD"));
+}, []);
+
+
+useEffect(() => {
+// evita chamada se datas ainda não estão prontas
+if (!data_inicio || !data_fim) return;
+
+
+fetchDashBoardRegistro();
+fetchDashBoard(data_inicio, data_fim);
+}, [
+data_inicio,
+data_fim,
+typeOfMov,
+selectStatus,
+]);
 
 
 
 
     return (
         <>
-<Snackbar
+    <Snackbar
     open={toastOpen}
     autoHideDuration={2500}
     onClose={() => setToastOpen(false)}
@@ -189,33 +175,34 @@ const fetchGroup = async() => {
     </Alert>
     </Snackbar>
     
-    {/* <CreatOrUpdateClientModal
-    open={openClientModal}
-    onClose={() => {
-    setOpenClientModal(false);
-    setClientDetails(null);   //  limpa ao fechar
-    }}
-    grupo={grupos}
-    onSuccess={async() => {
-    await fetchClient("")
-    setOpenClientModal(false);
-    setClientDetails(null);   //  limpa ao fechar
-    }}   //  recarrega lista
-    client={clientDetails}  //  passa via props
-    /> */}
     <Stack display={"flex"} flexDirection={"row"} flexGrow={1} gap={2} mr={2} mb={4}>
-    {summaryCard.length >0 && (
-    summaryCard.map((i, index) => 
-    <SummaryCard
-     key={index}
-    title={i.title}
-    value={maskCurrency(i.valor)}
-    subtitle= { summaryCard[index].descricao !== 'Atualizado hoje' ? i.descricao : `Período: ${selectPeriodo}`} 
-    valueColor={i.positive? colorPositive : colorNegative}
-    borderStyle={bordasComponents}
-    icon={i.title ==='Saldo Atual'? <DollarSign color="#FFD300"/> : i.positive===true?  <TrendingUp color={colorPositive} /> : <TrendingDown color={colorNegative}/>}
-    />)
-    )}
+      <SummaryCard
+      key={dashboard?.total_entrada}
+      title={'Total Entradas'}
+      value={maskCurrency(dashboard?.total_entrada ?? 0)}
+      subtitle= {'Valor bruto'} 
+      valueColor={colorPositive }
+      borderStyle={bordasComponents}
+      icon={ <TrendingUp color={colorPositive} />}
+      />
+      <SummaryCard
+      key={dashboard?.total_saida}
+      title={'Total Saídas'}
+      value={maskCurrency(dashboard?.total_saida ?? 0)}
+      subtitle= {'Valor bruto'} 
+      valueColor={colorNegative }
+      borderStyle={bordasComponents}
+      icon={ <TrendingDown color={colorNegative} />}
+      />
+      <SummaryCard
+      key={dashboard?.saldo}
+      title={'Saldo Liquído'}
+      value={maskCurrency(dashboard?.saldo ?? 0)}
+      subtitle= {'Saldo disponível'} 
+      valueColor={primaryColor }
+      borderStyle={bordasComponents}
+      icon={ <DollarSign color={primaryColor} />}
+      />
     </Stack>
     <Box display={"flex"} flexDirection={"column"} flexGrow={1} ml={2}>
         <Stack display={"flex"} flexDirection={"row"} gap={1} alignContent={"center"} alignItems={"center"}>
@@ -224,7 +211,7 @@ const fetchGroup = async() => {
                 Filtros
             </Typography>
         </Stack>
-    <Stack display={"flex"} flexDirection={"row"} gap={2} mr={2} mt={2} alignContent={"center"} alignItems={"start"}>
+    <Stack display={"flex"} flexDirection={"row"} gap={2} mr={2} mt={2} alignContent={"center"} alignItems={"center"}>
     <TextField
     placeholder="Buscar cliente..."
     variant="outlined"
@@ -292,6 +279,7 @@ const fetchGroup = async() => {
     },
     }}
     />
+    <Box flex={1}></Box>
 <BaseSelect
   value={typeOfMov}
   height={45}
@@ -302,7 +290,7 @@ const fetchGroup = async() => {
     jaCarregouRefTypeOfStatus.current = true;
     setTypeOfMov(e.target.value);
   }}
-  options={typeOfMovimenttion.map((status) => ({
+  options={typeOfCategoryList.map((status) => ({
     value: status,
     label: status,
   }))}
@@ -327,7 +315,7 @@ const fetchGroup = async() => {
   onChange={(e) => {
     setSelectStatus(e.target.value);
   }}
-  options={optionsStatusMovWallte.map((status) => ({
+  options={typeOfReceberList.map((status) => ({
     value: status,
     label: status,
   }))}
@@ -343,25 +331,85 @@ const fetchGroup = async() => {
     },
   }}
 />
-<BaseSelect
-  value={selectPeriodo}
-  height={45}
-  sx={{
-    flex:1
-  }}
-  onChange={(e) => {
-    setSelectPeriodo(e.target.value);
-  }}
-  options={optionsPeriodoMovWallet.map((status) => ({
-    value: status,
-    label: status,
-  }))}
-  SelectProps={{
-    MenuProps: {
-      PaperProps: {
-        sx: {
-          bgcolor: bgColorCardsDashBoard,
-          borderRadius: 1,
+<LocalizationProvider dateAdapter={AdapterDayjs}>
+<DatePicker
+format="DD/MM/YYYY"
+label="Data início"
+maxDate={dayjs(new Date)}
+value={data_inicio ? dayjs(data_inicio) : null}
+onChange={(date) => {
+setDataInicio(date ? date.format("YYYY-MM-DD") : null);
+
+}}
+slotProps={{
+    textField: {
+      size:"small",
+      sx:{
+        backgroundColor: bgColorTopSellers,
+        borderRadius: 1,
+        transition: "0.3s ease",
+        flex:1,
+        "&:hover": {
+          boxShadow: "0 0 25px rgba(40, 61, 107, 0.6)",
+        },
+
+        "& .MuiOutlinedInput-root": {
+          backgroundColor: bgColorTopSellers,
+          color: "#fff",
+        },
+
+        "& .MuiOutlinedInput-notchedOutline": {
+          border: bordasComponents,
+        },
+
+        "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+          border: `1px solid ${primaryColor}`,
+        },
+
+        "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+          border: `1px solid ${primaryColor}`,
+          boxShadow: "0 0 0 3px rgba(245,159,10,0.25)",
+        },
+
+        "& .MuiSelect-select": {
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          padding: "0 12px",
+          fontSize: 14,
+          color: "#fff",
+        },
+
+        "& .MuiSvgIcon-root": {
+          color: colorOpacity,
+        },
+
+        "&.Mui-disabled .MuiSelect-select": {
+          color: colorOpacity,
+          WebkitTextFillColor: colorOpacity,
+        },
+
+        "& .MuiFormHelperText-root": {
+          color: colorOpacity,
+        },
+      }
+    },
+    popper: {
+      sx: {
+        "& .MuiPaper-root": {
+          backgroundColor: bgColorCardsDashBoard,
+          color: "#fff",
+          border: bordasComponents,
+        },
+        "& .MuiPickersDay-root": {
+          color: "#fff",
+        },
+        "& .MuiPickersDay-root.Mui-selected": {
+          backgroundColor: primaryColor,
+          color: "#FFFF",
+          fontWeight: 900,
+        },
+          "& label": {
           color: "#fff",
         },
       },
@@ -369,6 +417,93 @@ const fetchGroup = async() => {
   }}
 />
 
+</LocalizationProvider>
+<LocalizationProvider dateAdapter={AdapterDayjs}>
+<DatePicker
+format="DD/MM/YYYY"
+label="Data final"
+value={data_fim ? dayjs(data_fim) : null}
+onChange={(date) => {
+setDataFim(date ? date.format("YYYY-MM-DD") : null);
+}}
+slotProps={{
+    textField: {
+      size:"small",
+      sx:{
+        backgroundColor: bgColorTopSellers,
+        borderRadius: 1,
+        transition: "0.3s ease",
+
+        "&:hover": {
+          boxShadow: "0 0 25px rgba(40, 61, 107, 0.6)",
+          borderColor: "rgba(40, 61, 107, 0.9)",
+        },
+
+        "& .MuiOutlinedInput-root": {
+          backgroundColor: bgColorTopSellers,
+          color: "#fff",
+        },
+
+        "& .MuiOutlinedInput-notchedOutline": {
+          border: bordasComponents,
+        },
+
+        "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+          border: `1px solid ${primaryColor}`,
+        },
+
+        "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+          border: `1px solid ${primaryColor}`,
+          boxShadow: "0 0 0 3px rgba(245,159,10,0.25)",
+        },
+
+        "& .MuiSelect-select": {
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          padding: "0 12px",
+          fontSize: 14,
+          color: "#fff",
+        },
+
+        "& .MuiSvgIcon-root": {
+          color: colorOpacity,
+        },
+
+        "&.Mui-disabled .MuiSelect-select": {
+          color: colorOpacity,
+          WebkitTextFillColor: colorOpacity,
+        },
+
+        "& .MuiFormHelperText-root": {
+          color: colorOpacity,
+        },
+      }
+    },
+    popper: {
+      sx: {
+        "& .MuiPaper-root": {
+          backgroundColor: bgColorCardsDashBoard,
+          color: "#fff",
+          border: bordasComponents,
+        },
+        "& .MuiPickersDay-root": {
+          color: "#fff",
+        },
+        "& .MuiPickersDay-root.Mui-selected": {
+          backgroundColor: primaryColor,
+          color: "#FFFF",
+          fontWeight: 900,
+        },
+          "& label": {
+          color: "#fff",
+        },
+      },
+    },
+  }}
+/>
+
+</LocalizationProvider>
     </Stack>
     </Box>
     <Box flexDirection={"column"} >
@@ -390,7 +525,7 @@ const fetchGroup = async() => {
     )}
 
     {/* LISTA VAZIA */}
-    {!loading && movimentacoes.length === 0 && (
+    {!loading && contas.length === 0 && (
     <Stack
     height={200}
     alignItems="center"
@@ -402,7 +537,7 @@ const fetchGroup = async() => {
     </Stack>
     )}
     {/* TABELA */}
-    {!loading && movimentacoes.length > 0 && (
+    {!loading && contas.length > 0 && (
     <TableContainer
     sx={{
     maxHeight: "100%",
@@ -458,8 +593,25 @@ const fetchGroup = async() => {
     >
     <TableCell sx={cellStyleWhite}>{formatDateTime(row.data_cadastro) }</TableCell>
     <TableCell sx={cellStyleWhite}>{row.descricao}</TableCell>
-    <TableCell sx={cellStyleWhite}>{row.categoria}</TableCell>
-    <TableCell sx={cellStyleWhite}>{row.origem}</TableCell>
+    <TableCell sx={cellStyle}>
+    <Box
+    sx={{
+    width: 80,
+    height: 22,
+    borderRadius: 10,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "0.7rem",
+    fontWeight: "bold",
+    color: "white",
+    bgcolor: row.cor
+    }}
+    >
+    {row.nome}
+    </Box>
+    </TableCell>
+    <TableCell sx={cellStyleWhite}>{row.origem_tipo}</TableCell>
     <TableCell sx={cellStyle}>
     <Box
     sx={{
@@ -471,21 +623,21 @@ const fetchGroup = async() => {
     justifyContent: "center",
     fontSize: "0.7rem",
     fontWeight: 600,
-    color:getStatusNeonFontStyle(row.status),
-    bgcolor: getStatusNeonBgColor(row.status),
+    color:  getStatusNeonFontStyle(new Date(row.data_vencimento) < new Date()?'Vencido': row.status!),
+    bgcolor:getStatusNeonBgColor(new Date(row.data_vencimento) < new Date() ?'Vencido':row.status!),
     }}
     >
-    {row.status}
+   { new Date(row.data_vencimento) < new Date() ?'Vencido':row.status}
     </Box>
     </TableCell>
-    <TableCell sx={{fontSize:"0.85rem",fontWeight:600, color: getStatusNeonFontStyle(row.status) ,borderBottom: "1px solid rgba(40, 61, 107, 0.25)",}}>{maskCurrency(row.valor)}</TableCell>
+    <TableCell sx={{fontSize:"0.85rem",fontWeight:600, color: getStatusNeonFontStyle(row.status) ,borderBottom: "1px solid rgba(40, 61, 107, 0.25)",}}>{maskCurrency(row.valor_total)}</TableCell>
     </TableRow>
     ))}
     </TableBody>
     </Table>
     </TableContainer>
     )}
-    {!loading && movimentacoes.length > rowsPerPage && (
+    {!loading && contas.length > rowsPerPage && (
     <Box
     mt={3}
     display="flex"

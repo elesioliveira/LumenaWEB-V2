@@ -1,5 +1,5 @@
 import type { CategoriaCor } from "../../produto/produto/dto/ProdutoDTO";
-import type { CategoryDTO, ContaPagarDTO, ContaReceberDTO, MovimentacaoWalletDTO, SummaryCardDTO } from "../dto/WalletDTO";
+import type {  ContaPagarDTO, ContaReceberDTO, MovimentacaoWalletDTO, SummaryCardDTO } from "../dto/WalletDTO";
 
 export const FluxoSummaryCardMock: SummaryCardDTO[] = [
   {
@@ -67,12 +67,9 @@ export const typeOfReceberList: string[] =[
 export const typeOfPaymentList: string[] =[
   'Todos','Pendente', 'Pago', 'Vencido'
 ];
-export const typeOfMovimenttion: string[] =[
-  'Todos os tipos','Entradas', 'Saídas'
-];
-export const optionsStatusMovWallte: string[] =[
-  'Todos Status','Concluídos', 'Pendentes'
-];
+
+
+
 export const optionsPeriodoMovWallet: string[] =[
   'Este mês','Esta semana', 'Hoje'
 ];

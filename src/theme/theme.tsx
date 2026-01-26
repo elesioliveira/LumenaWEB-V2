@@ -259,3 +259,43 @@ export const textFieldStyle = {
     color: "#FFFF",
   },
 };
+
+const baseInputHeight = 35;
+
+export const  baseOutlinedInputSx = {
+  "& .MuiOutlinedInput-root": {
+    height: baseInputHeight,
+    padding: 0,
+    backgroundColor: bgColorTopSellers,
+    color: "#fff",
+  },
+
+  "& .MuiInputBase-input": {
+    height: "100%",
+    display: "flex",
+    alignItems: "center",
+    boxSizing: "border-box",
+    fontSize: 12,
+  },
+
+  "& .MuiOutlinedInput-notchedOutline": {
+    border: bordasComponents,
+  },
+
+  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+    border: `1px solid ${primaryColor}`,
+  },
+
+  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    border: `1px solid ${primaryColor}`,
+    boxShadow: "0 0 0 3px rgba(245,159,10,0.25)",
+  },
+
+  "& .MuiSvgIcon-root": {
+    color: colorOpacity,
+  },
+
+  "& .MuiFormHelperText-root": {
+    color: colorOpacity,
+  },
+};
