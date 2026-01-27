@@ -2,7 +2,8 @@
 import axios from "axios";
 
 //DEV
-const urlBase = "http://localhost:5037/API/V1/";
+export const urlBase = "http://localhost:5037/API/V1/";
+export const urlImages = "http://localhost:5037/";
 
 //PROD
 // const urlBase = "https://hmlv2api.avaliadordigital.com.br/API/V1";

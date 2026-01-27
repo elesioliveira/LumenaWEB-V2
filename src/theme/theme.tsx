@@ -64,7 +64,7 @@ export const customTheme = createTheme({
     },
 
     text: {
-      primary: colorOpacity,
+      primary: "#FFFF",
       secondary: "#6b7280",
     },
 

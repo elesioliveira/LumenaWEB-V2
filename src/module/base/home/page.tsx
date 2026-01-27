@@ -23,6 +23,7 @@ import { ModuleClient } from "../client/ModuleClient";
 import { StockPage } from "../stock/StockPage";
 import { ModuleSales } from "../sales/SalesPage";
 import { ModuleWallet } from "../wallet/ModuleWallet";
+import { ModuleCompany } from "../company/ComapnyModule";
   
 const menuItems = [
   { label: "Dashboard", 
@@ -94,6 +95,8 @@ const handleOnChagentPage = (page: CurrentModulePage) => {
         return <ModuleSales/>;
         case CurrentModulePage.Financial:
         return <ModuleWallet/>;
+        case CurrentModulePage.Company:
+        return <ModuleCompany/>;
       // case CurrentModulePage.Seller:
       //   return <SellerPage />;
       // case CurrentModulePage.Client:
