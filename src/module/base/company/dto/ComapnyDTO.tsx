@@ -19,3 +19,24 @@ export interface CompanyFORMDTO {
   uf: string | null;
   observacao: string | null;
 }
+
+export interface UserDTOForm {
+  nome: string | null,
+  email: string| null,
+  senha: string| null,
+  confirmarSenha: string| null,
+  ativo: boolean| null,
+  perfil: number| null,
+}
+export interface UserDTOAPI {
+  nome: string,
+  email: string,
+  senha: string,
+  ativo: boolean,
+  perfil: string
+}
+
+export interface PerfilUser {
+  value: number;
+  label: string;
+};

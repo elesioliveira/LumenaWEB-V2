@@ -5,6 +5,7 @@ import {  Building2, User2 } from "lucide-react";
 import { div } from "framer-motion/m";
 import { CurrentTabCompany } from "./enums/ComapanyEnums";
 import { DetailsCompanyTab } from "./pages/DetailsCompanyTab";
+import { UsersTab } from "./pages/UsersTab";
 
 const currentPageStock = [
   {
@@ -27,7 +28,7 @@ const [currentPage, setPage] = useState<CurrentTabCompany>(CurrentTabCompany.Det
       case CurrentTabCompany.DetailsCompany:
         return <DetailsCompanyTab/>
       case CurrentTabCompany.Users:
-        return <div>Users</div>;
+        return <UsersTab/>;
       default:
         return null;
     }

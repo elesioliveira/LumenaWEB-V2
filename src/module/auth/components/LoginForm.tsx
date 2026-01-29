@@ -102,7 +102,7 @@ if (!result.success) {
       value={email}
       onChange={(e) => setEmail(e.target.value.trim())}
       InputProps={{
-        sx: { height: 60, fontSize: "1.1rem", mb:2 }, // input maior
+        sx: { height: 60, fontSize: "1.1rem", mb:2, color:"black" }, // input maior
         startAdornment: (
           <Mail size={24} style={{ marginRight: "10px", opacity: 0.6 }} />
         ),
@@ -123,7 +123,7 @@ if (!result.success) {
       value={password}
       onChange={(e) => setPassword(e.target.value.trim())}
       InputProps={{
-        sx: { height: 60, fontSize: "1.1rem" },
+        sx: { height: 60, fontSize: "1.1rem",color:"black" },
         startAdornment: (
           <Lock size={24} style={{ marginRight: "10px", opacity: 0.6 }} />
         ),

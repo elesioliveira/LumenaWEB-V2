@@ -10,13 +10,16 @@ export const getStatusNeonBgColor = (status: string) => {
     case "Pago":
     case "Recebido":
     case "Concluído":
+    case "Gerente":
       return "rgba(0, 255, 156, 0.18)";
 
     case "Pendente":
+    case "Usuário":
       return "rgba(255, 211, 0, 0.18)";
 
     case "Vencido":
     case "Cancelado":
+    case "Administrador":
       return "rgba(255, 46, 46, 0.18)";
 
     default:
@@ -30,13 +33,16 @@ export const getStatusNeonFontStyle = (status: string) => {
     case "Pago":
     case "Recebido":
     case "Concluído":
+    case "Gerente":
       return   "#00FF9C";
 
     case "Pendente":
+    case "Usuário":
       return "#FFD300";
 
     case "Vencido":
     case "Cancelado":
+    case "Administrador":
       return "#FF2E2E";
 
     default:

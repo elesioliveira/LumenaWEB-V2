@@ -177,7 +177,6 @@ selectStatus,
     
     <Stack display={"flex"} flexDirection={"row"} flexGrow={1} gap={2} mr={2} mb={4}>
       <SummaryCard
-      key={dashboard?.total_entrada}
       title={'Total Entradas'}
       value={maskCurrency(dashboard?.total_entrada ?? 0)}
       subtitle= {'Valor bruto'} 
@@ -186,7 +185,6 @@ selectStatus,
       icon={ <TrendingUp color={colorPositive} />}
       />
       <SummaryCard
-      key={dashboard?.total_saida}
       title={'Total Saídas'}
       value={maskCurrency(dashboard?.total_saida ?? 0)}
       subtitle= {'Valor bruto'} 
@@ -195,7 +193,6 @@ selectStatus,
       icon={ <TrendingDown color={colorNegative} />}
       />
       <SummaryCard
-      key={dashboard?.saldo}
       title={'Saldo Liquído'}
       value={maskCurrency(dashboard?.saldo ?? 0)}
       subtitle= {'Saldo disponível'} 

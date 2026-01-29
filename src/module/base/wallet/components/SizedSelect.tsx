@@ -27,9 +27,9 @@ export function BaseSelect({
       select
       variant="outlined"
       {...props}
-      sx={{
+    sx={{
         backgroundColor: bgColorTopSellers,
-        borderRadius: 2,
+        borderRadius: 1,
         transition: "0.3s ease",
 
         "&:hover": {
@@ -41,14 +41,16 @@ export function BaseSelect({
           height,
           backgroundColor: bgColorTopSellers,
           color: "#fff",
+          borderRadius: 1
         },
 
         "& .MuiOutlinedInput-notchedOutline": {
-          border: bordasComponents,
+          border: bordasComponents,borderRadius: 1
         },
 
         "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
           border: `1px solid ${primaryColor}`,
+          borderRadius: 1
         },
 
         "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
