@@ -31,7 +31,7 @@ export interface UserDTOForm {
 export interface UserDTOAPI {
   nome: string,
   email: string,
-  senha: string,
+  senha: string | null,
   ativo: boolean,
   perfil: string
 }
@@ -40,3 +40,10 @@ export interface PerfilUser {
   value: number;
   label: string;
 };
+
+export interface DashBoardDTO {
+  qtd_usuario: number;
+  qtd_ativo: number;
+  qtd_inativo: number;
+  qtd_administrador: number;
+}

@@ -29,3 +29,29 @@ export const submitCreateUser = async (dto: UserDTOAPI)=> {
         return error.response.data ?? {success:false, message: "Erro. Contate o administrador"};
     }
 };
+export const submitUpdateUser = async (dto: UserDTOAPI, id: number)=> {
+    try {
+        const response = await api.put(`Put/Update/User/${id}`,dto, {withCredentials:true});
+        return response.data;
+    } catch (error: any) {
+        return error.response.data ?? {success:false, message: "Erro. Contate o administrador"};
+    }
+};
+
+export const fetchDashboardUser = async() => {
+    try {
+        const response = await api.get("Get/Dashboard-Users", {withCredentials:true});
+        return response.data;
+    } catch (error: any) {
+        return error.response.data ?? {success:false, message: "Erro. Contate o administrador"};
+    }
+};
+
+export const updateRotaUser = async(rota: number[], id_usuario: number) => {
+    try {
+        const response = await api.post(`Post/Create/User-Route/${id_usuario}`, rota, {withCredentials:true});
+        return response.data;
+    } catch (error: any) {
+        return error.response.data ?? {success:false, message: "Erro. Contate o administrador"};
+    }
+};

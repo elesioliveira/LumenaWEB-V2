@@ -31,9 +31,12 @@ import { getStatusNeonBgColor, getStatusNeonFontStyle } from "../../wallet/helpe
 import { TableActionsMenuContaPagar } from "../../wallet/components/TableActionsMenuContaPagar";
 import { PaginationButton } from "../../produto/fornecedor/components/PaginationButton";
 import { DialogUser } from "../components/DialogCreateOrUpdateUser";
-import { fetchUser } from "../repository/CompanyRepository";
+import { fetchDashboardUser, fetchUser, submitUpdateUser } from "../repository/CompanyRepository";
 import { preload } from "react-dom";
 import { formatDateTime } from "../../../../shared/MaskUtils";
+import { TableActionsMenuUser } from "../../wallet/components/TableActionnsMenuUser";
+import type { DashBoardDTO, UserDTOAPI } from "../dto/ComapnyDTO";
+import { DialogPermissions } from "../components/DialogPermissions";
 
 
 
@@ -43,6 +46,7 @@ import { formatDateTime } from "../../../../shared/MaskUtils";
 
 export function UsersTab() {
 const [dialogUserOpen, setDialog] =useState(false);
+const [dialogPermission, setOpenDialogPermission] =useState(false);
 const [userSelected, setUser] = useState<User | null>(null);
 const [toastOpen, setToastOpen] = useState(false);
 const [toastMsg, setToastMsg] = useState("");
@@ -57,6 +61,7 @@ const jaCarregouRefTypeOfStatus = useRef(false);
 const jaCarregou = useRef(false);
 const [perfil, setPerfil] = useState<string>("Todos");
 const [status, setStatus] = useState<string>("Todos");
+const [dashBaord, setDash] = useState<DashBoardDTO | null>(null);
 const [page, setPage] = useState(0);
 const rowsPerPage = 10;
 const totalPages = Math.ceil(users.length / rowsPerPage);
@@ -96,6 +101,7 @@ try {
         return;
     }
     setUsers(result.data);
+    setPage(0);
 } catch (error) {
                 setToastMsg( "Erro. Contate o administrador.");
             setToastType("error");
@@ -105,16 +111,80 @@ try {
 }
 };
 
+const fetchDash=  async ()=> {
+    try {
+        const result = await fetchDashboardUser();
+        if(!result?.success) {
+            setToastMsg(result.message);
+            setToastType("error");
+            setToastOpen(true);
+            return;
+        }
+        setDash(result.data);
+    } catch (error) {
+        setToastMsg("Erro. Contate o administrador.");
+        setToastType("error");
+        setToastOpen(true);
+    }
+}
+
+const onChangeActive = async (row: User) => {
+try {
+    setLoading(true);
+
+    const payload: UserDTOAPI = {
+        ativo: row.status ==="Ativo"? false : true,
+        email: row.email?.trim() ??"",
+        nome: row.nome?.trim()??"",
+        perfil:row.perfil,
+        senha:null,
+    };
+    const result =await submitUpdateUser(payload, row.id);
+    if (!result?.success) {
+        setToastMsg(result.message ?? "Erro. Contate o administrador.");
+        setToastType('error');
+        setToastOpen(true);
+        return;
+    }
+} catch (error) {
+            setToastMsg( "Erro. Contate o administrador.");
+        setToastType('error');
+        setToastOpen(true);
+  } finally {
+      setLoading(false);
+  }
+};
+
+
+
+
 useEffect(()=>{
+
     const preLoad = async ()=> {
         await fetchUsers();
+        if(!jaCarregou.current) {
+         await fetchDash();
+         jaCarregou.current= true;
+    }
     };
     preLoad();
 },[ perfil, status]);
 
-
     return (
     <>
+    <DialogPermissions
+    rotas={userSelected?.rotas ?? null}
+    onClose={()=> {
+    setOpenDialogPermission(false)
+    }}
+    onSuccess={async ()=> {
+        setUser(null);
+        setOpenDialogPermission(false);
+        await fetchUsers();
+    }}
+    id_user= {userSelected?.id ?? null}
+    open={dialogPermission}
+    />
     <DialogUser
     open={dialogUserOpen}
     user={userSelected}
@@ -123,7 +193,7 @@ useEffect(()=>{
     setUser(null);
     }}
     onSuccess={async() => {
-        //buscar users novamente
+    await fetchUsers();
     setDialog(false);
     setUser(null);
     }}   //  recarrega lista
@@ -172,22 +242,22 @@ useEffect(()=>{
                  <Stack display={"flex"} flexDirection={"row"} flexGrow={1} gap={2} mr={2} mb={3} mt={4}>
                    <InfoCard
                     title="Total de Usuários"
-                    value={5}
+                    value={dashBaord?.qtd_usuario ?? 0}
                     icon={<Users2 color={primaryColor} size={38} />}
                     />
                    <InfoCard
                     title="Usuários Ativos"
-                    value={4}
+                    value={dashBaord?.qtd_ativo ?? 0}
                     icon={<UserCheck color={colorPositive} size={38} />}
                     />
                    <InfoCard
                     title="Usuários Inativos"
-                    value={5}
+                    value={dashBaord?.qtd_inativo ?? 0}
                     icon={<UserRoundX color={colorOpacity} size={38} />}
                     />
                    <InfoCard
                     title="Administradores"
-                    value={1}
+                    value={dashBaord?.qtd_administrador ?? 0}
                     icon={<Shield color={colorNegative} size={38} />}
                     />
                 </Stack>
@@ -427,12 +497,21 @@ useEffect(()=>{
                 </TableCell>
                  <TableCell sx={cellStyleWhite}>{formatDateTime(row.ultimo_acesso, true)}</TableCell>
                 <TableCell sx={cellStyleWhite} align="left">
-                        <TableActionsMenuContaPagar
-                        rowId={row.id}
-                        onView={()=> {}}
-                        handleActionVisualizar={ ()=> {}}
-                        handleActionMarcarComoPago={ async()=> {}}
-                        handleEditarConta={()=> {}}
+                        <TableActionsMenuUser
+                        active={async()=> {
+                           await onChangeActive (row);
+                           await fetchUsers();
+                           await fetchDash();
+                        }}
+                        edit={()=>{
+                            setUser(row);
+                            setDialog(true);
+                        }}
+                        permissao={()=>{
+                            setUser(row);
+                            setOpenDialogPermission(true);
+                        }}
+                        userActive= {row.status ==="Ativo"}
                         />
                 </TableCell>
                 </TableRow>

@@ -61,7 +61,6 @@ const gtin = useWatch({ control, name: "eanCode" });
 useEffect(() => {
   if (product) {
       const unidadeSelecionada = unidadeMock.find((u) => u.nome === product.un);
-      console.log("Unidade selecionada:", unidadeSelecionada);
     reset({
       eanCode: product.eanCode ?? null,
        ativo: product.ativo,

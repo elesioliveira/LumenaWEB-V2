@@ -25,7 +25,7 @@ import type { UserDTOAPI, UserDTOForm } from "../dto/ComapnyDTO";
 import { FormTextField } from "./FormTextFieldUser";
 import { BaseSelect } from "../../wallet/components/SizedSelect";
 import { perfilUser } from "../mock/CompanyMocks";
-import { submitCreateUser } from "../repository/CompanyRepository";
+import { submitCreateUser, submitUpdateUser } from "../repository/CompanyRepository";
 
 
 
@@ -48,24 +48,31 @@ const {
   reset,
   watch,
   formState: { errors, isSubmitting },
-} = useForm<UserDTOForm>();
+} = useForm<UserDTOForm>({
+  defaultValues: {
+    ativo: false,
+    email: "",
+    nome: "",
+    perfil: null,
+  },
+});
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
   const [toastType, setToastType] = useState<"success" | "error">("error");
   const [isLoading, setLoading] = useState(false);
-
+const perfilValue = watch("perfil");
 
 
 useEffect(() => {
   if (user?.id) {
-   
+   const p = perfilUser.find((p) => p.label === user.perfil);
     const preLoadData = async () => {
-      reset({
-        ativo: user.status === "Ativo",
-        email: user.email,
-        nome: user.nome,
-        perfil: perfilUser.find(p => p.label === user.perfil)?.value ?? null
-      });
+    reset({
+      ativo: user.status === "Ativo",
+      email: user.email,
+      nome: user.nome,
+        perfil: p?.value ?? null,
+    });
     };
 
     preLoadData();
@@ -91,14 +98,15 @@ const onSubmit = async (data: UserDTOForm) => {
 try {
     setLoading(true);
     const findPerfil = perfilUser.find((p) => p.value === data.perfil);
+
     const payload: UserDTOAPI = {
         ativo: true,
         email: data.email?.trim() ??"",
         nome: data.nome?.trim()??"",
-        perfil: findPerfil?.label ?? "",
-        senha: data.senha?.trim() ?? "",
+        perfil:findPerfil?.label ?? "",
+        senha:data.senha ===''? null : data.senha,
     };
-    const result = await submitCreateUser(payload);
+    const result =user? await submitUpdateUser(payload, user.id) :  await submitCreateUser(payload);
     if (!result?.success) {
         setToastMsg(result.message ?? "Erro. Contate o administrador.");
         setToastType('error');
@@ -110,10 +118,9 @@ try {
             setToastMsg( "Erro. Contate o administrador.");
         setToastType('error');
         setToastOpen(true);
-} finally {
-    setLoading(false);
-}
-
+  } finally {
+      setLoading(false);
+  }
 };
 
 
@@ -206,7 +213,9 @@ return (
       color: "#fff",
     }}
   >
-<form onSubmit={handleSubmit(onSubmit)} id="user-form">
+{isLoading? (
+  <CircularProgress size={32} color="inherit" />
+) : (<form onSubmit={handleSubmit(onSubmit)} id="user-form">
     <FormTextField
     label="Nome*"
     name="nome"
@@ -251,14 +260,15 @@ return (
     }}
     />
     </Stack>
-    <BaseSelect
+  <BaseSelect
     label="Perfil*"
     fullWidth
     error={!!errors.perfil}
+    value={perfilValue ?? ""}
     helperText={errors.perfil?.message}
-    defaultValue=""
     {...register("perfil", {
-        required: "Perfil é obrigatório",
+      required: "Perfil é obrigatório",
+      valueAsNumber: true, // 👈 ISSO AQUI
     })}
     SelectProps={{
     MenuProps: {
@@ -276,7 +286,8 @@ return (
         label: p.label,
     }))}
     />
-</form>
+</form>)}
+
   </DialogContent>
   {/* ACTIONS */}
   <DialogActions

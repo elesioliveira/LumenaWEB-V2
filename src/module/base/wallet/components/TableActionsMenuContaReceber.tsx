@@ -21,7 +21,6 @@ export function TableActionsMenuContaReceber({ rowId,handleActionVisualizar,hand
     setAnchorEl(null);
   };
   const handleAction = (value: string) => {
-   console.log(value);
   };
 
 

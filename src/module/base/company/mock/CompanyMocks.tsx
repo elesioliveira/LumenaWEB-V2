@@ -7,9 +7,11 @@ export const perfilUser: PerfilUser []= [
   {value: 3, label:"Vendedor"},
   {value: 4, label:"Suporte"},
 ];
+
 export const perfilUserTab = [
   "Todos", "Administrador", "Gerente", "Vendedor", "Suporte"
 ];
+
 export const statusTab = [
 "Todos", "Ativo", "Inativo"
 ];

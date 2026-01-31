@@ -55,9 +55,6 @@ useEffect(() => {
   if (category) {
  const cor = categoriasCoresView.find((c)=> c.cor === category.cor);
  const tipo = tipoReceita.find((t)=> t.label === category.tipo);
- console.log(category);
- console.log(cor);
- console.log(tipo);
     reset({
       nome: category.nome,
       tipo: tipo!.id,

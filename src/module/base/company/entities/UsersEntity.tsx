@@ -5,4 +5,5 @@ export interface User {
     perfil: string;
     status: string;
     ultimo_acesso: string;
+    rotas: number[] | null;
 };

@@ -14,7 +14,7 @@
   Badge,
   Avatar,
   } from "@mui/material";
-  import {  useState } from "react";
+  import {  useEffect, useMemo, useState } from "react";
   import { bgComponents, bordasComponents, colorOpacity, } from "../../../theme/theme";
 import { ModuleProduct } from "../produto/ModuleProductPage";
 import { CurrentModulePage } from "./enums/HomeEnums";
@@ -24,45 +24,66 @@ import { StockPage } from "../stock/StockPage";
 import { ModuleSales } from "../sales/SalesPage";
 import { ModuleWallet } from "../wallet/ModuleWallet";
 import { ModuleCompany } from "../company/ComapnyModule";
+import { useSessionController } from "../../auth/controller/SessionController";
   
 const menuItems = [
-  { label: "Dashboard", 
+  { 
+    key: 0,
+    label: "Dashboard", 
     icon: LayoutDashboard, 
     page: CurrentModulePage.Dashboard 
   },
-  { label: "Vendas", 
+  { 
+    key: 1,
+    label: "Vendas", 
     icon: ShoppingCart, 
     page: CurrentModulePage.Sales 
   },
-  { label: "Produto",
+  { 
+    key:2,
+     label: "Produto",
      icon: Package, 
      page: CurrentModulePage.Product 
     },
-  { label: "Clientes", 
+  { 
+    key:3,
+    label: "Clientes", 
     icon: Users, 
     page: CurrentModulePage.Client 
   },
-  { label: "Financeiro", 
+  { 
+    key:4,
+    label: "Financeiro", 
     icon: Wallet, 
     page: CurrentModulePage.Financial 
   },
-  { label: "Estoque", 
+  { 
+    key:5,
+    label: "Estoque", 
     icon: Truck, 
     page: CurrentModulePage.Stock 
   },
-  { label: "Relatórios", 
+  { 
+    key:6,
+    label: "Relatórios", 
     icon: ClipboardList, 
     page: CurrentModulePage.Reports 
   },
-  { label: "Análise", 
+  { 
+    key:7,
+    label: "Análise", 
     icon: ChartColumn, 
     page: CurrentModulePage.Analysis 
   },
-  { label: "Empresa", 
+  { 
+    key:8,
+    label: "Empresa", 
     icon: Building2, 
     page: CurrentModulePage.Company 
   },
-  { label: "Configurações", 
+  { 
+    key:9,
+    label: "Configurações", 
     icon: Settings, 
     page: CurrentModulePage.Settings 
   },
@@ -73,7 +94,15 @@ const menuItems = [
 
 export default function HomePage() {
 const [collapsed, setCollapsed] = useState(false);
-const [currentPage, setPage] = useState<CurrentModulePage>(CurrentModulePage.Dashboard);
+const { user } = useSessionController();
+const allowedMenuItems = useMemo(() => {
+  if (!user) return [];
+
+  return menuItems.filter((item) =>
+    user.rotas.includes(item.key)
+  );
+}, [user]);
+const [currentPage, setPage] = useState<CurrentModulePage>(allowedMenuItems[0].page);
 const drawerWidth = collapsed ? 80 : 280;
 
 
@@ -97,27 +126,11 @@ const handleOnChagentPage = (page: CurrentModulePage) => {
         return <ModuleWallet/>;
         case CurrentModulePage.Company:
         return <ModuleCompany/>;
-      // case CurrentModulePage.Seller:
-      //   return <SellerPage />;
-      // case CurrentModulePage.Client:
-      //   return <ClientPage />;
-      // case CurrentModulePage.Financial:
-      //   return <FinancialPage />;
-      // case CurrentModulePage.Stock:
-      //   return <StockPage />;
-      // case CurrentModulePage.Reports:
-      //   return <ReportsPage />;
-      // case CurrentModulePage.Analysis:
-      //   return <AnalysisPage />;
-      // case CurrentModulePage.Company:
-      //   return <CompanyPage />;
-      // case CurrentModulePage.Settings:
-      //   return <SettingsPage />;
       default:
         return null;
     }
   };
-     
+   
 
 
   return (
@@ -189,7 +202,6 @@ const handleOnChagentPage = (page: CurrentModulePage) => {
   width: drawerWidth,
   flexShrink: 0,
   whiteSpace: "nowrap",
-  border: bordasComponents,
   transition: "width 0.3s ease",
   "& .MuiDrawer-paper": {
   width: drawerWidth,
@@ -234,7 +246,7 @@ const handleOnChagentPage = (page: CurrentModulePage) => {
   </Box>}
   <Divider sx={{ width: "100%",height:"1px", backgroundColor: "#283d6b", opacity: 0.7}} />
 <List sx={{ width: "100%", pl: 2, pr: 2, display: "flex", flexDirection: "column", gap: 2 }}>
-  {menuItems.map((item) => {
+  {allowedMenuItems.map((item) => {
     const isActive = item.page === currentPage;
     const Icon = item.icon;
 

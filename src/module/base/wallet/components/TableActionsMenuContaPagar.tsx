@@ -22,7 +22,6 @@ export function TableActionsMenuContaPagar({ rowId,  onView,handleActionVisualiz
   };
 
   const handleAction = (action: string) => {
-    console.log(`Ação: ${action} | ID: ${rowId}`);
     handleClose();
   };
   

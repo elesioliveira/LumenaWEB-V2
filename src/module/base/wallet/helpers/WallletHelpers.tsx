@@ -15,6 +15,7 @@ export const getStatusNeonBgColor = (status: string) => {
 
     case "Pendente":
     case "Usuário":
+    case "Vendedor":
       return "rgba(255, 211, 0, 0.18)";
 
     case "Vencido":
@@ -38,6 +39,7 @@ export const getStatusNeonFontStyle = (status: string) => {
 
     case "Pendente":
     case "Usuário":
+    case "Vendedor":
       return "#FFD300";
 
     case "Vencido":
