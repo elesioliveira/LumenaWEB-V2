@@ -24,10 +24,12 @@ import { PaginationButton } from "../produto/fornecedor/components/PaginationBut
 import { CreateOrUpdateGroupModal } from "./componentes/CreateOrUpdateGroupModal";
 import { getGroupClient, updateGroupClient } from "./repository/ClientRepository";
 import type { GroupDTO } from "./dto/ClientDTO";
+import { useResponsive } from "../../../shared/useResponsive";
 
 
 
 export function GroupClient() {
+const { isMobile } = useResponsive();
 const [openGroupClientModal, setOpenGroupClientModal] = useState(false);
 const [selectGroup, setSelectGroup] =useState<GroupClientEntity | null>(null);
 const [group, setGroup] = useState<GroupClientEntity[]>([]);
@@ -150,8 +152,8 @@ setOpenGroupClientModal(true);//  abre modal
     }} 
     />
     <Box flexDirection={"column"}>
-    <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={2}>
-    <Stack display={"flex"} flexDirection={"row"} flexGrow={1} justifyContent={"space-between"} justifyItems={"center"} alignContent={"center"}alignItems={"center"} >
+    <Box display={"flex"} flexDirection={"column"} flexGrow={2} pl={{ xs: 0, md: 2 }}>
+    <Stack display={"flex"} flexDirection={{ xs: "column", md: "row" }} flexGrow={1} justifyContent={"space-between"} justifyItems={"center"} alignContent={"center"} alignItems={{ xs: "stretch", md: "center" }} flexWrap="wrap" gap={{ xs: 1, md: 2 }} >
     <Box display={"flex"} flexDirection={"column"}>
     <Typography sx={{fontWeight:"bold", fontSize:"1.5rem", color:"#ffff"}}>
     Grupos de Clientes
@@ -160,7 +162,7 @@ setOpenGroupClientModal(true);//  abre modal
     Gerencie os grupos para categorizar seus clientes
     </Typography>
     </Box>
-    <Stack display={"flex"} flexDirection={"row"} gap={2} mr={3} >
+    <Stack display={"flex"} flexDirection={{ xs: "column", md: "row" }} gap={{ xs: 1, md: 2 }} mr={{ xs: 0, md: 3 }} flexWrap="wrap" >
     <TextField
     placeholder="Buscar grupo..."
     onChange={(e) => {
@@ -169,7 +171,7 @@ setOpenGroupClientModal(true);//  abre modal
     }}
     size="small"
     sx={{
-    width: 270,
+    width: { xs: "100%", md: 270 },
 
     // INPUT ROOT
     "& .MuiOutlinedInput-root": {
@@ -267,6 +269,7 @@ setOpenGroupClientModal(true);//  abre modal
     maxHeight: "100%",
     mr: 5,
     mt: 2,
+    overflowX: "auto",
     }}
     >
     <Table
@@ -275,6 +278,7 @@ setOpenGroupClientModal(true);//  abre modal
     bgcolor: "transparent",
     borderCollapse: "separate",
     borderSpacing: "0 8px",
+    minWidth: 700,
     }}
     >
     {/* HEADER */}
@@ -401,6 +405,7 @@ setOpenGroupClientModal(true);//  abre modal
     alignItems="center"
     gap={2}
     mb={2}
+    flexWrap="wrap"
     >
     {/* LEFT */}
     <PaginationButton

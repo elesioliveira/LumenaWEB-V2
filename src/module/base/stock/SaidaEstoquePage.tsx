@@ -24,11 +24,13 @@ import { fetchFornecedor, fetchStock, fetchStockDetails } from "./repository/Sto
 import type { MovimetDetails, StockEntradaEntity } from "./entity/StockEntity";
 import { ModalDeleteMovById } from "./componentes/ModalDeleteMov";
 import { ModalViewMovimentation } from "./componentes/ModalViewMovimentation";
+import { useResponsive } from "../../../shared/useResponsive";
 
 
 
 
 export function SaidaEstoque() {
+  const { isMobile } = useResponsive();
   const [openModalSaida, setModalSaida] = useState(false);
   const [fornecedores, setFornecedores] = useState<FornecedorProduct[]>([]);
 const [movimentDelete, setMovimentDelete] =useState<number |null>(null);
@@ -160,8 +162,8 @@ const getFornecedor = async () => {
       }}
       />
     <Box flexDirection={"column"}>
-    <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={2}>
-    <Stack display={"flex"} flexDirection={"row"} flexGrow={2} justifyContent={"space-between"} mr={2} alignContent={"center"} justifyItems={"center"} alignItems={"center"} >
+    <Box display={"flex"} flexDirection={"column"} flexGrow={2} pl={{ xs: 0, md: 2 }}>
+    <Stack display={"flex"} flexDirection={{ xs: "column", md: "row" }} flexGrow={2} justifyContent={"space-between"} mr={2} alignContent={"center"} justifyItems={"center"} alignItems={{ xs: "stretch", md: "center" }} flexWrap="wrap" gap={{ xs: 1, md: 2 }} >
     <Box display={"flex"} flexDirection={"column"}>
     <Typography sx={{fontWeight:"bold", fontSize:"1.5rem", color:"#ffff"}}>
     Saída de Estoque
@@ -224,6 +226,7 @@ const getFornecedor = async () => {
     maxHeight: "100%",
     mr: 5,
     mt: 2,
+    overflowX: "auto",
     }}
     >
     <Table
@@ -232,6 +235,7 @@ const getFornecedor = async () => {
     bgcolor: "transparent",
     borderCollapse: "separate",
     borderSpacing: "0 8px",
+    minWidth: 700,
     }}
     >
     {/* HEADER */}
@@ -322,6 +326,7 @@ const getFornecedor = async () => {
     alignItems="center"
     gap={2}
     mb={2}
+    flexWrap="wrap"
     >
     {/* LEFT */}
     <PaginationButton

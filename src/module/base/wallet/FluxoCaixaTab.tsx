@@ -25,6 +25,7 @@ import { SummaryCard } from "./components/SummaryCardComponent";
 import { movimentacoesWalletMock, optionsPeriodoMovWallet, FluxoSummaryCardMock, typeOfCategoryList, typeOfReceberList } from "./mocks/WalletMocks";
 import { BaseSelect } from "./components/SizedSelect";
 import { getStatusNeonBgColor, getStatusNeonFontStyle } from "./helpers/WallletHelpers";
+import { useResponsive } from "../../../shared/useResponsive";
 import { fetchDashBoardRegistroResumo, fetchDashBoardResumo } from "./repository/WalletRepository";
 import type { DashBoardResumo, DashBoardResumoRegistro } from "./entity/WalletEntity";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -34,6 +35,7 @@ import dayjs from "dayjs";
 
 
 export function MovimentacaoWalletTab() {
+const { isMobile } = useResponsive();
 const [openClientModal, setOpenClientModal] = useState(false);
 const [toastOpen, setToastOpen] = useState(false);
 const [toastMsg, setToastMsg] = useState("");
@@ -175,7 +177,7 @@ selectStatus,
     </Alert>
     </Snackbar>
     
-    <Stack display={"flex"} flexDirection={"row"} flexGrow={1} gap={2} mr={2} mb={4}>
+    <Stack display={"flex"} flexDirection={{ xs: "column", sm: "row" }} flexWrap={"wrap"} flexGrow={1} gap={2} sx={{ mr: { xs: 1, md: 2 } }} mb={4}>
       <SummaryCard
       title={'Total Entradas'}
       value={maskCurrency(dashboard?.total_entrada ?? 0)}
@@ -201,14 +203,14 @@ selectStatus,
       icon={ <DollarSign color={primaryColor} />}
       />
     </Stack>
-    <Box display={"flex"} flexDirection={"column"} flexGrow={1} ml={2}>
+    <Box display={"flex"} flexDirection={"column"} flexGrow={1} sx={{ ml: { xs: 0, md: 2 } }}>
         <Stack display={"flex"} flexDirection={"row"} gap={1} alignContent={"center"} alignItems={"center"}>
             <Funnel/>
             <Typography fontWeight={600} display={"flex"} color={"white"} fontSize={"1.6rem"}>
                 Filtros
             </Typography>
         </Stack>
-    <Stack display={"flex"} flexDirection={"row"} gap={2} mr={2} mt={2} alignContent={"center"} alignItems={"center"}>
+    <Stack display={"flex"} flexDirection={{ xs: "column", md: "row" }} flexWrap={"wrap"} gap={2} sx={{ mr: { xs: 1, md: 2 } }} mt={2} alignContent={"center"} alignItems={"center"}>
     <TextField
     placeholder="Buscar cliente..."
     variant="outlined"
@@ -504,9 +506,9 @@ slotProps={{
     </Stack>
     </Box>
     <Box flexDirection={"column"} >
-    <Box display={"flex"} flexDirection={"column"} flexGrow={1} ml={2}>
+    <Box display={"flex"} flexDirection={"column"} flexGrow={1} sx={{ ml: { xs: 0, md: 2 } }}>
     {/* Tabela */}
-    <Box mr={2} flexGrow={1}>
+    <Box sx={{ mr: { xs: 1, md: 2 } }} flexGrow={1}>
     {/* LOADING */}
     {loading && (
     <Stack
@@ -540,6 +542,7 @@ slotProps={{
     maxHeight: "100%",
     mr: 5,
     mt: 2,
+    overflowX: "auto",
     }}
     >
     <Table
@@ -548,6 +551,7 @@ slotProps={{
     bgcolor: "transparent",
     borderCollapse: "separate",
     borderSpacing: "0 8px",
+    minWidth: 700,
     }}
     >
     {/* HEADER */}

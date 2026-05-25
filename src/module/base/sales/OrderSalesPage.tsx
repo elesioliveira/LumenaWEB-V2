@@ -30,12 +30,14 @@ import { ModalViewSale } from "./components/SalesComponents";
 import { useSales } from "./provider/SalesProvider";
 import { CurrentSaleViewEnum } from "./enums/SalesEnums";
 import { ModalCancelSale } from "./components/SalesModalCancel";
+import { useResponsive } from "../../../shared/useResponsive";
 
 
 
 
 export function OrderSalePage() {
-const { hydrateFromApi } = useSales();
+const { isMobile } = useResponsive();
+const { hydrateFromApi, onChangedCurrentPage } = useSales();
 const [openSaleModal, setOpenDetailsModal] = useState(false);
 const [openModalCancel, setOpenCancelModal] = useState(false);
 const [toastOpen, setToastOpen] = useState(false);
@@ -211,8 +213,8 @@ useEffect(()=> {
     </Snackbar>
     <Box flexDirection={"column"}>
    
-    <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={2}>
-    <Stack display={"flex"} flexDirection={"row"} flexGrow={2} justifyContent={"space-between"} >
+    <Box display={"flex"} flexDirection={"column"} flexGrow={2} pl={{ xs: 0, md: 2 }}>
+    <Stack display={"flex"} flexDirection={{ xs: "column", md: "row" }} flexGrow={2} justifyContent={"space-between"} flexWrap="wrap" gap={{ xs: 1, md: 2 }} >
     <Box display={"flex"} flexDirection={"column"}>
     <Typography sx={{fontWeight:"bold", fontSize:"1.5rem", color:"#ffff"}}>
     Pedidos de Venda
@@ -222,19 +224,19 @@ useEffect(()=> {
     </Typography>
     </Box>
     </Stack>
-    <Stack display={"flex"} flexDirection={"row"} flexGrow={1} justifyContent={"space-between"} mt={8} mb={3} mr={2} justifyItems={"start"}  alignItems={"start"} alignContent={"start"}>
+    <Stack display={"flex"} flexDirection={{ xs: "column", md: "row" }} flexGrow={1} justifyContent={"space-between"} mt={8} mb={3} mr={2} justifyItems={"start"} alignItems={{ xs: "stretch", md: "start" }} alignContent={"start"} flexWrap="wrap" gap={{ xs: 1, md: 0 }}>
     <Stack display={"flex"} flexDirection={"row"}  gap={1}  mb={1} >
     <ShoppingCart size={30} color="#ffff" />
     <Typography sx={{fontWeight:"bold", fontSize:"1.5rem", color:"#FFFF"}}>
     Lista de Pedidos
     </Typography>
     </Stack>
-    <Stack display={"flex"} flexDirection={"row"} gap={1.2}>
+    <Stack display={"flex"} flexDirection={{ xs: "column", md: "row" }} gap={1.2} flexWrap="wrap">
 <TextField
   select
 sx={{
   ...textFieldStyle,
-  width: 200,
+  width: { xs: "100%", md: 200 },
 
   "& .MuiOutlinedInput-input": {
     padding: "6px 10px",
@@ -272,7 +274,7 @@ sx={{
       }}
     size="small"
     sx={{
-    width: 270,
+    width: { xs: "100%", md: 270 },
 
     // INPUT ROOT
     "& .MuiOutlinedInput-root": {
@@ -313,9 +315,7 @@ sx={{
     boxShadow="0 0 20px rgba(245,159,10,0.35)"
     background="linear-gradient(to right, #f59f0a 0%, #e68a00 100%)"
     startIcon={<Plus />}
-    onClick={async() => {
-    await debounceSearch();
-    }}
+    onClick={() => onChangedCurrentPage(CurrentSaleViewEnum.NewSale)}
   />
     </Stack>
     </Stack>
@@ -355,6 +355,7 @@ sx={{
     maxHeight: "100%",
     mr: 5,
     mt: 2,
+    overflowX: "auto",
     }}
     >
     <Table
@@ -363,6 +364,7 @@ sx={{
     bgcolor: "transparent",
     borderCollapse: "separate",
     borderSpacing: "0 8px",
+    minWidth: 900,
     }}
     >
     {/* HEADER */}
@@ -479,6 +481,7 @@ sx={{
     alignItems="center"
     gap={2}
     mb={2}
+    flexWrap="wrap"
     >
     {/* LEFT */}
     <PaginationButton

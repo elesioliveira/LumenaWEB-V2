@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Box, Stack, Toolbar, Typography } from "@mui/material";
 import { bgView, bordasComponents, colorOpacity } from "../../../theme/theme";
+import { useResponsive } from "../../../shared/useResponsive";
 import {  User2 } from "lucide-react";
 import { CurrentWalletTabEnum } from "./enums/WalletEnums";
 import { div } from "framer-motion/m";
@@ -29,6 +30,7 @@ const currentPageStock = [
 ];
 
 export function ModuleWallet() {
+const { isMobile } = useResponsive();
 const [currentPage, setPage] = useState<CurrentWalletTabEnum>(CurrentWalletTabEnum.FluxoCaixa);
 
   const currentPageView = () => {
@@ -57,31 +59,30 @@ const handleOnChagentPage = (page: CurrentWalletTabEnum) => {
   flexGrow: 1,
   bgcolor: bgView,
   flexDirection:"column",
-  pl:2.5,
-  // SCROLL ÚNICO AQUI
+  pl: { xs: 1, md: 2.5 },
   overflowY: "auto",
   overflowX: "hidden",
-
-  // ESSENCIAL para Flexbox
   minHeight: 0,
   }}
   >
   <Toolbar></Toolbar>
-  <Typography fontWeight={600} color={"white"} fontSize={"1.8rem"} mt={4} ml={2}>
+  <Typography fontWeight={600} color={"white"} fontSize={{ xs: "1.4rem", md: "1.8rem" }} mt={4} ml={2}>
     Financeiro
   </Typography>
-  <Typography fontWeight={300} color={colorOpacity} fontSize={"1.2rem"} mt={0} ml={2}>
+  <Typography fontWeight={300} color={colorOpacity} fontSize={{ xs: "0.9rem", md: "1.2rem" }} mt={0} ml={2}>
    Gerencie suas finanças, contas a pagar e receber
   </Typography>
   <Stack
   direction="row"
   flexGrow={1}
-  gap={5}
-  ml={2}
-  height={100}
+  gap={{ xs: 2, md: 5 }}
+  ml={{ xs: 0, md: 2 }}
+  height={{ xs: 60, md: 100 }}
   sx={{
   borderBottom: bordasComponents,
   mb: 3,
+  overflowX: "auto",
+  "&::-webkit-scrollbar": { display: "none" },
   }}
   >
 {currentPageStock.map((item) => {
@@ -92,7 +93,8 @@ const handleOnChagentPage = (page: CurrentWalletTabEnum) => {
       key={item.label}
       onClick={() => handleOnChagentPage(item.page)}
       sx={{
-        width: 150,
+        minWidth: { xs: "auto", md: 150 },
+        px: { xs: 2, md: 0 },
         height: "100%",
         cursor: "pointer",
         display: "flex",

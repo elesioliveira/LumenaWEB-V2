@@ -27,11 +27,13 @@ import type { FornecedorProduct } from "../produto/produto/entity/ProductEntity"
 import type { MovimetDetails, StockEntradaEntity } from "./entity/StockEntity";
 import { ModalDeleteMovById } from "./componentes/ModalDeleteMov";
 import { ModalViewMovimentation } from "./componentes/ModalViewMovimentation";
+import { useResponsive } from "../../../shared/useResponsive";
 
 
 
 
 export function EntradaEstoque() {
+const { isMobile } = useResponsive();
 const [openModalCreate, setModalCreate] = useState(false);
 const [openModalDelete, setOpenModalDelete] = useState(false);
 const [movimentDelete, setMovimentDelete] =useState<number |null>(null);
@@ -172,8 +174,8 @@ useEffect(() => {
     </Alert>
     </Snackbar>
     <Box flexDirection={"column"}>
-    <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={2}>
-    <Stack display={"flex"} flexDirection={"row"} flexGrow={2} justifyContent={"space-between"} mr={2} alignContent={"center"} justifyItems={"center"} alignItems={"center"} >
+    <Box display={"flex"} flexDirection={"column"} flexGrow={2} pl={{ xs: 0, md: 2 }}>
+    <Stack display={"flex"} flexDirection={{ xs: "column", md: "row" }} flexGrow={2} justifyContent={"space-between"} mr={2} alignContent={"center"} justifyItems={"center"} alignItems={{ xs: "stretch", md: "center" }} flexWrap="wrap" gap={{ xs: 1, md: 2 }} >
     <Box display={"flex"} flexDirection={"column"}>
     <Typography sx={{fontWeight:"bold", fontSize:"1.5rem", color:"#ffff"}}>
     Entrada de Notas
@@ -235,6 +237,7 @@ useEffect(() => {
     maxHeight: "100%",
     mr: 5,
     mt: 2,
+    overflowX: "auto",
     }}
     >
     <Table
@@ -243,6 +246,7 @@ useEffect(() => {
     bgcolor: "transparent",
     borderCollapse: "separate",
     borderSpacing: "0 8px",
+    minWidth: 700,
     }}
     >
     {/* HEADER */}
@@ -333,6 +337,7 @@ useEffect(() => {
     alignItems="center"
     gap={2}
     mb={2}
+    flexWrap="wrap"
     >
     {/* LEFT */}
     <PaginationButton

@@ -24,9 +24,11 @@ import { formatDateTime } from "../../../../shared/MaskUtils";
 import type { MarkEntity } from "./entity/MarkEntity";
 import { getMark, updateMark } from "./repository/MarkRepository";
 import { PaginationButton } from "../fornecedor/components/PaginationButton";
+import { useResponsive } from "../../../../shared/useResponsive";
 import { CreateOrUpdateMarkModal } from "./components/CreateOrUpdateMark";
 
 export function MarkPage() {
+  const { isMobile } = useResponsive();
   const [openMarkModal, setOpenMarkModal] = useState(false);
 const [selectedMark, selectMark] =useState<MarkEntity | null>(null);
 const [markes, setMarkes] = useState<MarkEntity[]>([]);
@@ -141,12 +143,12 @@ page * rowsPerPage + rowsPerPage
     onSuccess={() => fetchCategories(searchRef.current)}   //  recarrega lista
     mark={selectedMark}  //  passa via props
     />
-    <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={2}>
-    <Stack display={"flex"} flexDirection={"row"} flexGrow={2} justifyContent={"space-between"} >
+    <Box display={"flex"} flexDirection={"column"} flexGrow={2} sx={{ pl: { xs: 1, md: 2 } }}>
+    <Stack display={"flex"} direction={{ xs: "column", md: "row" }} flexGrow={2} justifyContent={"space-between"} flexWrap="wrap" gap={{ xs: 1, md: 2 }} >
     <Typography sx={{fontWeight:"bold", fontSize:"1.5rem", color:"#ffff"}}>
     Marcas
     </Typography>
-    <Stack display={"flex"} flexDirection={"row"} gap={2} mr={3} >
+    <Stack display={"flex"} direction={{ xs: "column", md: "row" }} gap={{ xs: 1, md: 2 }} mr={3} flexWrap="wrap" >
     <TextField
     placeholder="Buscar marca..."
     onChange={(e) => {
@@ -155,7 +157,7 @@ page * rowsPerPage + rowsPerPage
     }}
     size="small"
     sx={{
-    width: 270,
+    width: { xs: "100%", md: 270 },
 
     // INPUT ROOT
     "& .MuiOutlinedInput-root": {
@@ -197,7 +199,7 @@ page * rowsPerPage + rowsPerPage
     onClick={() => setOpenMarkModal(true)}
     sx={{
     height: 40,
-    width:100,
+    width: { xs: "100%", md: 100 },
     px: 3,
     color: "#fff",
     fontWeight: 600,
@@ -253,6 +255,7 @@ page * rowsPerPage + rowsPerPage
     maxHeight: "100%",
     mr: 5,
     mt: 2,
+    overflowX: "auto",
     }}
     >
     <Table
@@ -261,6 +264,7 @@ page * rowsPerPage + rowsPerPage
     bgcolor: "transparent",
     borderCollapse: "separate",
     borderSpacing: "0 8px",
+    minWidth: 700,
     }}
     >
     {/* HEADER */}
@@ -369,6 +373,7 @@ page * rowsPerPage + rowsPerPage
     alignItems="center"
     gap={2}
     mb={2}
+    flexWrap="wrap"
     >
     {/* LEFT */}
     <PaginationButton

@@ -42,7 +42,9 @@ export function ModalViewMovimentation({
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: 820,
+          width: { xs: "95vw", sm: "90vw", md: 820 },
+          maxHeight: "90vh",
+          overflowY: "auto",
           bgcolor: bgColorCardsDashBoard,
           borderRadius: 2,
           gap:0,
@@ -123,7 +125,7 @@ export function ModalViewMovimentation({
       <Typography color={colorOpacity} fontWeight={400} fontSize={"1.2rem"} mt={4}>
       Itens
       </Typography>
-      <TableContainer sx={{ maxHeight: "450px",  mt:0}}>
+      <TableContainer sx={{ maxHeight: "450px",  mt:0, overflowX: "auto" }}>
       <Table
         stickyHeader//se tirar some o header da table
         aria-label="Pedidos Recentes"

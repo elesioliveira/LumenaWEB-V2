@@ -26,12 +26,14 @@ import { categoriasCoresView, categoriaSummaryCardMock, tipoReceita, typeOfCateg
 import { BaseSelect } from "./components/SizedSelect";
 import { PrimaryActionButton } from "../../../shared/PrimaryActionButtonProps";
 import { getCategoriabgColorNeonStylr, getCategoriaFontNeonStylr,  } from "./helpers/WallletHelpers";
+import { useResponsive } from "../../../shared/useResponsive";
 import { CreateOrUpdateCategoryWallet } from "./components/ModalCreateOrUpdateCategory";
 import { fetchCategory, fetchCategoryActives, submitUpdateCategory } from "./repository/WalletRepository";
 
 
 
 export function CategoriaTab() {
+const { isMobile } = useResponsive();
 const [categorySelected, setCategoryWallet] = useState<CategoryDTO | null>(null);
 const [openModal, setOpenModal] = useState<boolean>(false);
 const [toastOpen, setToastOpen] = useState(false);
@@ -176,7 +178,7 @@ useEffect(()=> {
     }}   //  recarrega lista
     category={categorySelected}  //  passa via props
     />
-    <Stack display={"flex"} flexDirection={"row"} flexGrow={1} gap={2} mr={2} mb={4}>
+    <Stack display={"flex"} flexDirection={{ xs: "column", sm: "row" }} flexWrap={"wrap"} flexGrow={1} gap={2} sx={{ mr: { xs: 1, md: 2 } }} mb={4}>
     <Box
       display="flex"
       flex={1}
@@ -287,15 +289,15 @@ useEffect(()=> {
       </Typography>
     </Box>
     </Stack>
-    <Box display={"flex"} flexDirection={"column"} flexGrow={1} ml={2}>
+    <Box display={"flex"} flexDirection={"column"} flexGrow={1} sx={{ ml: { xs: 0, md: 2 } }}>
         <Stack display={"flex"} flexDirection={"row"} gap={1} alignContent={"center"} alignItems={"center"}>
             <Funnel/>
             <Typography fontWeight={600} display={"flex"} color={"white"} fontSize={"1.6rem"}>
                 Filtros
             </Typography>
         </Stack>
-    <Stack display={"flex"}  flexGrow={1} flexDirection={"row"} gap={2} mr={4} mt={2} alignContent={"center"} alignItems={"start"} justifyContent={"space-between"}>
-    <Stack display={"flex"} flexDirection={"row"}gap={2}  alignContent={"center"} alignItems={"start"}>
+    <Stack display={"flex"}  flexGrow={1} flexDirection={{ xs: "column", md: "row" }} flexWrap={"wrap"} gap={2} sx={{ mr: { xs: 1, md: 4 } }} mt={2} alignContent={"center"} alignItems={"start"} justifyContent={"space-between"}>
+    <Stack display={"flex"} flexDirection={{ xs: "column", md: "row" }} flexWrap={"wrap"} gap={2}  alignContent={"center"} alignItems={"start"}>
     <TextField
     placeholder="Buscar categoria..."
     variant="outlined"
@@ -307,7 +309,8 @@ useEffect(()=> {
     }}
     sx={{
     // INPUT ROOT
-    minWidth:400,
+    minWidth:{ xs: 0, md: 400 },
+    width: "100%",
         transition: "0.3s ease",
         "&:hover": {
           boxShadow: "0 0 25px rgba(40, 61, 107, 0.6)",
@@ -367,7 +370,7 @@ useEffect(()=> {
       value={typeOfCategory}
       height={45}
       sx={{
-        width:200
+        width:{ xs: "100%", sm: 200 }
       }}
       onChange={(e) => {
         jaCarregouRefTypeOfStatus.current = true;
@@ -398,7 +401,7 @@ useEffect(()=> {
     background="linear-gradient(to right, #f59f0a 0%, #e68a00 100%)"
     startIcon={<Plus />}
     sx={{
-      width:200,
+      width:{ xs: "100%", sm: 200 },
       height:50,
     }}
     onClick={async() => setOpenModal(true)}
@@ -406,9 +409,9 @@ useEffect(()=> {
     </Stack>
     </Box>
     <Box flexDirection={"column"} >
-    <Box display={"flex"} flexDirection={"column"} flexGrow={1} ml={2}>
+    <Box display={"flex"} flexDirection={"column"} flexGrow={1} sx={{ ml: { xs: 0, md: 2 } }}>
     {/* Tabela */}
-    <Box mr={2} flexGrow={1}>
+    <Box sx={{ mr: { xs: 1, md: 2 } }} flexGrow={1}>
     {/* LOADING */}
     {loading && (
     <Stack
@@ -442,6 +445,7 @@ useEffect(()=> {
     maxHeight: "100%",
     mr: 5,
     mt: 2,
+    overflowX: "auto",
     }}
     >
     <Table
@@ -450,6 +454,7 @@ useEffect(()=> {
     bgcolor: "transparent",
     borderCollapse: "separate",
     borderSpacing: "0 8px",
+    minWidth: 700,
     }}
     >
     {/* HEADER */}

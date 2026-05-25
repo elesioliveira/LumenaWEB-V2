@@ -24,6 +24,7 @@ import { fetchEnderecoByCep } from "../../client/repository/ClientRepository";
 import { maskCEP, maskTelefone } from "../../../../shared/MaskUtils";
 import { SecondaryActionButton } from "../../../../shared/SecondaryActionButton";
 import { urlBase, urlImages } from "../../../../shared/HttpManager";
+import { useResponsive } from "../../../../shared/useResponsive";
 
 
 
@@ -38,8 +39,7 @@ const [toastType, setToastType] = useState<"success" | "error">("error");
 const searchRef = useRef("");
 const [loading, setLoading] = useState(true);
 const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-const theme = useTheme(); // obrigatório
-const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+const { isMobile } = useResponsive();
 const [logoPreview, setLogoPreview] = useState<string | null>(null);
 const fileInputRef = useRef<HTMLInputElement | null>(null);
 const [selectedLogoFile, setSelectedLogoFile] = useState<File | null>(null);

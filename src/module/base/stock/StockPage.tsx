@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Box, Stack, Toolbar, Typography } from "@mui/material";
 import { bgView, bordasComponents } from "../../../theme/theme";
+import { useResponsive } from "../../../shared/useResponsive";
 import { ClipboardList, FileInput, FileOutput } from "lucide-react";
 import { CurrentFornecedorPage } from "./enum/enums";
 import { MovimentPage } from "./MovimentPage";
@@ -27,6 +28,7 @@ const currentPageStock = [
 ];
 
 export function StockPage() {
+const { isMobile } = useResponsive();
 const [currentPage, setPage] = useState<CurrentFornecedorPage>(
 CurrentFornecedorPage.Movimemovement
 );
@@ -57,12 +59,9 @@ const handleOnChagentPage = (page: CurrentFornecedorPage) => {
   flexGrow: 1,
   bgcolor: bgView,
   flexDirection:"column",
-  pl:2.5,
-  // SCROLL ÚNICO AQUI
+  pl: { xs: 1, md: 2.5 },
   overflowY: "auto",
   overflowX: "hidden",
-
-  // ESSENCIAL para Flexbox
   minHeight: 0,
   }}
   >
@@ -70,13 +69,15 @@ const handleOnChagentPage = (page: CurrentFornecedorPage) => {
   <Stack
   direction="row"
   flexGrow={1}
-  gap={5}
-  ml={2}
-  height={100}
+  gap={{ xs: 2, md: 5 }}
+  ml={{ xs: 0, md: 2 }}
+  height={{ xs: 60, md: 100 }}
   mt={2}
   sx={{
   borderBottom: bordasComponents,
   mb: 3,
+  overflowX: "auto",
+  "&::-webkit-scrollbar": { display: "none" },
   }}
   >
 {currentPageStock.map((item) => {
@@ -88,7 +89,8 @@ const handleOnChagentPage = (page: CurrentFornecedorPage) => {
       key={item.label}
       onClick={() => handleOnChagentPage(item.page)}
       sx={{
-        width: 150,
+        minWidth: { xs: "auto", md: 150 },
+        px: { xs: 2, md: 0 },
         height: "100%",
         cursor: "pointer",
         display: "flex",

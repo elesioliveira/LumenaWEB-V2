@@ -28,6 +28,7 @@ import { movimentacoesWalletMock, optionsPeriodoMovWallet, FluxoSummaryCardMock,
 import { BaseSelect } from "./components/SizedSelect";
 import { PrimaryActionButton } from "../../../shared/PrimaryActionButtonProps";
 import { getStatusNeonBgColor, getStatusNeonFontStyle } from "./helpers/WallletHelpers";
+import { useResponsive } from "../../../shared/useResponsive";
 import { TableActionsMenuContaPagar } from "./components/TableActionsMenuContaPagar";
 import { CreateOrUpdateContaReceberModal } from "./components/ModalContaReceber";
 import { CreateOrUpdateContaPagar } from "./components/DialogContaPagar";
@@ -38,6 +39,7 @@ import { VisualizarContaDialog } from "./components/VisualizarContaDialog";
 
 
 export function ContasPagarTab() {
+const { isMobile } = useResponsive();
 const [openClientModal, setOpenClientModal] = useState(false);
 const [visualizarConta, setVisualizarConta] = useState(false);
 const [contaSelecionada, setContaSelecionada] = useState<ContaReceberEntity | null>(null);
@@ -215,7 +217,7 @@ const fetchDashBoard = async () => {
     }}
     conta={contaSelecionada}
     />
-    <Stack display={"flex"} flexDirection={"row"} flexGrow={1} gap={2} mr={2} mb={4}>
+    <Stack display={"flex"} flexDirection={{ xs: "column", sm: "row" }} flexWrap={"wrap"} flexGrow={1} gap={2} sx={{ mr: { xs: 1, md: 2 } }} mb={4}>
       <SummaryCard
       title='Total Pendente'
       value={maskCurrency(dashBoard?.total_aberto ?? 0)}
@@ -231,15 +233,15 @@ const fetchDashBoard = async () => {
       borderStyle={bordasComponents}
       />
     </Stack>
-    <Box display={"flex"} flexDirection={"column"} flexGrow={1} ml={2}>
+    <Box display={"flex"} flexDirection={"column"} flexGrow={1} sx={{ ml: { xs: 0, md: 2 } }}>
         <Stack display={"flex"} flexDirection={"row"} gap={1} alignContent={"center"} alignItems={"center"}>
             <Funnel/>
             <Typography fontWeight={600} display={"flex"} color={"white"} fontSize={"1.6rem"}>
                 Filtros
             </Typography>
         </Stack>
-    <Stack display={"flex"}  flexGrow={1} flexDirection={"row"} gap={2} mr={4} mt={2} alignContent={"center"} alignItems={"start"} justifyContent={"space-between"}>
-    <Stack display={"flex"} flexDirection={"row"}gap={2}  alignContent={"center"} alignItems={"start"}>
+    <Stack display={"flex"}  flexGrow={1} flexDirection={{ xs: "column", md: "row" }} flexWrap={"wrap"} gap={2} sx={{ mr: { xs: 1, md: 4 } }} mt={2} alignContent={"center"} alignItems={"start"} justifyContent={"space-between"}>
+    <Stack display={"flex"} flexDirection={{ xs: "column", md: "row" }} flexWrap={"wrap"} gap={2}  alignContent={"center"} alignItems={"start"}>
     <TextField
     placeholder="Buscar contas..."
     variant="outlined"
@@ -251,7 +253,8 @@ const fetchDashBoard = async () => {
     }}
     sx={{
     // INPUT ROOT
-    minWidth:400,
+    minWidth:{ xs: 0, md: 400 },
+    width: "100%",
         transition: "0.3s ease",
         "&:hover": {
           boxShadow: "0 0 25px rgba(40, 61, 107, 0.6)",
@@ -311,7 +314,7 @@ const fetchDashBoard = async () => {
       value={typeOfPayment}
       height={45}
       sx={{
-        width:200
+        width:{ xs: "100%", sm: 200 }
       }}
       onChange={  (e) => {
         jaCarregouRefTypeOfStatus.current = true;
@@ -342,7 +345,7 @@ const fetchDashBoard = async () => {
     background="linear-gradient(to right, #f59f0a 0%, #e68a00 100%)"
     startIcon={<Plus />}
     sx={{
-      width:200,
+      width:{ xs: "100%", sm: 200 },
       height:50,
     }}
     onClick={async() => handleContaSelecionada(null, true)}
@@ -350,9 +353,9 @@ const fetchDashBoard = async () => {
     </Stack>
     </Box>
     <Box flexDirection={"column"} >
-    <Box display={"flex"} flexDirection={"column"} flexGrow={1} ml={2}>
+    <Box display={"flex"} flexDirection={"column"} flexGrow={1} sx={{ ml: { xs: 0, md: 2 } }}>
     {/* Tabela */}
-    <Box mr={2} flexGrow={1}>
+    <Box sx={{ mr: { xs: 1, md: 2 } }} flexGrow={1}>
     {/* LOADING */}
     {loading && (
     <Stack
@@ -386,6 +389,7 @@ const fetchDashBoard = async () => {
     maxHeight: "100%",
     mr: 5,
     mt: 2,
+    overflowX: "auto",
     }}
     >
     <Table
@@ -394,6 +398,7 @@ const fetchDashBoard = async () => {
     bgcolor: "transparent",
     borderCollapse: "separate",
     borderSpacing: "0 8px",
+    minWidth: 700,
     }}
     >
     {/* HEADER */}

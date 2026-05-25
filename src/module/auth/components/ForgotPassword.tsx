@@ -54,7 +54,7 @@ export function ForgotPassword() {
   }
 
   return (
-    <Box width="100%" sx={{ py: 4, mt: 30 }}>
+    <Box width="100%" sx={{ py: 4, mt: { xs: 8, md: 30 } }}>
       {/* Títulos */}
       <Typography variant="h4" fontWeight="bold" color="#0f1729" mb={1}>
         Esqueceu a senha?

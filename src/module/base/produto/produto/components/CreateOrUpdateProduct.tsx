@@ -1,26 +1,25 @@
-import { Controller, useWatch } from "react-hook-form";
-import { useEffect, useState } from "react";
 import {
   Alert,
+  Autocomplete,
   Box,
   Button,
   CircularProgress,
+  MenuItem,
   Modal,
   Snackbar,
   Stack,
   TextField,
   Typography,
-  MenuItem,
-  Autocomplete,
 } from "@mui/material";
-import { useForm } from "react-hook-form";
-import { bgColorCardsDashBoard, colorOpacity, textFieldStyle } from "../../../../../theme/theme";
-import type { CategoryProduct, FornecedorProduct, MarkProduct, ProductEntity } from "../entity/ProductEntity";
-import type { ProductDTO } from "../dto/ProdutoDTO";
-import { createProduct, fetchProductByGtin, updateProduct } from "../repository/ProductRepository";
+import { useEffect, useRef, useState } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { maskCurrency, parseCurrencyBR } from "../../../../../shared/MaskUtils";
 import { statusAtivoOptions, unidadeMock, type IUnidade } from "../../../../../shared/Mocks";
+import { bgColorCardsDashBoard, colorOpacity, textFieldStyle } from "../../../../../theme/theme";
+import type { ProductDTO } from "../dto/ProdutoDTO";
+import type { CategoryProduct, FornecedorProduct, MarkProduct, ProductEntity } from "../entity/ProductEntity";
 import { getUnidadeDescricao } from "../helprs/Helpers";
+import { createProduct, fetchProductByGtin, updateProduct } from "../repository/ProductRepository";
 
 
 
@@ -57,6 +56,7 @@ const gtin = useWatch({ control, name: "eanCode" });
   const [toastType, setToastType] = useState<"success" | "error">("error");
   const [loadingGtin, setLoadingGtin] = useState(false);
   const [un, setUnidade] = useState<IUnidade | null>(null);
+  const eanInputRef = useRef<HTMLInputElement | null>(null);
 
 useEffect(() => {
   if (product) {
@@ -97,13 +97,12 @@ useEffect(() => {
 
 
 const handleFetchProductByGtin = async () => {
-  // Implementar busca de produto por GTIN se necessário
    if (!gtin) return;
-  if (gtin.length < 13) return;
+  if (!/^\d{8,14}$/.test(gtin.trim())) return;
 
   try {
     setLoadingGtin(true);
-    const result = await fetchProductByGtin(gtin);
+    const result = await fetchProductByGtin(gtin.trim());
     if(!result.success) {
         setToastType("error");
         setToastMsg(result.message ?? "Gtin inválido.");
@@ -113,11 +112,10 @@ const handleFetchProductByGtin = async () => {
     const data = result.data;
     setValue("nome", data.nome ?? '');
   } catch (error) {
-            setToastType("error");
+        setToastType("error");
         setToastMsg("Erro ao buscar produto pelo GTIN.");
         setToastOpen(true);
-  }
-   finally {
+  } finally {
       setLoadingGtin(false);
     }
 }
@@ -136,9 +134,9 @@ const onSubmit = async (data: ProductDTO) => {
       ativo: data.ativo,
       un: unidadeDescricao?? "",
       eanCode: data.eanCode?.trim(),
-      marca_id: Number(data.marca_id),
-      fornecedor_id: Number(data.fornecedor_id),
-      categoria_id: Number(data.categoria_id),
+      marca_id:data.marca_id !== null  && data.marca_id !== "" ? Number(data.marca_id) : null,
+      fornecedor_id:data.fornecedor_id !== null  && data.fornecedor_id !== "" ? Number(data.fornecedor_id) : null,
+      categoria_id:data.categoria_id !== null  && data.categoria_id !== "" ? Number(data.categoria_id) : null,
       preco_custo: parseCurrencyBR(data.preco_custo as unknown as string),
       preco_venda: parseCurrencyBR(data.preco_venda as unknown as string),
       estoque_minimo: Number(data.estoque_minimo),
@@ -188,7 +186,9 @@ flexDirection={"column"}
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    width: 620,
+    width: { xs: "95vw", sm: "90vw", md: 620 },
+    maxHeight: "90vh",
+    overflowY: "auto",
     bgcolor: bgColorCardsDashBoard,
     borderRadius: 2,
     border: "1px solid rgba(40, 61, 107, 0.4)",
@@ -226,15 +226,21 @@ flexDirection={"column"}
 <Stack gap={2} display={"flex"} flexDirection={"row"} flexGrow={1}>
   <Box display={"flex"} flexDirection={"column"} flex={1}>
       {/* Nome */}
-                <Typography fontSize="1rem" fontWeight={400} color="#fff" mb={1} mt={3}>
+  <Typography fontSize="1rem" fontWeight={400} color="#fff" mb={1} mt={3}>
   Código EAN
   </Typography>
     <TextField 
-    
-      placeholder="Código de barras"
+      placeholder="Código de barras (leitor ou manual)"
       {...register("eanCode", { required: "Campo obrigatório" })}
+      inputRef={eanInputRef}
       error={!!errors.eanCode}
       onBlur={handleFetchProductByGtin}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          handleFetchProductByGtin();
+        }
+      }}
       helperText={errors.eanCode?.message}
       sx={textFieldStyle}
     />
@@ -469,7 +475,7 @@ flexDirection={"column"}
 </Stack>
 <Box
   display="grid"
-  gridTemplateColumns="repeat(3, 1fr)"
+  gridTemplateColumns={{ xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" }}
   gap={2}
 >
 <Box display={"flex"} flexDirection={"column"} flex={1}>

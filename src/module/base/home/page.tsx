@@ -1,8 +1,9 @@
 
-  import { Bell, Building2, ChartColumn, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, Layers, LayoutDashboard, LogOut, Package, Pencil, Plus, Ruler, Settings, ShoppingBag, ShoppingCart,  Tag,  ToggleLeft,  ToggleRight,  Trash2,  Truck, User, Users, Users2, Wallet } from "lucide-react";
+  import { Bell, Building2, ChartColumn, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, Layers, LayoutDashboard, LogOut, Menu, Package, Pencil, Plus, Ruler, Settings, ShoppingBag, ShoppingCart,  Tag,  ToggleLeft,  ToggleRight,  Trash2,  Truck, User, Users, Users2, Wallet, X } from "lucide-react";
   import {
   Box,
   Drawer,
+  IconButton,
   List,
   ListItemButton,
   ListItemText,
@@ -16,6 +17,7 @@
   } from "@mui/material";
   import {  useEffect, useMemo, useState } from "react";
   import { bgComponents, bordasComponents, colorOpacity, } from "../../../theme/theme";
+  import { useResponsive } from "../../../shared/useResponsive";
 import { ModuleProduct } from "../produto/ModuleProductPage";
 import { CurrentModulePage } from "./enums/HomeEnums";
 import { DashBoardPage } from "../dashboard/DashBoardPage";
@@ -24,6 +26,7 @@ import { StockPage } from "../stock/StockPage";
 import { ModuleSales } from "../sales/SalesPage";
 import { ModuleWallet } from "../wallet/ModuleWallet";
 import { ModuleCompany } from "../company/ComapnyModule";
+import { AnalysisPage } from "../analysis/AnalysisPage";
 import { useSessionController } from "../../auth/controller/SessionController";
   
 const menuItems = [
@@ -94,6 +97,8 @@ const menuItems = [
 
 export default function HomePage() {
 const [collapsed, setCollapsed] = useState(false);
+const [mobileOpen, setMobileOpen] = useState(false);
+const { isMobile } = useResponsive();
 const { user } = useSessionController();
 const allowedMenuItems = useMemo(() => {
   if (!user) return [];
@@ -103,11 +108,12 @@ const allowedMenuItems = useMemo(() => {
   );
 }, [user]);
 const [currentPage, setPage] = useState<CurrentModulePage>(allowedMenuItems[0].page);
-const drawerWidth = collapsed ? 80 : 280;
+const drawerWidth = isMobile ? 280 : (collapsed ? 80 : 280);
 
 
 const handleOnChagentPage = (page: CurrentModulePage) => {
   setPage(page);
+  if (isMobile) setMobileOpen(false);
 };
 
   const currentModule = () => {
@@ -115,7 +121,7 @@ const handleOnChagentPage = (page: CurrentModulePage) => {
       case CurrentModulePage.Product:
         return <ModuleProduct />;
         case CurrentModulePage.Dashboard:
-        return <DashBoardPage collapsed={collapsed} />;
+        return <DashBoardPage collapsed={collapsed} onNavigate={handleOnChagentPage} />;
         case CurrentModulePage.Stock:
         return <StockPage/>;
         case CurrentModulePage.Client:
@@ -126,6 +132,8 @@ const handleOnChagentPage = (page: CurrentModulePage) => {
         return <ModuleWallet/>;
         case CurrentModulePage.Company:
         return <ModuleCompany/>;
+        case CurrentModulePage.Analysis:
+        return <AnalysisPage/>;
       default:
         return null;
     }
@@ -137,27 +145,33 @@ const handleOnChagentPage = (page: CurrentModulePage) => {
   <Box
   sx={{
   display: "flex",
-  height: "100vh",   // viewport inteira
+  height: "100vh",
   width: "100vw",
-  overflow: "hidden" //  nunca scroll aqui
+  overflow: "hidden",
   }}>
 
   {/* AppBar */}
-  <AppBar position="fixed"   sx={{
+  <AppBar position="fixed" sx={{
   background: "#131d34",
   borderRadius: 0,
   p: 0.35,
-  border: bordasComponents //  borda aplicada corretamente
+  border: bordasComponents,
+  ...(isMobile && { zIndex: (theme: any) => theme.zIndex.drawer + 1 }),
   }}>
   <Toolbar>
+  {isMobile && (
+    <IconButton onClick={() => setMobileOpen(!mobileOpen)} sx={{ mr: 1, color: "#fff" }}>
+      {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+    </IconButton>
+  )}
   <Stack
   direction="row"
   sx={{
-  width: "100%",          // ← ocupa 100% da largura
-  justifyContent: "flex-end", // ← empurra os filhos para a direita
+  width: "100%",
+  justifyContent: "flex-end",
   alignItems: "center",
-  gap:2,
-  borderRadius:0
+  gap: 2,
+  borderRadius: 0,
   }}>
   <Badge badgeContent={4} color="primary">
   <Bell  color={colorOpacity}/>
@@ -180,7 +194,7 @@ const handleOnChagentPage = (page: CurrentModulePage) => {
   }}>
   <User size={22} color={colorOpacity} />
   </Avatar>
-  <Stack flexDirection={"column"} gap={0}>
+  <Stack flexDirection={"column"} gap={0} sx={{ display: { xs: "none", sm: "flex" } }}>
   <Typography gutterBottom variant="body1" component="div" mb={0}mt={0} fontSize={"0.8rem"}>
   Elesio Oliveira
   </Typography>
@@ -197,14 +211,17 @@ const handleOnChagentPage = (page: CurrentModulePage) => {
   
   {/* Drawer lateral */}
   <Drawer
-  variant="permanent"
+  variant={isMobile ? "temporary" : "permanent"}
+  open={isMobile ? mobileOpen : true}
+  onClose={() => setMobileOpen(false)}
+  ModalProps={{ keepMounted: true }}
   sx={{
-  width: drawerWidth,
+  width: isMobile ? 0 : drawerWidth,
   flexShrink: 0,
   whiteSpace: "nowrap",
   transition: "width 0.3s ease",
   "& .MuiDrawer-paper": {
-  width: drawerWidth,
+  width: 280,
   transition: "width 0.3s ease",
   boxSizing: "border-box",
   borderRight: bordasComponents,
@@ -214,6 +231,7 @@ const handleOnChagentPage = (page: CurrentModulePage) => {
   display: "flex",
   flexDirection: "column",
   justifyContent: "space-between",
+  ...(!isMobile && { width: drawerWidth }),
   },
   }}>
   {/* Logo */}
@@ -313,7 +331,7 @@ const handleOnChagentPage = (page: CurrentModulePage) => {
   <Divider sx={{ width: "100%",height:"1px", backgroundColor: "#283d6b", opacity: 0.7}} /> 
   {/* Rodapé do Drawer */}
   <Box sx={{ width: "100%",  display: "flex",pl:2,pr:2, flexDirection: "column", gap: 1 }}>
-  {/* Botão Recolher/Expandir */}
+  {!isMobile && (
   <ListItemButton
   sx={{
   width: "100%",
@@ -341,6 +359,7 @@ const handleOnChagentPage = (page: CurrentModulePage) => {
   />
   )}
   </ListItemButton>
+  )}
 
   {/* Botão Sair */}
   <ListItemButton

@@ -69,7 +69,7 @@ useSessionController.getState().setUser(result.data);
 
 
     return (
-   <Box width="100%" sx={{ py: 2, mt:20}}> {/* aumentei de 400 → 480 */}
+   <Box width="100%" sx={{ py: 2, mt: { xs: 6, md: 20 } }}>
       <Snackbar
             anchorOrigin={{ vertical: "top", horizontal: "center" }}
             open={toastOpen}

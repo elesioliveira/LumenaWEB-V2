@@ -3,7 +3,7 @@ import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import { Controller } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Box,
@@ -14,7 +14,6 @@ import {
   Stack,
   TextField,
   Typography,
-  MenuItem,
   Autocomplete,
   TableContainer,
   TableHead,
@@ -25,15 +24,16 @@ import {
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 import type { FornecedorProduct } from "../../produto/produto/entity/ProductEntity";
-import type { EstoqueItem, MovimentarEstoqueDTO, ProdutoExample } from "../dto/StockDTO";
+import type { EstoqueItem, MovimentarEstoqueDTO } from "../dto/StockDTO";
 import { fetchProductByGtinOrName, submitMovimentarEstoque } from "../repository/StockRepository";
-import { bgColorCardsDashBoard, bgColorDatePicker, bordasComponents, colorNegative, colorOpacity, hoverGlow, primaryColor, textFieldStyle } from "../../../../theme/theme";
-import { mask } from "framer-motion/m";
-import { formatDateTime, maskCEP, maskCurrency } from "../../../../shared/MaskUtils";
-import { Package, Pencil, ToggleRight, Trash2 } from "lucide-react";
+import { bgColorCardsDashBoard, bordasComponents, colorNegative, colorOpacity, hoverGlow, primaryColor, textFieldStyle } from "../../../../theme/theme";
+import { maskCurrency } from "../../../../shared/MaskUtils";
+import { FileUp, Package, Trash2 } from "lucide-react";
 import { cellStyle, cellStyleBold } from "../../../../theme/cellTable";
 import { PrimaryActionButton } from "../../../../shared/PrimaryActionButtonProps";
 import type { StockProduct } from "../entity/StockEntity";
+import { parseNFeXml } from "../utils/parseNFeXml";
+import { createProduct } from "../../produto/produto/repository/ProductRepository";
 
 
 interface CreateEntradaEstoqueModal {
@@ -58,6 +58,7 @@ export function CreateEntradaEstoqueModal({
     handleSubmit,
     reset,    
   control,
+  setValue,
     formState: { errors, isSubmitting },
   } = useForm<MovimentarEstoqueDTO>();
   const [toastOpen, setToastOpen] = useState(false);
@@ -70,6 +71,8 @@ export function CreateEntradaEstoqueModal({
   const [produtos, setProdutos] = useState<StockProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [search, setSearch] = useState("");
+  const [importingXml, setImportingXml] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
 const calcularValorTotal = () =>
   itens.reduce((total, item) => total + (item.sub_total ?? 0), 0);
@@ -85,12 +88,20 @@ const onSubmit = async (data: MovimentarEstoqueDTO) => {
     return;
   }
 
+  const itensInvalidos = itens.filter((i) => !i.produto_id);
+  if (itensInvalidos.length > 0) {
+    setToastType("error");
+    setToastMsg("Existem itens não cadastrados. Remova-os antes de salvar.");
+    setToastOpen(true);
+    return;
+  }
+
   setLoading(true);
 
   try {
     const payload: MovimentarEstoqueDTO = {
       ...data,
-      tipo: "ENTRADA", // ou controlado por select
+      tipo: "ENTRADA",
       valor_total: calcularValorTotal(),
       data_emissao: data.data_emissao
       ? data.data_emissao.toISOString()
@@ -163,6 +174,99 @@ const fetchProducts = async (value: string) => {
   setLoadingProducts(false);
 };
 
+const handleImportXml = async (file: File) => {
+  setImportingXml(true);
+  try {
+    const xmlString = await file.text();
+    const nfeData = parseNFeXml(xmlString);
+
+    setValue("nota", nfeData.numero);
+    if (nfeData.dataEmissao) {
+      setValue("data_emissao", dayjs(nfeData.dataEmissao));
+    }
+
+    const fornecedorMatch = fornecedores.find(
+      (f) =>
+        f.nome.toLowerCase().includes(nfeData.fornecedor.nome.toLowerCase()) ||
+        nfeData.fornecedor.nome.toLowerCase().includes(f.nome.toLowerCase())
+    );
+    if (fornecedorMatch) {
+      setValue("fornecedor_id", fornecedorMatch.id);
+    }
+
+    const importedItens: EstoqueItem[] = [];
+    let produtosCriados = 0;
+
+    for (const item of nfeData.itens) {
+      const searchKey = item.ean || item.nome;
+      const result = await fetchProductByGtinOrName(searchKey);
+
+      if (result?.success && result.data?.length > 0) {
+        const produto: StockProduct = result.data[0];
+        importedItens.push({
+          produto_id: produto.id,
+          nome: produto.nome,
+          quantidade: item.quantidade,
+          valor_unitario: item.valorUnitario,
+          sub_total: item.subtotal,
+        });
+      } else {
+        const newProduct = await createProduct({
+          nome: item.nome,
+          eanCode: item.ean || null,
+          un: item.unidade || "UN",
+          ativo: true,
+          preco_custo: item.valorUnitario,
+          preco_venda: 0,
+          estoque_minimo: 0,
+          marca_id: 0,
+          fornecedor_id: fornecedorMatch?.id ?? 0,
+          categoria_id: 0,
+          descricao: null,
+        });
+
+        if (newProduct?.success && newProduct.data?.id) {
+          produtosCriados++;
+          importedItens.push({
+            produto_id: newProduct.data.id,
+            nome: item.nome,
+            quantidade: item.quantidade,
+            valor_unitario: item.valorUnitario,
+            sub_total: item.subtotal,
+          });
+        } else {
+          importedItens.push({
+            produto_id: null,
+            nome: `[NÃO CADASTRADO] ${item.nome}`,
+            quantidade: item.quantidade,
+            valor_unitario: item.valorUnitario,
+            sub_total: item.subtotal,
+          });
+        }
+      }
+    }
+
+    setItens(importedItens);
+
+    if (produtosCriados > 0) {
+      setToastType("success");
+      setToastMsg(`XML importado! ${produtosCriados} produto(s) criado(s) automaticamente.`);
+      setToastOpen(true);
+    } else {
+      setToastType("success");
+      setToastMsg(`XML importado com ${importedItens.length} item(ns).`);
+      setToastOpen(true);
+    }
+  } catch (error) {
+    setToastType("error");
+    setToastMsg(error instanceof Error ? error.message : "Erro ao processar o XML.");
+    setToastOpen(true);
+  } finally {
+    setImportingXml(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+};
+
 useEffect(() => {
   const timer = setTimeout(() => {
     fetchProducts(search);
@@ -187,27 +291,59 @@ return (
 <Modal open={open} onClose={ onClose}>
 <Box
 display={"flex"}
-maxHeight={"800px"}
 flexDirection={"column"}
     sx={{
     position: "absolute",
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    width: 820,
+    width: { xs: "95vw", sm: "90vw", md: 820 },
+    maxHeight: "90vh",
     bgcolor: bgColorCardsDashBoard,
     borderRadius: 2,
     border: "1px solid rgba(40, 61, 107, 0.4)",
     p: 4,
-    overflow:"auto"
+    overflowY:"auto"
     }}>
-  <Typography fontSize="1.4rem" fontWeight={600} color="#fff" mb={0}>
-    Nova Nota de Entrada
-  </Typography>
-  <Typography fontSize="1rem" fontWeight={400} color={colorOpacity} mb={0}>
-    Preencha os dados da nota fiscal de entrada
-  </Typography>
-{submitLoading && (
+  <Stack direction="row" justifyContent="space-between" alignItems="center">
+    <Box>
+      <Typography fontSize="1.4rem" fontWeight={600} color="#fff" mb={0}>
+        Nova Nota de Entrada
+      </Typography>
+      <Typography fontSize="1rem" fontWeight={400} color={colorOpacity} mb={0}>
+        Preencha os dados da nota fiscal de entrada
+      </Typography>
+    </Box>
+    <Button
+      variant="outlined"
+      startIcon={<FileUp size={18} />}
+      onClick={() => fileInputRef.current?.click()}
+      disabled={importingXml}
+      sx={{
+        color: primaryColor,
+        borderColor: primaryColor,
+        textTransform: "none",
+        fontWeight: 600,
+        "&:hover": {
+          borderColor: primaryColor,
+          backgroundColor: "rgba(245,159,10,0.08)",
+        },
+      }}
+    >
+      {importingXml ? "Processando..." : "Importar XML"}
+    </Button>
+    <input
+      ref={fileInputRef}
+      type="file"
+      accept=".xml"
+      hidden
+      onChange={(e) => {
+        const file = e.target.files?.[0];
+        if (file) handleImportXml(file);
+      }}
+    />
+  </Stack>
+{(submitLoading || importingXml) && (
 <Stack
 height={200}
 alignItems="center"
@@ -219,10 +355,10 @@ Carregando ...
 </Typography>
 </Stack>
 )}
-  {!submitLoading && (<form onSubmit={handleSubmit(onSubmit)}>
+  {!submitLoading && !importingXml && (<form onSubmit={handleSubmit(onSubmit)}>
 <Box 
 display="grid"
-gridTemplateColumns="repeat(2, 1fr)"
+gridTemplateColumns={{ xs: "1fr", sm: "repeat(2, 1fr)" }}
 gap={2} >
 <Box display={"flex"} flexDirection={"column"} flex={1}>
 <Typography fontSize="1rem" fontWeight={400} color="#fff" mb={1} mt={3}>
@@ -502,7 +638,7 @@ Itens da Nota
 </Box>
 
  {itens.length >0}     
-  <TableContainer sx={{ maxHeight: "100%",  mt:0}}>
+  <TableContainer sx={{ maxHeight: "100%",  mt:0, overflowX: "auto" }}>
       <Table
         stickyHeader//se tirar some o header da table
         aria-label="Pedidos Recentes"

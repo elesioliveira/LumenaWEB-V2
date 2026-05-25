@@ -8,6 +8,7 @@ import { CanalVendaPage } from "./canalVenda/CanalVendaPage";
 import { EntregaPage } from "./entrega/EntregaPage";
 import { Box, Stack, Toolbar, Typography } from "@mui/material";
 import { bgView, bordasComponents } from "../../../theme/theme";
+import { useResponsive } from "../../../shared/useResponsive";
 import { Layers, Package, ShoppingCart, Tag, Truck, Users2 } from "lucide-react";
 
 const subModulesProduct = [
@@ -44,6 +45,7 @@ const subModulesProduct = [
 ];
 
 export function ModuleProduct() {
+const { isMobile } = useResponsive();
 const [currentPage, setPage] = useState<CurrentSubModuleProduct>(
 CurrentSubModuleProduct.Product
 );
@@ -80,12 +82,9 @@ const handleOnChagentPage = (page: CurrentSubModuleProduct) => {
   flexGrow: 1,
   bgcolor: bgView,
   flexDirection:"column",
-  pl:2.5,
-  // SCROLL ÚNICO AQUI
+  pl: { xs: 1, md: 2.5 },
   overflowY: "auto",
   overflowX: "hidden",
-
-  // ESSENCIAL para Flexbox
   minHeight: 0,
   }}
   >
@@ -93,13 +92,15 @@ const handleOnChagentPage = (page: CurrentSubModuleProduct) => {
   <Stack
   direction="row"
   flexGrow={1}
-  gap={5}
-  ml={2}
-  height={100}
+  gap={{ xs: 1, md: 5 }}
+  ml={{ xs: 0, md: 2 }}
+  height={{ xs: 50, md: 100 }}
   mt={2}
   sx={{
   borderBottom: bordasComponents,
   mb: 3,
+  overflowX: "auto",
+  "&::-webkit-scrollbar": { display: "none" },
   }}
   >
 {subModulesProduct.map((item) => {
@@ -111,7 +112,8 @@ const handleOnChagentPage = (page: CurrentSubModuleProduct) => {
       key={item.label}
       onClick={() => handleOnChagentPage(item.page)}
       sx={{
-        width: 150,
+        minWidth: { xs: "auto", md: 150 },
+        px: { xs: 1.5, md: 0 },
         height: "100%",
         cursor: "pointer",
         display: "flex",

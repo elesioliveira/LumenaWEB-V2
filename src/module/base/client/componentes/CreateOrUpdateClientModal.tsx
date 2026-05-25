@@ -193,13 +193,13 @@ flexDirection={"column"}
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    width: 820,
-    height: 800,
+    width: { xs: "95vw", sm: "90vw", md: 820 },
+    maxHeight: "90vh",
     bgcolor: bgColorCardsDashBoard,
     borderRadius: 2,
     border: "1px solid rgba(40, 61, 107, 0.4)",
     p: 4,
-    overflow: "auto"
+    overflowY: "auto"
   }}
 >
 <Stack display={"flex"} flexDirection={"row"} flexGrow={1} justifyContent={"space-between"}>
@@ -246,7 +246,7 @@ flexDirection={"column"}
 <Typography fontWeight={400} color={colorOpacity} fontSize={"1rem"} mt={4}>
     Dados Básicos
 </Typography>
-<Box display={"grid"}  gridTemplateColumns="repeat(2, 1fr)" gap={2} flexGrow={1} width={"100%"}>
+<Box display={"grid"}  gridTemplateColumns={{ xs: "1fr", sm: "repeat(2, 1fr)" }} gap={2} flexGrow={1} width={"100%"}>
 <Box display={"flex"} flexDirection={"column"} flex={1}>  
 <Typography fontSize="1rem" fontWeight={400} color="#fff" mb={1} mt={3}>
   Tipo*
@@ -375,7 +375,7 @@ flexDirection={"column"}
 <Typography fontWeight={400} color={colorOpacity} fontSize={"1rem"} mt={4}>
     Contato
 </Typography>
-<Box display={"grid"}  gridTemplateColumns="repeat(2, 1fr)" gap={2} flexGrow={1} width={"100%"}>
+<Box display={"grid"}  gridTemplateColumns={{ xs: "1fr", sm: "repeat(2, 1fr)" }} gap={2} flexGrow={1} width={"100%"}>
 <Box display="flex" flexDirection="column" flex={1}>
   <Typography fontSize="1rem" fontWeight={400} color="#fff" mb={1} mt={3}>
     Email *
@@ -425,7 +425,7 @@ flexDirection={"column"}
   />
 </Box>
 </Box>
-<Stack flexDirection={"row"} display={"flex"} flexGrow={1} mt={4} gap={2}>
+<Stack flexDirection={{ xs: "column", sm: "row" }} display={"flex"} flexGrow={1} mt={4} gap={2}>
 <Box flex={2} flexDirection={"column"}>
 <Typography color={"#FFF"} fontSize={"1.1rem"} fontWeight={400}>
     Rua
@@ -469,7 +469,7 @@ flexDirection={"column"}
   />
 </Box>
 </Stack>
-<Stack flexDirection={"row"} display={"flex"} flexGrow={1} mt={4} gap={2}>
+<Stack flexDirection={{ xs: "column", sm: "row" }} display={"flex"} flexGrow={1} mt={4} gap={2}>
 <Box flex={1} flexDirection={"column"}>
 <Typography color={"#FFF"} fontSize={"1.1rem"} fontWeight={400}>
     Complemento
@@ -513,7 +513,7 @@ flexDirection={"column"}
   />
 </Box>
 </Stack>
-<Box display={"grid"}  gridTemplateColumns="repeat(3, 1fr)" gap={2} flexGrow={1} width={"100%"}>
+<Box display={"grid"}  gridTemplateColumns={{ xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(3, 1fr)" }} gap={2} flexGrow={1} width={"100%"}>
 <Box display={"flex"} flexDirection={"column"} flex={1}>  
 <Typography fontSize="1rem" fontWeight={400} color="#fff" mb={1} mt={3}>
   CEP

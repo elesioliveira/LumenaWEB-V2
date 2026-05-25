@@ -22,11 +22,13 @@ import { bgColorNegative, bgColorPositive, bgColorTopSellers, bgComponents, colo
 import { cellStyle, cellStyleBold } from "../../../../theme/cellTable";
 import { formatDateTime, maskCurrency } from "../../../../shared/MaskUtils";
 import { PaginationButton } from "../fornecedor/components/PaginationButton";
+import { useResponsive } from "../../../../shared/useResponsive";
 import type { FormProductData, ProductEntity } from "./entity/ProductEntity";
 import { getFormProduct, getProduct, updateProduct } from "./repository/ProductRepository";
 import { CreateOrUpdateProductModal } from "./components/CreateOrUpdateProduct";
 
 export function ProdutoPage() {
+  const { isMobile } = useResponsive();
   const [openProductModal, setOpenProductModal] = useState(false);
 const [selectedProduct, setSelectedProduct] =useState<ProductEntity | null>(null);
 const [products, setProducts] = useState<ProductEntity[]>([]);
@@ -158,12 +160,12 @@ const fetchFormProduct = async () => {
   onSuccess={() => fetchEntregas(searchRef.current)}
   produto={selectedProduct}
 />
-    <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={2}>
-    <Stack display={"flex"} flexDirection={"row"} flexGrow={2} justifyContent={"space-between"} >
+    <Box display={"flex"} flexDirection={"column"} flexGrow={2} sx={{ pl: { xs: 1, md: 2 } }}>
+    <Stack display={"flex"} direction={{ xs: "column", md: "row" }} flexGrow={2} justifyContent={"space-between"} flexWrap="wrap" gap={{ xs: 1, md: 2 }} >
     <Typography sx={{fontWeight:"bold", fontSize:"1.5rem", color:"#ffff"}}>
     Produtos
     </Typography>
-    <Stack display={"flex"} flexDirection={"row"} gap={2} mr={3} >
+    <Stack display={"flex"} direction={{ xs: "column", md: "row" }} gap={{ xs: 1, md: 2 }} mr={3} flexWrap="wrap" >
     <TextField
     placeholder="Buscar produtos..."
     onChange={(e) => {
@@ -172,7 +174,7 @@ const fetchFormProduct = async () => {
     }}
     size="small"
     sx={{
-    width: 270,
+    width: { xs: "100%", md: 270 },
 
     // INPUT ROOT
     "& .MuiOutlinedInput-root": {
@@ -214,7 +216,7 @@ const fetchFormProduct = async () => {
     onClick={() => setOpenProductModal(true) }
     sx={{
     height: 40,
-    width:100,
+    width: { xs: "100%", md: 100 },
     px: 3,
     color: "#fff",
     fontWeight: 600,
@@ -270,6 +272,7 @@ const fetchFormProduct = async () => {
     maxHeight: "100%",
     mr: 5,
     mt: 2,
+    overflowX: "auto",
     }}
     >
     <Table
@@ -278,6 +281,7 @@ const fetchFormProduct = async () => {
     bgcolor: "transparent",
     borderCollapse: "separate",
     borderSpacing: "0 8px",
+    minWidth: 900,
     }}
     >
     {/* HEADER */}
@@ -392,6 +396,7 @@ const fetchFormProduct = async () => {
     alignItems="center"
     gap={2}
     mb={2}
+    flexWrap="wrap"
     >
     {/* LEFT */}
     <PaginationButton

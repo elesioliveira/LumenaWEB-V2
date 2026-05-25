@@ -1,4 +1,4 @@
-import Decimal from "decimal.js";
+
 import {  Package, Save, ShoppingCart, Trash2} from "lucide-react";
   import {
   Box,
@@ -22,14 +22,12 @@ import type { Canais, ClientSalesEntity, Entrega, FormSalesEntity, ProductSalesE
 import {  typeOfStatusListNewSales } from "./mocks/SalesMocks";
 import React from "react";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import type { Dayjs } from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { cellStyle, cellStyleBold } from "../../../theme/cellTable";
 import { maskCurrency } from "../../../shared/MaskUtils";
-import type { EstoqueItem } from "../stock/dto/StockDTO";
 import { PrimaryActionButton } from "../../../shared/PrimaryActionButtonProps";
 import { fetchClient, fetchFormSale, fetchProductByGtinOrNameSales, submitNewSale, updateSubmitSale } from "./repository/SalesRepository";
-import type { NewSaleDTO, SaleItensFormDTO } from "./dto/SaleDTO";
+import type { NewSaleDTO } from "./dto/SaleDTO";
 import { useSales } from "./provider/SalesProvider";
 import { CurrentSaleViewEnum } from "./enums/SalesEnums";
 import dayjs from "dayjs";
@@ -76,6 +74,7 @@ const [clients, setClients] = useState<ClientSalesEntity[]>([]);
 const [loading, setLoading] = useState(false);
 const debounceRef = useRef<number | null>(null);
 const debounceProductRef = useRef<number | null>(null);
+const productInputRef = useRef<HTMLInputElement | null>(null);
 
 
 
@@ -209,6 +208,37 @@ const fetchClients = async (search: string) => {
   }
 };
 
+const isGtinLike = (value: string) => /^\d{8,14}$/.test(value.trim());
+
+const addProductToList = (product: ProductSalesEntity, qty: number) => {
+  const jaExiste = itens.some((item) => item.produto_id === product.id);
+  if (jaExiste) {
+    setToastType("error");
+    setToastMsg("Produto já adicionado a lista");
+    setToastOpen(true);
+    return;
+  }
+
+  setItens((prev) => [
+    ...prev,
+    {
+      produto_id: product.id,
+      nome: product.nome,
+      quantidade: qty,
+      valor_unitario: product.preco_venda,
+      sub_total: qty * product.preco_venda,
+    },
+  ]);
+
+  setSelectProduct(null);
+  setQuantidade("");
+  setProducts([]);
+
+  requestAnimationFrame(() => {
+    productInputRef.current?.focus();
+  });
+};
+
 const fetchProducts = async (value: string) => {
   if (!value || value.trim().length < 2) {
     setProducts([]);
@@ -227,10 +257,11 @@ const fetchProducts = async (value: string) => {
 
   const data: ProductSalesEntity[] = result.data;
 
-  // se veio apenas 1 produto (GTIN)
-  if (data.length === 1) {
+  if (data.length === 1 && isGtinLike(value)) {
+    addProductToList(data[0], 1);
+  } else if (data.length === 1) {
     setSelectProduct(data[0]);
-    setProducts(data); // opcional
+    setProducts(data);
   } else {
     setProducts(data);
   }
@@ -265,7 +296,7 @@ useEffect(() => {
     </Snackbar>
     <Box flexDirection={"column"} mb={2}>
    
-    <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={2}>
+    <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={{ xs: 0, md: 2 }}>
     <Box display={"flex"} flexDirection={"column"}>
     <Typography sx={{fontWeight:"bold", fontSize:"1.5rem", color:"#ffff"}}>
     Novo Pedido
@@ -274,7 +305,7 @@ useEffect(() => {
     Crie um novo pedido de venda
     </Typography>
     </Box>
-    <Box display={"flex"} flexDirection={"row"} flexGrow={1} mt={4} gap={4} mr={2}>
+    <Box display={"flex"} flexDirection={{ xs: "column", md: "row" }} flexGrow={1} mt={4} gap={{ xs: 2, md: 4 }} mr={{ xs: 0, md: 2 }}>
       <Box display={"flex"} flex={3.2} flexDirection={"column"} gap={4}>
         <Box display={"flex"} flexDirection={"column"} p={4} width="100%" sx={{
            border: bordasComponents, borderRadius:1}}>
@@ -284,7 +315,7 @@ useEffect(() => {
                     Dados do Pedido
                 </Typography>
             </Stack>
-            <Box display={"grid"}  gridTemplateColumns="repeat(2, 1fr)" gap={4} flexGrow={1} width={"100%"} mt={4}>
+            <Box display={"grid"}  gridTemplateColumns={{ xs: "1fr", sm: "repeat(2, 1fr)" }} gap={{ xs: 2, md: 4 }} flexGrow={1} width={"100%"} mt={4}>
             <Box display={"flex"} flexDirection={"column"} gap={1}>
             <Typography color={"#FFFF"} fontWeight={400}>Cliente *</Typography>
              <Autocomplete<ClientSalesEntity, false, false, false>
@@ -466,7 +497,7 @@ useEffect(() => {
             </Stack>
 <Box
   display="grid"
-  gridTemplateColumns="2fr 1fr 1fr auto"
+  gridTemplateColumns={{ xs: "1fr", sm: "1fr 1fr", md: "2fr 1fr 1fr auto" }}
   gap={2}
   mt={2}
 >
@@ -475,22 +506,29 @@ useEffect(() => {
   options={products}
   loading={loading}
   value={productSelected}
-              onInputChange={(_, value, reason) => {
-                if (reason === "input") {
-                  handleSearchChangeProduct(value);
-                }
-              }}
-              onChange={(_, value) => {
-                setSelectProduct(value);
-                 setQuantidade("");
-              }}
+  onInputChange={(_, value, reason) => {
+    if (reason === "input") {
+      handleSearchChangeProduct(value);
+    }
+  }}
+  onChange={(_, value) => {
+    setSelectProduct(value);
+    setQuantidade("");
+  }}
   getOptionLabel={(option) => option.nome}
   isOptionEqualToValue={(option, value) => option.id === value.id}
   renderInput={(params) => (
     <TextField
       {...params}
-      placeholder="Buscar por produto..."
+      inputRef={productInputRef}
+      placeholder="Buscar por produto ou código de barras..."
       sx={textFieldStyle}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && productSelected) {
+          e.preventDefault();
+          addProductToList(productSelected, Number(quantidade) || 1);
+        }
+      }}
     />
   )}
   PaperComponent={(props) => (
@@ -550,39 +588,12 @@ useEffect(() => {
     disabled={!productSelected || !quantidade || quantidade <= 0}
     onClick={() => {
       if (!productSelected || !quantidade) return;
-       const jaExiste = itens.some(
-        (item) => item.produto_id === productSelected.id
-    );
-
-  if (jaExiste) {
-    setToastType("error");
-    setToastMsg("Produto já adicionado a lista");
-    setToastOpen(true);  
-    return;
-}
-
-      const subTotal =
-        quantidade * productSelected.preco_venda;
-
-      setItens((prev) => [
-        ...prev,
-        {
-          produto_id: productSelected.id,
-          nome: productSelected.nome,
-          quantidade,
-          valor_unitario: productSelected.preco_venda,
-          sub_total: subTotal,
-        },
-      ]);
-
-      // reset
-      setSelectProduct(null);
-      setQuantidade("");
+      addProductToList(productSelected, Number(quantidade));
     }}
   />
 </Box>
 {itens.length > 0 ? (
-  <TableContainer sx={{ maxHeight: "100%", mt: 0 }}>
+  <TableContainer sx={{ maxHeight: "100%", mt: 0, overflowX: "auto" }}>
     <Table
       stickyHeader
       aria-label="Pedidos Recentes"
@@ -591,6 +602,7 @@ useEffect(() => {
         bgcolor: "transparent",
         borderCollapse: "separate",
         borderSpacing: "0 8px",
+        minWidth: 600,
       }}
     >
       {/* HEADER */}
@@ -669,7 +681,7 @@ useEffect(() => {
   <Box
     sx={{
       mt: 3,
-      height: 180,
+      minHeight: 120,
       border: "2px dashed rgba(40, 61, 107, 0.6)",
       borderRadius: 1,
       display: "flex",
@@ -687,7 +699,7 @@ useEffect(() => {
 
         </Box>
       </Box>
-      <Box display={"flex"} flex={2} flexDirection={"column"}>
+      <Box display={"flex"} flex={2} flexDirection={"column"} sx={{ mt: { xs: 2, md: 0 } }}>
         <Box display={"flex"} flexDirection={"column"} p={4} width="100%" sx={{border: bordasComponents, borderRadius:1}}>
             <Typography color={"#FFFF"} fontSize="1.2rem" fontWeight="bold">
                 Resumo do Pedido
@@ -759,13 +771,13 @@ useEffect(() => {
             )}
             />
             </Box>
+    <Box display="flex" flexDirection="column" flexWrap="wrap" gap={2} mt={0.4}>
     <PrimaryActionButton
       label="Salvar"
       height={53}
       boxShadow="0 0 20px rgba(245,159,10,0.35)"
       startIcon={<Save />}
       background="linear-gradient(to right, #f59f0a 0%, #e68a00 100%)"
-      sx={{ mt: 0.4 }}
       loading={loading}
       onClick={onSubmitNewSale}
     />
@@ -773,12 +785,12 @@ useEffect(() => {
     label="Cancelar"
      height={53}
     background={"transparent"}
-    sx={{mt:2}}
     boxShadow={"transparent"}
     onClick={() => {
     onChangedCurrentPage(CurrentSaleViewEnum.Order);
     }}
   />
+    </Box>
       </Box>
       </Box>
     </Box>

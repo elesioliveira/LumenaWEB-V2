@@ -1,4 +1,3 @@
-import type { IUnidade } from "../../../../../shared/Mocks";
 
 export interface ProductDTO {
   nome?: string | null;
@@ -6,9 +5,9 @@ export interface ProductDTO {
   ativo: boolean ;
   un?: string | null | number;
   eanCode?: string | null;
-  marca_id: number| string;
-  fornecedor_id: number| string
-  categoria_id: number| string
+  marca_id: number| string | null;
+  fornecedor_id: number| string | null;
+  categoria_id: number| string | null;
   preco_custo?: number | null;
   preco_venda?: number | null;
   estoque_minimo?: number | null;

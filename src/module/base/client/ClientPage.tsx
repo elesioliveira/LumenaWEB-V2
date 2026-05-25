@@ -25,10 +25,12 @@ import { CreatOrUpdateClientModal } from "./componentes/CreateOrUpdateClientModa
 import { getClient, getClientDetails, getGroupClient, putStatusClient } from "./repository/ClientRepository";
 import { ufMocks } from "./mocks/ClientMocks";
 import type { ClientStatusDTO } from "./dto/ClientDTO";
+import { useResponsive } from "../../../shared/useResponsive";
 
 
 
 export function ClientPage() {
+const { isMobile } = useResponsive();
 const [openClientModal, setOpenClientModal] = useState(false);
 const [clients, setClients] = useState<ClientEntity[]>([]);
 const [grupos, setGrupos] = useState<GroupClientEntity []>([]);
@@ -195,8 +197,8 @@ const fetchGroup = async() => {
     client={clientDetails}  //  passa via props
     />
     <Box flexDirection={"column"} >
-    <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={2}>
-    <Stack display={"flex"} flexDirection={"row"} flexGrow={1} justifyContent={"space-between"} justifyItems={"center"} alignContent={"center"}alignItems={"center"} >
+    <Box display={"flex"} flexDirection={"column"} flexGrow={2} pl={{ xs: 0, md: 2 }}>
+    <Stack display={"flex"} flexDirection={{ xs: "column", md: "row" }} flexGrow={1} justifyContent={"space-between"} justifyItems={"center"} alignContent={"center"} alignItems={{ xs: "stretch", md: "center" }} flexWrap="wrap" gap={{ xs: 1, md: 2 }} >
     <Box display={"flex"} flexDirection={"column"}>
     <Typography sx={{fontWeight:"bold", fontSize:"1.5rem", color:"#ffff"}}>
     Clientes
@@ -205,7 +207,7 @@ const fetchGroup = async() => {
     Gerencie os clientes do sistema
     </Typography>
     </Box>
-    <Stack display={"flex"} flexDirection={"row"} gap={2} mr={3} >
+    <Stack display={"flex"} flexDirection={{ xs: "column", md: "row" }} gap={{ xs: 1, md: 2 }} mr={{ xs: 0, md: 3 }} flexWrap="wrap" >
     <TextField
     placeholder="Buscar cliente..."
     onChange={(e) => {
@@ -214,7 +216,7 @@ const fetchGroup = async() => {
     }}
     size="small"
     sx={{
-    width: 270,
+    width: { xs: "100%", md: 270 },
 
     // INPUT ROOT
     "& .MuiOutlinedInput-root": {
@@ -312,6 +314,7 @@ const fetchGroup = async() => {
     maxHeight: "100%",
     mr: 5,
     mt: 2,
+    overflowX: "auto",
     }}
     >
     <Table
@@ -320,6 +323,7 @@ const fetchGroup = async() => {
     bgcolor: "transparent",
     borderCollapse: "separate",
     borderSpacing: "0 8px",
+    minWidth: 800,
     }}
     >
     {/* HEADER */}
@@ -454,6 +458,7 @@ const fetchGroup = async() => {
     alignItems="center"
     gap={2}
     mb={2}
+    flexWrap="wrap"
     >
     {/* LEFT */}
     <PaginationButton

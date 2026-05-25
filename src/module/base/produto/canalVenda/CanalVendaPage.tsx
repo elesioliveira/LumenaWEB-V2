@@ -24,9 +24,11 @@ import { formatDateTime } from "../../../../shared/MaskUtils";
 import type { CanalVendaEntity } from "./entity/CanalVendaEntity";
 import { getCanalVenda, updateCanalVenda } from "./repository/CanalVendaRepository";
 import { PaginationButton } from "../fornecedor/components/PaginationButton";
+import { useResponsive } from "../../../../shared/useResponsive";
 import { CreateOrUpdateCanalVendaModal } from "./components/CreateOrUpdateCanalVendaModal";
 
 export function CanalVendaPage() {
+  const { isMobile } = useResponsive();
   const [openCanalVendaModal, setOpenCanalVendaModal] = useState(false);
 const [selectedCanalVenda, selectCanalVenda] =useState<CanalVendaEntity | null>(null);
 const [canaisVendas, setCanais] = useState<CanalVendaEntity[]>([]);
@@ -141,12 +143,12 @@ page * rowsPerPage + rowsPerPage
     onSuccess={() => fetchCanaisVenda(searchRef.current)}   //  recarrega lista
     canalVenda={selectedCanalVenda}  //  passa via props
     />
-    <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={2}>
-    <Stack display={"flex"} flexDirection={"row"} flexGrow={2} justifyContent={"space-between"} >
+    <Box display={"flex"} flexDirection={"column"} flexGrow={2} sx={{ pl: { xs: 1, md: 2 } }}>
+    <Stack display={"flex"} direction={{ xs: "column", md: "row" }} flexGrow={2} justifyContent={"space-between"} flexWrap="wrap" gap={{ xs: 1, md: 2 }} >
     <Typography sx={{fontWeight:"bold", fontSize:"1.5rem", color:"#ffff"}}>
     Canais de Vendas
     </Typography>
-    <Stack display={"flex"} flexDirection={"row"} gap={2} mr={3} >
+    <Stack display={"flex"} direction={{ xs: "column", md: "row" }} gap={{ xs: 1, md: 2 }} mr={3} flexWrap="wrap" >
     <TextField
     placeholder="Buscar canais de vendas..."
     onChange={(e) => {
@@ -155,7 +157,7 @@ page * rowsPerPage + rowsPerPage
     }}
     size="small"
     sx={{
-    width: 270,
+    width: { xs: "100%", md: 270 },
 
     // INPUT ROOT
     "& .MuiOutlinedInput-root": {
@@ -197,7 +199,7 @@ page * rowsPerPage + rowsPerPage
     onClick={() => setOpenCanalVendaModal(true)}
     sx={{
     height: 40,
-    width:100,
+    width: { xs: "100%", md: 100 },
     px: 3,
     color: "#fff",
     fontWeight: 600,
@@ -253,6 +255,7 @@ page * rowsPerPage + rowsPerPage
     maxHeight: "100%",
     mr: 5,
     mt: 2,
+    overflowX: "auto",
     }}
     >
     <Table
@@ -261,6 +264,7 @@ page * rowsPerPage + rowsPerPage
     bgcolor: "transparent",
     borderCollapse: "separate",
     borderSpacing: "0 8px",
+    minWidth: 700,
     }}
     >
     {/* HEADER */}
@@ -368,6 +372,7 @@ page * rowsPerPage + rowsPerPage
     alignItems="center"
     gap={2}
     mb={2}
+    flexWrap="wrap"
     >
     {/* LEFT */}
     <PaginationButton

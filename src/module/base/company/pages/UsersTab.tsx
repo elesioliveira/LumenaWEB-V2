@@ -37,6 +37,7 @@ import { formatDateTime } from "../../../../shared/MaskUtils";
 import { TableActionsMenuUser } from "../../wallet/components/TableActionnsMenuUser";
 import type { DashBoardDTO, UserDTOAPI } from "../dto/ComapnyDTO";
 import { DialogPermissions } from "../components/DialogPermissions";
+import { useResponsive } from "../../../../shared/useResponsive";
 
 
 
@@ -53,8 +54,7 @@ const [toastMsg, setToastMsg] = useState("");
 const [toastType, setToastType] = useState<"success" | "error">("error");
 const searchRef = useRef("");
 const [loading, setLoading] = useState(false);
-const theme = useTheme(); // obrigatório
-const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+const { isMobile } = useResponsive();
 const [users, setUsers] = useState<User[]>(usersMock);
 const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 const jaCarregouRefTypeOfStatus = useRef(false);
@@ -212,15 +212,15 @@ useEffect(()=>{
     {toastMsg}
     </Alert>
     </Snackbar>
-    <Box flexDirection={"column"} mr={2}>
-    <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={2}>
+    <Box flexDirection={"column"} mr={{ xs: 1, md: 2 }}>
+    <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={{ xs: 0, md: 2 }}>
     <Box display={"flex"} flexDirection={"column"}>
-      <Stack display={"flex"} flexDirection={"row"} width={"100%"} minHeight={0} alignContent={"center"} justifyContent={"space-between"}>
+      <Stack display={"flex"} flexDirection={{ xs: "column", md: "row" }} width={"100%"} minHeight={0} alignContent={"center"} justifyContent={"space-between"} gap={2}>
         <Box display={"flex"} flexDirection={"column"}>
-              <Typography sx={{fontWeight:"bold", fontSize:"1.5rem", color:"#ffff"}}>
+              <Typography sx={{fontWeight:"bold", fontSize: { xs: "1.2rem", md: "1.5rem" }, color:"#ffff"}}>
               Usuários e Permissões
               </Typography>
-              <Typography sx={{fontWeight:400, fontSize:"1rem", color:colorOpacity}}>
+              <Typography sx={{fontWeight:400, fontSize: { xs: "0.85rem", md: "1rem" }, color:colorOpacity}}>
               Gerencie os usuários e seus níveis de acesso
               </Typography>
         </Box>
@@ -231,7 +231,7 @@ useEffect(()=>{
           background="linear-gradient(to right, #f59f0a 0%, #e68a00 100%)"
           startIcon={<Plus />}
           sx={{
-          width: "200px",
+          width: { xs: "100%", sm: "200px" },
           height: 50,
           mt: "auto",
           }}
@@ -239,7 +239,7 @@ useEffect(()=>{
         />
       </Stack>
     </Box>
-                 <Stack display={"flex"} flexDirection={"row"} flexGrow={1} gap={2} mr={2} mb={3} mt={4}>
+                 <Stack display={"flex"} flexDirection={{ xs: "column", sm: "row" }} flexWrap="wrap" flexGrow={1} gap={2} mr={{ xs: 0, md: 2 }} mb={3} mt={4}>
                    <InfoCard
                     title="Total de Usuários"
                     value={dashBaord?.qtd_usuario ?? 0}
@@ -261,8 +261,8 @@ useEffect(()=>{
                     icon={<Shield color={colorNegative} size={38} />}
                     />
                 </Stack>
-    <Stack display={"flex"} flexDirection={"row"} width={"100%"} minHeight={0} gap={2} alignContent={"flex-start"} alignItems={"end"}>
-        <Box display={"flex"} flexDirection={"column"} minHeight={0} minWidth={500} gap={0.5}>
+    <Stack display={"flex"} flexDirection={{ xs: "column", md: "row" }} width={"100%"} minHeight={0} gap={2} alignContent={"flex-start"} alignItems={{ xs: "stretch", md: "end" }} flexWrap="wrap">
+        <Box display={"flex"} flexDirection={"column"} minHeight={0} minWidth={{ xs: 0, md: 500 }} gap={0.5} flex={1}>
         <Stack display={"flex"} flexDirection={"row"} gap={1} alignContent={"center"} alignItems={"center"}>
         <Funnel/>
         <Typography fontWeight={600} display={"flex"} color={"white"} fontSize={"1.6rem"}>
@@ -339,7 +339,7 @@ useEffect(()=>{
         </Box>
         <BaseSelect
             value={perfil}
-            sx={{width:250, height:45}}
+            sx={{width: { xs: "100%", sm: 250 }, height:45}}
             onChange={(e) => {
             jaCarregouRefTypeOfStatus.current = true;
             setPerfil(e.target.value);
@@ -362,7 +362,7 @@ useEffect(()=>{
         />
         <BaseSelect
             value={status}
-            sx={{width:250, height:45}}
+            sx={{width: { xs: "100%", sm: 250 }, height:45}}
             onChange={(e) => {
             jaCarregouRefTypeOfStatus.current = true;
             setStatus(e.target.value);
@@ -404,8 +404,9 @@ useEffect(()=>{
                 <TableContainer
                 sx={{
                 maxHeight: "100%",
-                mr: 5,
+                mr: { xs: 0, md: 5 },
                 mt: 2,
+                overflowX: "auto",
                 }}
                 >
                 <Table
@@ -414,6 +415,7 @@ useEffect(()=>{
                 bgcolor: "transparent",
                 borderCollapse: "separate",
                 borderSpacing: "0 8px",
+                minWidth: 700,
                 }}
                 >
                 {/* HEADER */}

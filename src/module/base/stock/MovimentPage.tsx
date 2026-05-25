@@ -25,11 +25,13 @@ import { ModalViewMovimentation } from "./componentes/ModalViewMovimentation";
 import type { MovimetDetails, StockEntradaEntity } from "./entity/StockEntity";
 import { fetchStockDetails, fetchStock } from "./repository/StockRepository";
 import { ModalDeleteMovById } from "./componentes/ModalDeleteMov";
+import { useResponsive } from "../../../shared/useResponsive";
 
 
 
 
 export function MovimentPage() {
+const { isMobile } = useResponsive();
 const [openModalView, setOpenModalView] = useState(false);
 const [openModalDelete, setOpenModalDelete] = useState(false);
 const [toastOpen, setToastOpen] = useState(false);
@@ -164,8 +166,8 @@ useEffect(()=> {
     </Snackbar>
     <Box flexDirection={"column"}>
    
-    <Box display={"flex"} flexDirection={"column"} flexGrow={2} ml={2}>
-    <Stack display={"flex"} flexDirection={"row"} flexGrow={2} justifyContent={"space-between"} >
+    <Box display={"flex"} flexDirection={"column"} flexGrow={2} pl={{ xs: 0, md: 2 }}>
+    <Stack display={"flex"} flexDirection={{ xs: "column", md: "row" }} flexGrow={2} justifyContent={"space-between"} flexWrap="wrap" gap={{ xs: 1, md: 2 }} >
     <Box display={"flex"} flexDirection={"column"}>
     <Typography sx={{fontWeight:"bold", fontSize:"1.5rem", color:"#ffff"}}>
     Movimentações de Estoque
@@ -175,14 +177,14 @@ useEffect(()=> {
     </Typography>
     </Box>
     </Stack>
-    <Stack display={"flex"} flexDirection={"row"} flexGrow={1} justifyContent={"space-between"} mt={8} mb={3} mr={2} justifyItems={"start"}  alignItems={"start"} alignContent={"start"}>
+    <Stack display={"flex"} flexDirection={{ xs: "column", md: "row" }} flexGrow={1} justifyContent={"space-between"} mt={8} mb={3} mr={2} justifyItems={"start"} alignItems={{ xs: "stretch", md: "start" }} alignContent={"start"} flexWrap="wrap" gap={{ xs: 1, md: 0 }}>
     <Stack display={"flex"} flexDirection={"row"}  gap={1}  mb={1} >
     <FileInput size={30} color="#ffff" />
     <Typography sx={{fontWeight:"bold", fontSize:"1.5rem", color:"#FFFF"}}>
     Histórico de Movimentações
     </Typography>
     </Stack>
-    <Stack display={"flex"} flexDirection={"row"} gap={1.2}>
+    <Stack display={"flex"} flexDirection={{ xs: "column", md: "row" }} gap={1.2} flexWrap="wrap">
     <TextField
     placeholder="Buscar por nº do documento"
   onChange={(e) => {
@@ -191,7 +193,7 @@ useEffect(()=> {
       }}
     size="small"
     sx={{
-    width: 270,
+    width: { xs: "100%", md: 270 },
 
     // INPUT ROOT
     "& .MuiOutlinedInput-root": {
@@ -289,6 +291,7 @@ useEffect(()=> {
     maxHeight: "100%",
     mr: 5,
     mt: 2,
+    overflowX: "auto",
     }}
     >
     <Table
@@ -297,6 +300,7 @@ useEffect(()=> {
     bgcolor: "transparent",
     borderCollapse: "separate",
     borderSpacing: "0 8px",
+    minWidth: 700,
     }}
     >
     {/* HEADER */}
@@ -408,6 +412,7 @@ useEffect(()=> {
     alignItems="center"
     gap={2}
     mb={2}
+    flexWrap="wrap"
     >
     {/* LEFT */}
     <PaginationButton

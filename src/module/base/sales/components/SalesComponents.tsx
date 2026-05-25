@@ -43,7 +43,9 @@ export function ModalViewSale({
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: 820,
+          width: { xs: "95vw", sm: "90vw", md: 820 },
+          maxHeight: "90vh",
+          overflowY: "auto",
           bgcolor: bgColorCardsDashBoard,
           borderRadius: 2,
           gap:0,
@@ -92,7 +94,7 @@ export function ModalViewSale({
          Informações completas do pedido
         </Typography>
        <Box display={"flex"} flexDirection={"column"} flexGrow={1}>
-        <Box display={"grid"}  gridTemplateColumns="repeat(2, 1fr)" gap={4} flexGrow={1} width={"100%"} mt={4}> 
+        <Box display={"grid"}  gridTemplateColumns={{ xs: "1fr", sm: "repeat(2, 1fr)" }} gap={4} flexGrow={1} width={"100%"} mt={4}> 
             <Box display={"flex"} flexDirection={"column"}>
                 <Typography fontWeight={400} color={colorOpacity} fontSize="1.3rem">
                     Cliente
@@ -130,7 +132,7 @@ export function ModalViewSale({
       <Typography color={colorOpacity} fontWeight={400} fontSize={"1.2rem"} mt={4}>
       Itens
       </Typography>
-      <TableContainer sx={{ maxHeight: "450px",  mt:0}}>
+      <TableContainer sx={{ maxHeight: "450px",  mt:0, overflowX: "auto" }}>
       <Table
         stickyHeader//se tirar some o header da table
         aria-label="Pedidos Recentes"
