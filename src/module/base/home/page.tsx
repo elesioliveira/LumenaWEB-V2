@@ -1,5 +1,5 @@
 
-  import { Bell, Building2, ChartColumn, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, Layers, LayoutDashboard, LogOut, Menu, Package, Pencil, Plus, Ruler, Settings, ShoppingBag, ShoppingCart,  Tag,  ToggleLeft,  ToggleRight,  Trash2,  Truck, User, Users, Users2, Wallet, X } from "lucide-react";
+  import { Bell, Building2, ChartColumn, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, Headset, Layers, LayoutDashboard, LogOut, Menu, Package, Pencil, Plus, Ruler, ShoppingBag, ShoppingCart,  Tag,  ToggleLeft,  ToggleRight,  Trash2,  Truck, User, Users, Users2, Wallet, X } from "lucide-react";
   import {
   Box,
   Drawer,
@@ -27,6 +27,7 @@ import { ModuleSales } from "../sales/SalesPage";
 import { ModuleWallet } from "../wallet/ModuleWallet";
 import { ModuleCompany } from "../company/ComapnyModule";
 import { AnalysisPage } from "../analysis/AnalysisPage";
+import { SupportPage } from "../support/SupportPage";
 import { useSessionController } from "../../auth/controller/SessionController";
   
 const menuItems = [
@@ -86,9 +87,9 @@ const menuItems = [
   },
   { 
     key:9,
-    label: "Configurações", 
-    icon: Settings, 
-    page: CurrentModulePage.Settings 
+    label: "Suporte", 
+    icon: Headset, 
+    page: CurrentModulePage.Support 
   },
   ];
 
@@ -134,6 +135,8 @@ const handleOnChagentPage = (page: CurrentModulePage) => {
         return <ModuleCompany/>;
         case CurrentModulePage.Analysis:
         return <AnalysisPage/>;
+        case CurrentModulePage.Support:
+        return <SupportPage/>;
       default:
         return null;
     }

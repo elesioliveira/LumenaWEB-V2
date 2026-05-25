@@ -1,18 +1,30 @@
-import {ResponsiveContainer,Line,XAxis,YAxis,Tooltip,CartesianGrid, Area, ComposedChart,
-} from "recharts";
-import { Calculator, DollarSign, Package, Plus, ShoppingCart, Truck, UsersRound } from "lucide-react";
 import {
-  Box,
-  Toolbar,
-  Typography,
-  Stack,
   Avatar,
+  Box,
   Button,
-  Table, TableHead, TableRow, TableCell, TableBody, TableContainer, CircularProgress
+  CircularProgress,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead, TableRow,
+  Toolbar,
+  Typography
 } from "@mui/material";
-import { useState, useEffect } from "react";
-import { bgColorCardsDashBoard, bgColorNegative, bgColorPositive, bgColorTopSellers, bgshopColor, bgView, colorGray, colorNegative, colorOpacity, colorPositive, primaryColor, productBgColorIcon, productColorIcon, shopIconColor, userBgColorIcon, userColorIcon } from "../../../theme/theme";
+import { Calculator, DollarSign, Package, Plus, ShoppingCart, Truck, UsersRound } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  Area,
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis, YAxis,
+} from "recharts";
 import { cellStyle, cellStyleBold } from "../../../theme/cellTable";
+import { bgColorCardsDashBoard, bgColorNegative, bgColorPositive, bgColorTopSellers, bgshopColor, bgView, colorGray, colorNegative, colorOpacity, colorPositive, primaryColor, productBgColorIcon, productColorIcon, shopIconColor, userBgColorIcon, userColorIcon } from "../../../theme/theme";
 import { fetchDashboard } from "./repository/repository";
 
 
@@ -630,7 +642,7 @@ export function DashBoardPage({ collapsed, onNavigate }: DashBoardPageProps) {
     Produtos Mais Vendidos
     </Typography>
     <Typography gutterBottom variant="body1" component="div" mb={0}mt={0} fontSize={"1rem"} color={colorOpacity}  fontWeight={400}>
-    Top 5 do mês atual
+    Top 15 do mês atual
     </Typography>
     {topProdutos.map((row, index) => (
       <Stack key={row.produto} display={"flex"} flexDirection={"row"}  alignItems={"center"} justifyContent={"start"} alignContent={"center"} justifyItems={"center"} gap={2} >

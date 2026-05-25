@@ -19,7 +19,7 @@ export const CurrentModulePage = {
     Reports:6,
     Analysis:7,
     Company:8,
-    Settings:9
+    Support:9
 } as const;
 
 export type CurrentModulePage = typeof CurrentModulePage[keyof typeof CurrentModulePage];

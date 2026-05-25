@@ -60,16 +60,16 @@ export const kpisAnaliticos: KpiAnalitico[] = [
     descricao: "Margem média sobre vendas",
   },
   {
-    label: "Taxa de Conversão",
-    value: "78,5%",
-    variacao: -3.4,
-    descricao: "Pedidos aprovados / total",
-  },
-  {
     label: "Inadimplência",
     value: "12,3%",
     variacao: -1.8,
     descricao: "Contas vencidas / a receber",
+  },
+  {
+    label: "Quantidade de Pedidos",
+    value: "100",
+    variacao: 10,
+    descricao: "Quantidade de pedidos",
   },
 ];
 

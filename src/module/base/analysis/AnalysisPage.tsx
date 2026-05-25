@@ -1,19 +1,11 @@
 import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  PieChart,
-  Pie,
-  Cell,
-  Line,
-  Area,
-  ComposedChart,
-  Legend,
-} from "recharts";
+  Box,
+  CircularProgress,
+  LinearProgress,
+  Stack,
+  Toolbar,
+  Typography,
+} from "@mui/material";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -26,13 +18,23 @@ import {
   Trophy,
   XCircle,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import {
-  Box,
-  Toolbar,
-  Typography,
-  Stack,
-  LinearProgress,
-} from "@mui/material";
+  Area,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ComposedChart,
+  Line,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from "recharts";
+import { maskCurrency } from "../../../shared/MaskUtils";
 import {
   bgColorCardsDashBoard,
   bgColorTopSellers,
@@ -43,15 +45,8 @@ import {
   colorPositive,
   primaryColor,
 } from "../../../theme/theme";
-import {
-  kpisAnaliticos,
-  vendasPorCanal,
-  margemProdutos,
-  curvaABC,
-  evolucaoMensal,
-  topClientes,
-  alertasInteligentes,
-} from "./mocks/AnalysisMocks";
+import { alertasInteligentes } from "./mocks/AnalysisMocks";
+import { fetchAnaliseData } from "./repository/repository";
 
 const cardSx = {
   bgcolor: bgColorCardsDashBoard,
@@ -88,7 +83,7 @@ function kpiIcon(label: string) {
       return <DollarSign color={primaryColor} size={24} />;
     case "Margem de Lucro":
       return <Percent color={colorPositive} size={24} />;
-    case "Taxa de Conversão":
+    case "Quantidade de Pedidos":
       return <ShoppingCart color="#197DFA" size={24} />;
     case "Inadimplência":
       return <TrendingDown color={colorNegative} size={24} />;
@@ -103,7 +98,7 @@ function kpiIconBg(label: string) {
       return "rgba(245,159,10,0.15)";
     case "Margem de Lucro":
       return "rgba(15,250,152,0.15)";
-    case "Taxa de Conversão":
+    case "Quantidade de Pedidos":
       return "rgba(25,125,250,0.15)";
     case "Inadimplência":
       return "rgba(255,46,46,0.15)";
@@ -138,7 +133,85 @@ function alertBg(tipo: string) {
   }
 }
 
+const mesNomes = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+const CATEGORY_COLORS = ["#f59f0a", "#197DFA", "#94a3b8", "#0ffa98", "#ff2e2e", "#FAE10F", "#de6f09", "#8b5cf6"];
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export function AnalysisPage() {
+  const [loading, setLoading] = useState(true);
+  const [kpis, setKpis] = useState<{ label: string; value: string | null; variacao: number |null; qtd: string | null; total: string | null }[]>([]);
+  const [vendasPorCanal, setVendasPorCanal] = useState<{ nome: string; qtd_por_canal: number; percentual: number }[]>([]);
+  const [vendasPorCategoria, setVendasPorCategoria] = useState<{ nome: string; qtd_por_categoria: number; percentual: number }[]>([]);
+  const [margemProdutos, setMargemProdutos] = useState<{ produto: string; preco_custo: number; preco_venda: number; margem: number; qtd_venda_por_produto: number; lucro_total: number }[]>([]);
+  const [topClientes, setTopClientes] = useState<{ id: number; cliente: string; qtd_por_cliente: number; total_por_cliente: number }[]>([]);
+  const [evolucaoMensal, setEvolucaoMensal] = useState<{ mes: string; receita_atual: number; receita_anterior: number }[]>([]);
+
+  useEffect(() => {
+    const loadAnalise = async () => {
+      const result = await fetchAnaliseData();
+      if (result.success && result.data) {
+        const d = result.data;
+
+        setKpis([
+          {
+            label: "Ticket Médio",
+            value: `R$ ${d.ticket_medio.ticket_mes_atual.toFixed(2)}`,
+            variacao: d.ticket_medio.percentual_variacao,
+            qtd: null,
+            total: null,
+          },
+          {
+            label: "Margem de Lucro",
+            value: `${d.margem_lucro.margem_lucro_percentual.toFixed(1)}%`,
+            variacao: d.margem_lucro.margem_lucro_percentual,
+            qtd: null,
+            total: null,
+          },
+          {
+            label: "Inadimplência",
+            value: `${d.inadimplencia.porcentagem_mes_atual.toFixed(1)}%`,
+            variacao: d.inadimplencia.percentual_variacao,
+            qtd: null,
+            total: null,
+          },
+          {
+            label: "Quantidade de Pedidos",
+            value: null,
+            variacao: null,
+            qtd: `${d.resumo_vendas.qtd}`,
+            total: `${d.resumo_vendas.total}`,
+          },
+        ]);
+
+        setVendasPorCanal(d.vendas_por_canal);
+        setVendasPorCategoria(d.vendas_por_categoria);
+        setMargemProdutos(d.margem_por_produto);
+        setTopClientes(d.top_clientes);
+        setEvolucaoMensal(
+          d.evolucao_mensal.map((item: any) => ({
+            mes: mesNomes[item.mes - 1] ?? `Mês ${item.mes}`,
+            receita_atual: item.receita_ano_atual,
+            receita_anterior: item.receita_ano_anterior,
+          }))
+        );
+      }
+      setLoading(false);
+    };
+    loadAnalise();
+  }, []);
+
+  if (loading) {
+    return (
+      <Box component="main" sx={{ flexGrow: 1, bgcolor: bgView, display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh" }}>
+        <CircularProgress sx={{ color: primaryColor }} />
+      </Box>
+    );
+  }
+
+  function formatCurrency(total: string) {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <Box
       component="main"
@@ -178,7 +251,7 @@ export function AnalysisPage() {
         direction="row"
         sx={{ flexWrap: "wrap", gap: { xs: 2, md: 2 }, mr: 2 }}
       >
-        {kpisAnaliticos.map((kpi) => (
+        {kpis.map((kpi) => (
           <Box
             key={kpi.label}
             sx={{
@@ -210,24 +283,32 @@ export function AnalysisPage() {
               </Box>
             </Stack>
             <Typography fontSize="1.8rem" fontWeight="bold" color="#fff">
-              {kpi.value}
+              {kpi.value} {kpi.qtd}
             </Typography>
             <Stack direction="row" alignItems="center" gap={0.5}>
-              {kpi.variacao >= 0 ? (
+             
+              {
+                kpi.total != null ? (
+                  <TrendingUp size={14} color={colorPositive} />
+                ):
+              kpi.variacao !== null && kpi.variacao >= 0 ? (
                 <TrendingUp size={14} color={colorPositive} />
               ) : (
                 <TrendingDown size={14} color={colorNegative} />
               )}
               <Typography
                 fontSize="0.8rem"
-                color={kpi.variacao >= 0 ? colorPositive : colorNegative}
+                color={
+                  kpi.total !==null? colorPositive:
+                  kpi.variacao !== null && kpi.variacao >= 0 ? colorPositive : colorNegative}
                 fontWeight={600}
               >
-                {kpi.variacao >= 0 ? "+" : ""}
-                {kpi.variacao}%
+                {kpi.variacao !== null && kpi.variacao >= 0 ? "+" : ""}
+                {kpi.variacao !== null ? kpi.variacao + '%' : ''}
+                {kpi.total !== null ? 'Total: ' + maskCurrency(kpi.total) : ''}
               </Typography>
               <Typography fontSize="0.75rem" color={colorOpacity} ml={0.5}>
-                vs. mês anterior
+               {kpi.total? '': ' vs. mês anterior'}
               </Typography>
             </Stack>
           </Box>
@@ -245,7 +326,7 @@ export function AnalysisPage() {
             Vendas por Canal
           </Typography>
           <Typography fontSize="0.9rem" color={colorOpacity} mb={2}>
-            Faturamento por canal de venda
+            Distribuição de vendas por canal
           </Typography>
           <Box height={280}>
             <ResponsiveContainer width="100%" height="100%">
@@ -257,18 +338,12 @@ export function AnalysisPage() {
                   </linearGradient>
                 </defs>
                 <CartesianGrid stroke="#283d6b" strokeDasharray="3 3" opacity={0.25} />
-                <XAxis dataKey="canal" stroke="#94a3b8" fontSize={12} />
-                <YAxis
-                  stroke="#94a3b8"
-                  fontSize={11}
-                  tickFormatter={(v: number) =>
-                    `R$ ${(v / 1000).toFixed(0)}k`
-                  }
-                />
+                <XAxis dataKey="nome" stroke="#94a3b8" fontSize={12} />
+                <YAxis stroke="#94a3b8" fontSize={11} />
                 <Tooltip
                   formatter={(value: number) => [
-                    `R$ ${value.toLocaleString("pt-BR")}`,
-                    "Faturamento",
+                    `${value}`,
+                    "Quantidade",
                   ]}
                   contentStyle={{
                     backgroundColor: "#131d34",
@@ -278,39 +353,39 @@ export function AnalysisPage() {
                   }}
                   labelStyle={{ color: "#94a3b8" }}
                 />
-                <Bar dataKey="faturamento" fill="url(#barGradient)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="qtd_por_canal" fill="url(#barGradient)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </Box>
         </Box>
 
-        {/* Curva ABC */}
+        {/* Vendas por Categoria */}
         <Box sx={{ ...cardSx, flex: 1, p: 3, minHeight: 380 }}>
           <Typography fontSize="1.3rem" fontWeight="bold" color="#fff" mb={0.5}>
-            Curva ABC
+            Vendas por Categoria
           </Typography>
           <Typography fontSize="0.9rem" color={colorOpacity} mb={2}>
-            Classificação de produtos por faturamento
+            Distribuição por categoria de produto
           </Typography>
           <Box height={200} display="flex" justifyContent="center">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={curvaABC}
-                  dataKey="percentual_faturamento"
-                  nameKey="classificacao"
+                  data={vendasPorCategoria}
+                  dataKey="percentual"
+                  nameKey="nome"
                   cx="50%"
                   cy="50%"
                   innerRadius={50}
                   outerRadius={80}
                   strokeWidth={0}
                 >
-                  {curvaABC.map((entry) => (
-                    <Cell key={entry.classificacao} fill={entry.cor} />
+                  {vendasPorCategoria.map((_, index) => (
+                    <Cell key={index} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value: number, name: string) => [`${value}%`, `Classe ${name}`]}
+                  formatter={(value: number, name: string) => [`${value}%`, name]}
                   contentStyle={{
                     backgroundColor: "#131d34",
                     border: "1px solid #283d6b",
@@ -322,14 +397,14 @@ export function AnalysisPage() {
             </ResponsiveContainer>
           </Box>
           <Stack gap={1.5} mt={1}>
-            {curvaABC.map((item) => (
-              <Stack key={item.classificacao} direction="row" alignItems="center" gap={1.5}>
-                <Box sx={{ width: 12, height: 12, borderRadius: "50%", bgcolor: item.cor }} />
+            {vendasPorCategoria.map((item, index) => (
+              <Stack key={item.nome} direction="row" alignItems="center" gap={1.5}>
+                <Box sx={{ width: 12, height: 12, borderRadius: "50%", bgcolor: CATEGORY_COLORS[index % CATEGORY_COLORS.length] }} />
                 <Typography fontSize="0.85rem" color="#fff" fontWeight={600}>
-                  Classe {item.classificacao}
+                  {item.nome}
                 </Typography>
                 <Typography fontSize="0.8rem" color={colorOpacity}>
-                  {item.percentual_faturamento}% — {item.qtd_produtos} produtos
+                  {item.percentual}% — {item.qtd_por_categoria} vendas
                 </Typography>
               </Stack>
             ))}
@@ -374,7 +449,7 @@ export function AnalysisPage() {
             {/* Rows */}
             {margemProdutos.map((prod) => (
               <Stack
-                key={prod.nome}
+                key={prod.produto}
                 direction="row"
                 alignItems="center"
                 sx={{
@@ -384,7 +459,7 @@ export function AnalysisPage() {
                 }}
               >
                 <Typography flex={2.5} fontSize="0.9rem" color="#fff" fontWeight={500}>
-                  {prod.nome}
+                  {prod.produto}
                 </Typography>
                 <Typography flex={1} fontSize="0.85rem" color={colorOpacity}>
                   R$ {prod.preco_custo.toFixed(2)}
@@ -396,7 +471,7 @@ export function AnalysisPage() {
                   {prod.margem.toFixed(1)}%
                 </Typography>
                 <Typography flex={1} fontSize="0.85rem" color={colorOpacity}>
-                  {prod.qtd_vendida}
+                  {prod.qtd_venda_por_produto}
                 </Typography>
                 <Box flex={2} pr={2}>
                   <LinearProgress
@@ -533,7 +608,7 @@ export function AnalysisPage() {
           <Stack gap={2}>
             {topClientes.map((cliente, index) => (
               <Stack
-                key={cliente.nome}
+                key={cliente.id}
                 direction="row"
                 alignItems="center"
                 gap={2}
@@ -566,14 +641,14 @@ export function AnalysisPage() {
                 </Box>
                 <Box flex={1}>
                   <Typography fontSize="0.9rem" color="#fff" fontWeight={500}>
-                    {cliente.nome}
+                    {cliente.cliente}
                   </Typography>
                   <Typography fontSize="0.75rem" color={colorOpacity}>
-                    {cliente.qtd_pedidos} pedidos
+                    {cliente.qtd_por_cliente} pedidos
                   </Typography>
                 </Box>
                 <Typography fontSize="0.9rem" color={primaryColor} fontWeight={600}>
-                  R$ {cliente.total_gasto.toLocaleString("pt-BR")}
+                  R$ {cliente.total_por_cliente.toLocaleString("pt-BR")}
                 </Typography>
               </Stack>
             ))}
