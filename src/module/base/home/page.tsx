@@ -1,34 +1,35 @@
 
-  import { Bell, Building2, ChartColumn, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, Headset, Layers, LayoutDashboard, LogOut, Menu, Package, Pencil, Plus, Ruler, ShoppingBag, ShoppingCart,  Tag,  ToggleLeft,  ToggleRight,  Trash2,  Truck, User, Users, Users2, Wallet, X } from "lucide-react";
   import {
+  AppBar,
+  Avatar,
+  Badge,
   Box,
+  Divider,
   Drawer,
   IconButton,
   List,
   ListItemButton,
   ListItemText,
-  Toolbar,
-  AppBar,
-  Typography,
-  Divider,
   Stack,
-  Badge,
-  Avatar,
-  } from "@mui/material";
-  import {  useEffect, useMemo, useState } from "react";
-  import { bgComponents, bordasComponents, colorOpacity, } from "../../../theme/theme";
-  import { useResponsive } from "../../../shared/useResponsive";
-import { ModuleProduct } from "../produto/ModuleProductPage";
-import { CurrentModulePage } from "./enums/HomeEnums";
-import { DashBoardPage } from "../dashboard/DashBoardPage";
-import { ModuleClient } from "../client/ModuleClient";
-import { StockPage } from "../stock/StockPage";
-import { ModuleSales } from "../sales/SalesPage";
-import { ModuleWallet } from "../wallet/ModuleWallet";
-import { ModuleCompany } from "../company/ComapnyModule";
-import { AnalysisPage } from "../analysis/AnalysisPage";
-import { SupportPage } from "../support/SupportPage";
+  Toolbar,
+  Typography,
+} from "@mui/material";
+import { Bell, Building2, ChartColumn, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, FileText, Headset, LayoutDashboard, LogOut, Menu, Package, ShoppingCart, Truck, User, Users, Wallet, X } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useResponsive } from "../../../shared/useResponsive";
+import { bgComponents, bordasComponents, colorOpacity, } from "../../../theme/theme";
 import { useSessionController } from "../../auth/controller/SessionController";
+import { AnalysisPage } from "../analysis/AnalysisPage";
+import { ModuleClient } from "../client/ModuleClient";
+import { ModuleCompany } from "../company/ComapnyModule";
+import { DashBoardPage } from "../dashboard/DashBoardPage";
+import { ModuleFiscal } from "../fiscal/ModuleFiscalPage";
+import { ModuleProduct } from "../produto/ModuleProductPage";
+import { ModuleSales } from "../sales/SalesPage";
+import { StockPage } from "../stock/StockPage";
+import { SupportPage } from "../support/SupportPage";
+import { ModuleWallet } from "../wallet/ModuleWallet";
+import { CurrentModulePage } from "./enums/HomeEnums";
   
 const menuItems = [
   { 
@@ -91,6 +92,12 @@ const menuItems = [
     icon: Headset, 
     page: CurrentModulePage.Support 
   },
+  { 
+    key:10,
+    label: "Fiscal", 
+    icon: FileText, 
+    page: CurrentModulePage.Fiscal 
+  },
   ];
 
 
@@ -137,6 +144,8 @@ const handleOnChagentPage = (page: CurrentModulePage) => {
         return <AnalysisPage/>;
         case CurrentModulePage.Support:
         return <SupportPage/>;
+        case CurrentModulePage.Fiscal:
+        return <ModuleFiscal/>;
       default:
         return null;
     }

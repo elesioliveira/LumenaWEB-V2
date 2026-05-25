@@ -1,32 +1,29 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Box,
-  Typography,
-  IconButton,
-  Stack,
-  Switch,
-  Button,
-  Snackbar,
-  Alert,
-  CircularProgress,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import Inventory2Icon from "@mui/icons-material/Inventory2";
-import GroupIcon from "@mui/icons-material/Group";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
-import DescriptionIcon from "@mui/icons-material/Description";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import BusinessIcon from "@mui/icons-material/Business";
-import SettingsIcon from "@mui/icons-material/Settings";
-import { bgColorCardsDashBoard, colorNegative, colorOpacity } from "../../../../theme/theme";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import DescriptionIcon from "@mui/icons-material/Description";
+import GroupIcon from "@mui/icons-material/Group";
+import Inventory2Icon from "@mui/icons-material/Inventory2";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Snackbar,
+  Stack,
+  Switch,
+  Typography
+} from "@mui/material";
+import { FileText, Headset, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { bgColorCardsDashBoard, colorNegative, colorOpacity } from "../../../../theme/theme";
 import { updateRotaUser } from "../repository/CompanyRepository";
 
 interface PermissionItem {
@@ -46,7 +43,9 @@ const permissions: PermissionItem[] = [
   { key: 6,habilitado:false, label: "Relatórios", icon: <DescriptionIcon sx={{color:"#FFF"}} /> },
   { key: 7,habilitado:false, label: "Análise", icon: <BarChartIcon sx={{color:"#FFF"}} /> },
   { key: 8,habilitado:false, label: "Empresa", icon: <BusinessIcon sx={{color:"#FFF"}} /> },
-  { key: 9,habilitado:false, label: "Configurações", icon: <SettingsIcon sx={{color:"#FFF"}} /> },
+  { key: 9,habilitado:false, label: "Suporte", icon: <Headset  color={"#fff"} /> },
+  { key: 10,habilitado:false, label: "Fiscal", icon: <FileText  color={"#fff"} /> },
+
 ];
 
 interface DialogPermissionsProps {
