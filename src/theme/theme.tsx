@@ -59,8 +59,8 @@ export const customTheme = createTheme({
     },
 
     background: {
-      default: "#f6f7f9", // Background
-      paper: "#ffffff",   // Cards / Popovers
+      default: bgView,
+      paper: bgColorCardsDashBoard,
     },
 
     text: {
@@ -117,19 +117,19 @@ shadows: [
       styleOverrides: {
         root: {
           borderRadius: "0.75rem",
-          backgroundColor: "#ffffff",
-                input: {
-        color: colorOpacity,
-        WebkitTextFillColor: colorOpacity,
-      },
+          backgroundColor: bgColorTopSellers,
+          input: {
+            color: "#fff",
+            WebkitTextFillColor: "#fff",
+          },
           "& fieldset": {
-            borderColor: "#e5e7eb", // Border
+            borderColor: "rgba(40, 61, 107, 0.4)",
           },
           "&:hover fieldset": {
-            borderColor: "#0f1729",
+            borderColor: primaryColor,
           },
           "&.Mui-focused fieldset": {
-            borderColor: "#f59f0a", // Focus Ring
+            borderColor: primaryColor,
             boxShadow: "0 0 0 3px rgba(245,159,10,0.25)",
           },
         },
@@ -139,10 +139,18 @@ shadows: [
     MuiInputLabel: {
       styleOverrides: {
         root: {
-          color: "#6b7280",
+          color: colorOpacity,
           "&.Mui-focused": {
-            color: "#f59f0a",
+            color: primaryColor,
           },
+        },
+      },
+    },
+
+    MuiSelect: {
+      styleOverrides: {
+        icon: {
+          color: colorOpacity,
         },
       },
     },
@@ -153,8 +161,8 @@ shadows: [
     MuiPaper: {
       styleOverrides: {
         root: {
-          backgroundColor: "#ffffff",
-          color: "#0f1729",
+          backgroundColor: bgColorCardsDashBoard,
+          color: "#fff",
           borderRadius: "0.75rem",
           boxShadow: "0px 1px 3px rgba(0,0,0,0.10)",
         },
@@ -167,20 +175,37 @@ shadows: [
     MuiPopover: {
       styleOverrides: {
         paper: {
-          backgroundColor: "#ffffff",
-          color: "#0f1729",
+          backgroundColor: bgColorTopSellers,
+          color: "#fff",
           borderRadius: "0.75rem",
         },
       },
     },
-    
 
     MuiMenu: {
       styleOverrides: {
         paper: {
-          backgroundColor: "#ffffff",
-          color: "#ffff",
+          backgroundColor: bgColorTopSellers,
+          color: "#fff",
           borderRadius: "0.75rem",
+          border: bordasComponents,
+        },
+      },
+    },
+
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          color: "#fff",
+          "&:hover": {
+            backgroundColor: "rgba(245,159,10,0.1)",
+          },
+          "&.Mui-selected": {
+            backgroundColor: "rgba(245,159,10,0.15)",
+            "&:hover": {
+              backgroundColor: "rgba(245,159,10,0.2)",
+            },
+          },
         },
       },
     },

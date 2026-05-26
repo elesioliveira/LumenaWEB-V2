@@ -2,10 +2,12 @@ import { useState } from "react";
 import { CurrentSubModuleFiscal } from "./enums/FiscalEnums";
 import { CfopPage } from "./cfop/CfopPage";
 import { ProdutoFiscalPage } from "./produtoFiscal/ProdutoFiscalPage";
+import { NotasFiscaisPage } from "./notasFiscais/NotasFiscaisPage";
+import { ConfigFiscalPage } from "./configFiscal/ConfigFiscalPage";
 import { Box, Stack, Toolbar, Typography } from "@mui/material";
 import { bgView, bordasComponents } from "../../../theme/theme";
 import { useResponsive } from "../../../shared/useResponsive";
-import { FileText, Link } from "lucide-react";
+import { FileText, Link, Receipt, Settings } from "lucide-react";
 
 const subModulesFiscal = [
   {
@@ -17,6 +19,16 @@ const subModulesFiscal = [
     label: "Regra Fiscal",
     icon: Link,
     page: CurrentSubModuleFiscal.RegraFiscal,
+  },
+  {
+    label: "Notas Fiscais",
+    icon: Receipt,
+    page: CurrentSubModuleFiscal.NotasFiscais,
+  },
+  {
+    label: "Configuração",
+    icon: Settings,
+    page: CurrentSubModuleFiscal.Configuracao,
   },
 ];
 
@@ -32,6 +44,10 @@ export function ModuleFiscal() {
         return <CfopPage />;
       case CurrentSubModuleFiscal.RegraFiscal:
         return <ProdutoFiscalPage />;
+      case CurrentSubModuleFiscal.NotasFiscais:
+        return <NotasFiscaisPage />;
+      case CurrentSubModuleFiscal.Configuracao:
+        return <ConfigFiscalPage />;
       default:
         return null;
     }
