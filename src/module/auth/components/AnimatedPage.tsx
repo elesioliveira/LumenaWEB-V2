@@ -14,9 +14,13 @@ export function AnimatedPage({ children, customKey }: { children: React.ReactNod
       style={{
         width: "100%",
         height: "100%",
-        position: "absolute", // IMPORTANT: posiciona sobre o Grid cell
+        position: "absolute",
         top: 0,
         left: 0,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        overflowY: "auto",
       }}
     >
       {children}

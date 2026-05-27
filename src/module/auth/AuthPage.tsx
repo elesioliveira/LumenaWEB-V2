@@ -205,18 +205,14 @@ const { currentPage } = useAuth();
         component={Paper}
         square
         sx={{
-          position: "relative",   // necessário para os children absolute
-          overflow: "hidden",     // corta overflow durante animação
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
+          position: "relative",
+          overflow: "hidden",
           backgroundColor: "#f6f7f9",
         }}
       >
-        <Box sx={{ width: "100%", maxWidth:"480px", height: "100%", position: "relative", m:{xs:2, md:0,}}}>
+        <Box sx={{ width: "100%", height: "100%", position: "relative" }}>
           <AnimatePresence mode="wait">
             <AnimatedPage customKey={currentPage}>
-              {/* currentPageView() deve retornar somente o conteúdo INTERNO (sem Grid item) */}
               {currentPageView()}
             </AnimatedPage>
           </AnimatePresence>

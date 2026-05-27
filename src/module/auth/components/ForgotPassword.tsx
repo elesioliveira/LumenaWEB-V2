@@ -1,18 +1,18 @@
-import { ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
-import { Mail } from "lucide-react";
 import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Stack,
-  Snackbar,
   Alert,
+  Box,
+  Button,
+  Snackbar,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
-import { useAuth } from "../provider/AuthProvider";
-import { CurrentPageEnum } from "../enums/CurrentPageEnum";
+import { ArrowLeft, ArrowRight, Loader2, Mail } from "lucide-react";
+import { useEffect, useState } from "react";
+import { loginInputSx } from "../../../theme/theme";
 import { useForgotPasswordController } from "../controller/ForgotPasswordController";
-import { useState, useEffect } from "react";
+import { CurrentPageEnum } from "../enums/CurrentPageEnum";
+import { useAuth } from "../provider/AuthProvider";
 
 export function ForgotPassword() {
   const { onChagendCurrentPage } = useAuth();
@@ -54,7 +54,7 @@ export function ForgotPassword() {
   }
 
   return (
-    <Box width="100%" sx={{ py: 4, mt: { xs: 8, md: 30 } }}>
+    <Box sx={{ width: "100%", maxWidth: "480px", py: 4, px: { xs: 2, md: 3 }, my: "auto" }}>
       {/* Títulos */}
       <Typography variant="h4" fontWeight="bold" color="#0f1729" mb={1}>
         Esqueceu a senha?
@@ -76,14 +76,10 @@ export function ForgotPassword() {
         variant="outlined"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        sx={{ ...loginInputSx, mb: 2 }}
         InputProps={{
-          sx: {
-            height: 55,
-            fontSize: "1.1rem",
-            "& input": { padding: "14px 0" },
-          },
           startAdornment: (
-            <Mail size={24} style={{ marginRight: "10px", opacity: 0.6 }} />
+            <Mail size={24} style={{ marginRight: "10px", opacity: 0.6,color:'black' }} />
           ),
         }}
       />

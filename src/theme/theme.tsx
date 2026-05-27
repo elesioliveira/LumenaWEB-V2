@@ -324,3 +324,30 @@ export const  baseOutlinedInputSx = {
     color: colorOpacity,
   },
 };
+
+export const loginInputSx = {
+  "& .MuiOutlinedInput-root": {
+    backgroundColor: "transparent",
+    height: 60,
+    fontSize: "1.1rem",
+  },
+  "& .MuiOutlinedInput-root input": {
+    color: "#0f1729",
+    WebkitTextFillColor: "#0f1729",
+  },
+  "& .MuiOutlinedInput-root input::placeholder": {
+    color: "#9ca3af",
+    WebkitTextFillColor: "#9ca3af",
+    opacity: 1,
+  },
+  "& .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#e5e7eb",
+  },
+  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#0f1729",
+  },
+  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#f59f0a",
+    boxShadow: "0 0 0 3px rgba(245,159,10,0.25)",
+  },
+};

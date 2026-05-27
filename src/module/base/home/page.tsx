@@ -16,9 +16,11 @@
 } from "@mui/material";
 import { Bell, Building2, ChartColumn, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, FileText, Headset, LayoutDashboard, LogOut, Menu, Package, ShoppingCart, Truck, User, Users, Wallet, X } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useResponsive } from "../../../shared/useResponsive";
 import { bgComponents, bordasComponents, colorOpacity, } from "../../../theme/theme";
 import { useSessionController } from "../../auth/controller/SessionController";
+import { submitLogout } from "../../auth/repository/AuthRepository";
 import { AnalysisPage } from "../analysis/AnalysisPage";
 import { ModuleClient } from "../client/ModuleClient";
 import { ModuleCompany } from "../company/ComapnyModule";
@@ -107,7 +109,8 @@ export default function HomePage() {
 const [collapsed, setCollapsed] = useState(false);
 const [mobileOpen, setMobileOpen] = useState(false);
 const { isMobile } = useResponsive();
-const { user } = useSessionController();
+const { user, clearUser } = useSessionController();
+const navigate = useNavigate();
 const allowedMenuItems = useMemo(() => {
   if (!user) return [];
 
@@ -118,6 +121,12 @@ const allowedMenuItems = useMemo(() => {
 const [currentPage, setPage] = useState<CurrentModulePage>(allowedMenuItems[0].page);
 const drawerWidth = isMobile ? 280 : (collapsed ? 80 : 280);
 
+
+const handleLogout = async () => {
+  await submitLogout();
+  clearUser();
+  navigate("/", { replace: true });
+};
 
 const handleOnChagentPage = (page: CurrentModulePage) => {
   setPage(page);
@@ -260,14 +269,14 @@ const handleOnChagentPage = (page: CurrentModulePage) => {
   boxShadow: "0 0 25px rgba(245,159,10,0.35)",
   }}
   >
-  <Typography variant="h6" fontWeight="bold">
+  <Typography variant="h6" fontWeight="bold" color="#fff">
   L
   </Typography>
   </Box>
 
   {!collapsed && (
   <Box>
-  <Typography variant="h6" fontWeight="bold">Lumena</Typography>
+  <Typography variant="h6" fontWeight="bold" color="#fff">Lumena</Typography>
   <Typography variant="body2" color={colorOpacity}>
   ERP System
   </Typography>
@@ -385,7 +394,7 @@ const handleOnChagentPage = (page: CurrentModulePage) => {
   color:"#FFFF"
   },
   }}
-  onClick={() => {}}
+  onClick={handleLogout}
   >
   <LogOut color="#fff" size={20} />
   {!collapsed && (

@@ -1,22 +1,24 @@
-import CircularProgress from "@mui/material/CircularProgress";
-import { useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { useEffect, useState } from "react";
 import {
+  Alert,
   Box,
-  Typography,
-  TextField,
   Button,
-  Stack,
   Divider,
   Snackbar,
-  Alert,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
-import { useAuth } from "../provider/AuthProvider";
-import { CurrentPageEnum } from "../enums/CurrentPageEnum";
-import { submitLogin } from "../repository/AuthRepository";
+import CircularProgress from "@mui/material/CircularProgress";
+import { ArrowRight, Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { loginInputSx } from "../../../theme/theme";
 import { useSessionController } from "../controller/SessionController";
+import { CurrentPageEnum } from "../enums/CurrentPageEnum";
+import { useAuth } from "../provider/AuthProvider";
+import { submitLogin } from "../repository/AuthRepository";
+
+
 
 export function LoginForm() {
 const navigate = useNavigate();
@@ -69,7 +71,7 @@ useSessionController.getState().setUser(result.data);
 
 
     return (
-   <Box width="100%" sx={{ py: 2, mt: { xs: 6, md: 20 } }}>
+   <Box sx={{ width: "100%", maxWidth: "480px", py: 2, px: { xs: 2, md: 3 }, my: "auto" }}>
       <Snackbar
             anchorOrigin={{ vertical: "top", horizontal: "center" }}
             open={toastOpen}
@@ -81,7 +83,7 @@ useSessionController.getState().setUser(result.data);
             </Alert>
           </Snackbar>
     {/* Títulos */}
-    <Typography variant="h4" fontWeight="bold" color="#0f1729" mb={1}>
+    <Typography variant="h4" fontWeight="bold" color={'text.secondary'} mb={1}>
       Bem-vindo de volta
     </Typography>
 
@@ -101,10 +103,10 @@ useSessionController.getState().setUser(result.data);
       variant="outlined"
       value={email}
       onChange={(e) => setEmail(e.target.value.trim())}
+      sx={{ ...loginInputSx, mb: 2 }}
       InputProps={{
-        sx: { height: 60, fontSize: "1.1rem", mb:2, color:"black" }, // input maior
         startAdornment: (
-          <Mail size={24} style={{ marginRight: "10px", opacity: 0.6 }} />
+          <Mail size={24} style={{ marginRight: "10px", opacity: 0.6,color:'black' }} />
         ),
       }}
     />
@@ -122,10 +124,10 @@ useSessionController.getState().setUser(result.data);
       variant="outlined"
       value={password}
       onChange={(e) => setPassword(e.target.value.trim())}
+      sx={loginInputSx}
       InputProps={{
-        sx: { height: 60, fontSize: "1.1rem",color:"black" },
         startAdornment: (
-          <Lock size={24} style={{ marginRight: "10px", opacity: 0.6 }} />
+          <Lock size={24} style={{ marginRight: "10px", opacity: 0.6,color:'black' }} />
         ),
         endAdornment: (
           <Box

@@ -1,21 +1,22 @@
-import { User, ArrowRight } from "lucide-react";
-import { Mail,Building2, Lock, Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
 import {
+  Alert,
   Box,
-  Typography,
-  TextField,
   Button,
-  Stack,
+  CircularProgress,
+  Grid,
   Radio,
   Snackbar,
-  Alert,
-  CircularProgress
+  Stack,
+  TextField,
+  Typography
 } from "@mui/material";
-import { useAuth } from "../provider/AuthProvider";
-import { CurrentPageEnum } from "../enums/CurrentPageEnum";
-import { useRegisterController } from "../controller/RegisterController";
+import { ArrowRight, Building2, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
+import { useState } from "react";
 import { maskCNPJ } from "../../../shared/MaskUtils";
+import { loginInputSx } from "../../../theme/theme";
+import { useRegisterController } from "../controller/RegisterController";
+import { CurrentPageEnum } from "../enums/CurrentPageEnum";
+import { useAuth } from "../provider/AuthProvider";
 
 export function Register() {
   const [showPassword, setShowPassword] = useState(false);
@@ -62,9 +63,9 @@ export function Register() {
   };
 
   return (
-    <Box width="100%" sx={{ py: 4, mt: 0 }}>
+    <Box sx={{ width: "100%", maxWidth: "600px", py: { xs: 3, md: 4 }, px: { xs: 2, md: 3 }, my: "auto" }}>
       {/* TITULOS */}
-      <Typography variant="h5" fontWeight="bold" mb={1}>
+      <Typography variant="h5" fontWeight="bold" mb={1} color="#0f1729">
         Criar conta
       </Typography>
 
@@ -73,164 +74,163 @@ export function Register() {
       </Typography>
 
       {/* INPUTS */}
-      {/* Nome completo */}
-      <Typography variant="subtitle1" fontWeight="400">
-        Nome completo
-      </Typography>
-      <TextField
-        fullWidth
-        placeholder="Elesio Oliveira"
-        margin="dense"
-        variant="outlined"
-        value={company.nome_responsavel}
-        onChange={(e) =>
-          handleChangeCompany("nome_responsavel", e.target.value)
-        }
-        InputProps={{
-          sx: {
-            height:45,
-            fontSize: "1.1rem",
-            mb: 2
-          },
-          startAdornment: (
-            <User size={24} style={{ marginRight: "10px", opacity: 0.6 }} />
-          )
-        }}
-      />
+      <Grid container spacing={2}>
+        {/* Nome completo */}
+        <Grid item xs={12} md={6}>
+          <Typography variant="subtitle1" fontWeight="400" color="#0f1729">
+            Nome completo
+          </Typography>
+          <TextField
+            fullWidth
+            placeholder="Elesio Oliveira"
+            margin="dense"
+            variant="outlined"
+            value={company.nome_responsavel}
+            onChange={(e) =>
+              handleChangeCompany("nome_responsavel", e.target.value)
+            }
+            sx={loginInputSx}
+            InputProps={{
+              startAdornment: (
+                <User size={24} style={{ marginRight: "10px", opacity: 0.6, color: 'black' }} />
+              ),
+            }}
+          />
+        </Grid>
 
-      {/* Nome empresa */}
-      <Typography variant="subtitle1" fontWeight="400">
-        Nome da empresa
-      </Typography>
-      <TextField
-        fullWidth
-        placeholder="Sua Empresa LTDA"
-        margin="dense"
-        variant="outlined"
-        value={company.razao_social}
-        onChange={(e) => handleChangeCompany("razao_social", e.target.value)}
-        InputProps={{
-          sx: {
-            height:45,
-            fontSize: "1.1rem",
-            mb: 2
-          },
-          startAdornment: (
-            <Building2 size={24} style={{ marginRight: "10px", opacity: 0.6 }} />
-          )
-        }}
-      />
-      {/* CNPJ empresa */}
-      <Typography variant="subtitle1" fontWeight="400">
-        CNPJ
-      </Typography>
-      <TextField
-        fullWidth
-        placeholder="**.***.***/****-**"
-        margin="dense"
-        variant="outlined"
-        value={company.cnpj}
-        onChange={(e) => handleChangeCompany("cnpj", maskCNPJ(e.target.value))}
-        inputProps={{ maxLength: 18 }}
-        InputProps={{
-          sx: {
-            height:45,
-            fontSize: "1.1rem",
-            mb: 2,
-          },
-          startAdornment: (
-            <Building2 size={24} style={{ marginRight: "10px", opacity: 0.6 }} />
-          )
-        }}
-      />
+        {/* Nome empresa */}
+        <Grid item xs={12} md={6}>
+          <Typography variant="subtitle1" fontWeight="400" color="#0f1729">
+            Nome da empresa
+          </Typography>
+          <TextField
+            fullWidth
+            placeholder="Sua Empresa LTDA"
+            margin="dense"
+            variant="outlined"
+            value={company.razao_social}
+            onChange={(e) => handleChangeCompany("razao_social", e.target.value)}
+            sx={loginInputSx}
+            InputProps={{
+              startAdornment: (
+                <Building2 size={24} style={{ marginRight: "10px", opacity: 0.6, color: 'black' }} />
+              ),
+            }}
+          />
+        </Grid>
 
-      {/* Email */}
-      <Typography variant="subtitle1" fontWeight="400">
-        Email
-      </Typography>
-      <TextField
-        fullWidth
-        placeholder="seu@email.com"
-        margin="dense"
-        variant="outlined"
-        value={company.email}
-        onChange={(e) => handleChangeCompany("email", e.target.value)}
-        InputProps={{
-          sx: {
-            height:45,
-            fontSize: "1.1rem",
-            mb: 2
-          },
-          startAdornment: (
-            <Mail size={24} style={{ marginRight: "10px", opacity: 0.6 }} />
-          )
-        }}
-      />
+        {/* CNPJ */}
+        <Grid item xs={12} md={6}>
+          <Typography variant="subtitle1" fontWeight="400" color="#0f1729">
+            CNPJ
+          </Typography>
+          <TextField
+            fullWidth
+            placeholder="**.***.***/****-**"
+            margin="dense"
+            variant="outlined"
+            value={company.cnpj}
+            onChange={(e) => handleChangeCompany("cnpj", maskCNPJ(e.target.value))}
+            inputProps={{ maxLength: 18 }}
+            sx={loginInputSx}
+            InputProps={{
+              startAdornment: (
+                <Building2 size={24} style={{ marginRight: "10px", opacity: 0.6, color: 'black' }} />
+              ),
+            }}
+          />
+        </Grid>
 
-      {/* SENHA */}
-      <Typography variant="subtitle1" fontWeight="400">
-        Senha
-      </Typography>
-      <TextField
-        fullWidth
-        type={showPassword ? "text" : "password"}
-        placeholder="*****"
-        margin="dense"
-        variant="outlined"
-        value={company.senha}
-        onChange={(e) => handleChangeCompany("senha", e.target.value)}
-        InputProps={{
-          sx: { height: 45, fontSize: "1.1rem", mb: 2 },
-          startAdornment: (
-            <Lock size={24} style={{ marginRight: "10px", opacity: 0.6 }} />
-          ),
-          endAdornment: (
-            <Box
-              sx={{ cursor: "pointer", opacity: 0.7 }}
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
-            </Box>
-          )
-        }}
-      />
+        {/* Email */}
+        <Grid item xs={12} md={6}>
+          <Typography variant="subtitle1" fontWeight="400" color="#0f1729">
+            Email
+          </Typography>
+          <TextField
+            fullWidth
+            placeholder="seu@email.com"
+            margin="dense"
+            variant="outlined"
+            value={company.email}
+            onChange={(e) => handleChangeCompany("email", e.target.value)}
+            sx={loginInputSx}
+            InputProps={{
+              startAdornment: (
+                <Mail size={24} style={{ marginRight: "10px", opacity: 0.6, color: 'black' }} />
+              ),
+            }}
+          />
+        </Grid>
 
-      {/* CONFIRMAR SENHA */}
-      <Typography variant="subtitle1" fontWeight="400">
-        Confirmar senha
-      </Typography>
-      <TextField
-        fullWidth
-        type={showPassword2 ? "text" : "password"}
-        placeholder="*****"
-        margin="dense"
-        variant="outlined"
-        value={confirmSenha}
-        onChange={(e) => setConfirmSenha(e.target.value)}
-        InputProps={{
-          sx: { height: 45, fontSize: "1.1rem" },
-          startAdornment: (
-            <Lock size={24} style={{ marginRight: "10px", opacity: 0.6 }} />
-          ),
-          endAdornment: (
-            <Box
-              sx={{ cursor: "pointer", opacity: 0.7 }}
-              onClick={() => setShowPassword2(!showPassword2)}
-            >
-              {showPassword2 ? <EyeOff size={22} /> : <Eye size={22} />}
-            </Box>
-          )
-        }}
-      />
+        {/* Senha */}
+        <Grid item xs={12} md={6}>
+          <Typography variant="subtitle1" fontWeight="400" color="#0f1729">
+            Senha
+          </Typography>
+          <TextField
+            fullWidth
+            type={showPassword ? "text" : "password"}
+            placeholder="*****"
+            margin="dense"
+            variant="outlined"
+            value={company.senha}
+            onChange={(e) => handleChangeCompany("senha", e.target.value)}
+            sx={loginInputSx}
+            InputProps={{
+              startAdornment: (
+                <Lock size={24} style={{ marginRight: "10px", opacity: 0.6, color: 'black' }} />
+              ),
+              endAdornment: (
+                <Box
+                  sx={{ cursor: "pointer", opacity: 0.7, color: 'black' }}
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+                </Box>
+              )
+            }}
+          />
+        </Grid>
+
+        {/* Confirmar senha */}
+        <Grid item xs={12} md={6}>
+          <Typography variant="subtitle1" fontWeight="400" color="#0f1729">
+            Confirmar senha
+          </Typography>
+          <TextField
+            fullWidth
+            type={showPassword2 ? "text" : "password"}
+            placeholder="*****"
+            margin="dense"
+            variant="outlined"
+            value={confirmSenha}
+            onChange={(e) => setConfirmSenha(e.target.value)}
+            sx={loginInputSx}
+            InputProps={{
+              startAdornment: (
+                <Lock size={24} style={{ marginRight: "10px", opacity: 0.6, color: 'black' }} />
+              ),
+              endAdornment: (
+                <Box
+                  sx={{ cursor: "pointer", opacity: 0.7, color: 'black' }}
+                  onClick={() => setShowPassword2(!showPassword2)}
+                >
+                  {showPassword2 ? <EyeOff size={22} /> : <Eye size={22} />}
+                </Box>
+              )
+            }}
+          />
+        </Grid>
+      </Grid>
 
       {/* CHECKBOX TERMOS */}
-      <Stack direction="row" alignItems="center" spacing={1} sx={{ flexWrap: "wrap" }}>
+      <Stack direction="row" alignItems="center" spacing={0.5} sx={{ flexWrap: "wrap" }}>
         <Radio checked />
-        <Typography component="span">Eu concordo com os</Typography>
+        <Typography component="span" color="#0f1729"> Eu concordo com os </Typography>
         <Typography component="span" color="primary.main" sx={{ cursor: "pointer" }}>
           Termos de uso
         </Typography>
-        <Typography component="span">e</Typography>
+        <Typography component="span" color="#0f1729"> e </Typography>
         <Typography component="span" color="primary.main" sx={{ cursor: "pointer" }}>
           Política de privacidade
         </Typography>

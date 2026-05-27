@@ -29,8 +29,17 @@ export const submitLogin = async (email: string, password: string) => {
       { withCredentials: true }
     );
 
-    return response.data; // ← objeto User
+    return response.data;
   } catch (error: any) {
     return error?.response?.data ?? null;
+  }
+};
+
+export const submitLogout = async () => {
+  try {
+    await api.post("Auth/Logout", null, { withCredentials: true });
+    return true;
+  } catch {
+    return false;
   }
 };
