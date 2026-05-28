@@ -10,12 +10,15 @@
   List,
   ListItemButton,
   ListItemText,
+  Menu as MuiMenu,
+  MenuItem,
   Stack,
   Toolbar,
   Typography,
 } from "@mui/material";
-import { Bell, Building2, ChartColumn, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, FileText, Headset, LayoutDashboard, LogOut, Menu, Package, ShoppingCart, Truck, User, Users, Wallet, X } from "lucide-react";
+import { Bell, Building2, ChartColumn, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, FileText, Headset, LayoutDashboard, LogOut, Menu, Package, Settings, ShoppingCart, Truck, User, Users, Wallet, X } from "lucide-react";
 import { useMemo, useState } from "react";
+import type { MouseEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useResponsive } from "../../../shared/useResponsive";
 import { bgComponents, bordasComponents, colorOpacity, } from "../../../theme/theme";
@@ -108,9 +111,18 @@ const menuItems = [
 export default function HomePage() {
 const [collapsed, setCollapsed] = useState(false);
 const [mobileOpen, setMobileOpen] = useState(false);
+const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+const menuOpen = Boolean(anchorEl);
 const { isMobile } = useResponsive();
 const { user, clearUser } = useSessionController();
 const navigate = useNavigate();
+
+const handleMenuOpen = (event: MouseEvent<HTMLElement>) => {
+  setAnchorEl(event.currentTarget);
+};
+const handleMenuClose = () => {
+  setAnchorEl(null);
+};
 const allowedMenuItems = useMemo(() => {
   if (!user) return [];
 
@@ -194,7 +206,7 @@ const handleOnChagentPage = (page: CurrentModulePage) => {
   gap: 2,
   borderRadius: 0,
   }}>
-  <Badge badgeContent={4} color="primary">
+  <Badge badgeContent={0} color="primary">
   <Bell  color={colorOpacity}/>
   </Badge>
   <Divider
@@ -209,23 +221,51 @@ const handleOnChagentPage = (page: CurrentModulePage) => {
   }}/>
   <Avatar
   sx={{
-  bgcolor: bgComponents,  // fundo
+  bgcolor: bgComponents,
   width: 45,
   height: 45,
   }}>
   <User size={22} color={colorOpacity} />
   </Avatar>
   <Stack flexDirection={"column"} gap={0} sx={{ display: { xs: "none", sm: "flex" } }}>
-  <Typography gutterBottom variant="body1" component="div" mb={0}mt={0} fontSize={"0.8rem"}>
-  Elesio Oliveira
+  <Typography gutterBottom variant="body1" component="div" mb={0} mt={0} fontSize={"0.8rem"}>
+  {user?.nome ?? "Usuário"}
   </Typography>
-  <Typography gutterBottom variant="body1" component="div" color={colorOpacity}mb={0} mt={0} fontSize={"0.8rem"}>
-  Administrador
+  <Typography gutterBottom variant="body1" component="div" color={colorOpacity} mb={0} mt={0} fontSize={"0.8rem"}>
+  {user?.perfil ?? "—"}
   </Typography>
   </Stack>
-  <Box sx={{ display: "flex", alignItems: "center", ml:1 }}>
+  <Box
+  sx={{ display: "flex", alignItems: "center", ml: 1, cursor: "pointer" }}
+  onClick={handleMenuOpen}
+  >
   <ChevronDown size={20} color={colorOpacity} />
   </Box>
+  <MuiMenu
+  anchorEl={anchorEl}
+  open={menuOpen}
+  onClose={handleMenuClose}
+  anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+  transformOrigin={{ vertical: "top", horizontal: "right" }}
+  slotProps={{
+    paper: {
+      sx: {
+        mt: 1,
+        backgroundColor: "#1a2744",
+        border: bordasComponents,
+        color: "#fff",
+        minWidth: 180,
+      },
+    },
+  }}
+  >
+  <MenuItem onClick={() => { handleMenuClose(); }} sx={{ gap: 1, fontSize: "0.85rem" }}>
+    <Settings size={16} color={colorOpacity} /> Configurações
+  </MenuItem>
+  <MenuItem onClick={() => { handleMenuClose(); handleLogout(); }} sx={{ gap: 1, fontSize: "0.85rem", color: "#f87171" }}>
+    <LogOut size={16} /> Sair
+  </MenuItem>
+  </MuiMenu>
   </Stack>
   </Toolbar>
   </AppBar>

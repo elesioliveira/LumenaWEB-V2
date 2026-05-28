@@ -13,6 +13,7 @@ export interface User {
   datacadastro: string;
   nome: string;
   email: string;
+  perfil: string;
   ativo: boolean;
   rotas: number[];
 }
